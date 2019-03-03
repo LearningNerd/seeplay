@@ -2,7 +2,7 @@
 
 *Learn to sight-read sheet music! SeePlay teaches you to hear with your eyes and play from your heart.* 👀🎹💖
 
-Built with @elmlang and the web MIDI API. This project is a work in progress, because I'm using this to [learn Elm](https://guide.elm-lang.org)!
+Built with [Elm](https://elm-lang.org) and the web MIDI API. This project is a work in progress, because I'm using this to [learn Elm](https://elm-lang.org)!
 
 
 ## Development setup
