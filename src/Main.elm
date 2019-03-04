@@ -2,6 +2,7 @@ port module Main exposing (..)
 
 
 import Tuple exposing (..)
+import Array exposing (..)
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -12,17 +13,11 @@ port handleNotePlayed : (Int -> msg) -> Sub msg
 
 -- MODEL
 
--- for piano:
--- midi code is between 0 and 127 ... on piano, 21 to 108
-
-pitchClass = 
-  ["C", "Db", "D", "Eb", "E", "F", "Gb", "Ab", "A", "Bb", "B"]
-
 type alias NoteName = (String, Int)
 
 type alias Note =
-  { noteName : NoteName
-  , midi : Int
+  { noteName : NoteName -- ("C", 4)
+  , midi : Int          -- from 21 to 108, for piano
   , frequency : Float
   }
 
@@ -114,7 +109,7 @@ main =
 createNote : Int -> Note
 createNote midiCode =
   { noteName = midiToNoteName midiCode
-  , midi = midiCode  -- clamp 0 127 noteCode -- ???????
+  , midi = clamp 21 108 midiCode -- assuming piano MIDI!
   , frequency = midiToFrequency midiCode
   }
 
@@ -131,9 +126,29 @@ displayNote note =
 
 midiToNoteName : Int -> NoteName
 midiToNoteName midiCode =
-  ("C", 4)
+  let
+    pitchClasses = Array.fromList 
+      ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"]
+    index = remainderBy 12 midiCode
+    pitchClass =  case (Array.get index pitchClasses) of
+                    Nothing -> "C" -- if index out of bounds (impastable!!)
+                    Just x -> x
+    octave = (midiCode // 12) - 1
+  in
+    (pitchClass, octave)
+
 
 midiToFrequency : Int -> Float
 midiToFrequency midiCode =
-  261.6255653006
+  let
+    -- 2 ^ (1/12) is the frequency ratio of each note...????
+    semitoneRatio =  1.0594630943592953
+    -- MIDI code 0 starts at about 8 Hz frequency
+    lowestFreq = 8.1757989156
+  in
+    lowestFreq * (semitoneRatio ^ toFloat midiCode)
+  -- Sources: https://en.wikipedia.org/wiki/Pitch_(music)#Labeling_pitches
+  -- http://subsynth.sourceforge.net/midinote2freq.html
+  -- and https://newt.phys.unsw.edu.au/jw/notes.html
+
 
