@@ -1,6 +1,7 @@
 port module Main exposing (..)
 
 
+import Tuple exposing (..)
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -11,17 +12,32 @@ port handleNotePlayed : (Int -> msg) -> Sub msg
 
 -- MODEL
 
+-- for piano:
+-- midi code is between 0 and 127 ... on piano, 21 to 108
+
+pitchClass = 
+  ["C", "Db", "D", "Eb", "E", "F", "Gb", "Ab", "A", "Bb", "B"]
+
+type alias NoteName = (String, Int)
+
+type alias Note =
+  { noteName : NoteName
+  , midi : Int
+  , frequency : Float
+  }
+
+
 type alias Model =
   {
     isMIDIConnected: Maybe Bool
-  , currentMIDICode: Int
+  , currentNote: Maybe Note
   }
 
 initialModel : Model
 initialModel =
   {
     isMIDIConnected = Nothing
-  , currentMIDICode = 0
+  , currentNote = Nothing
   }
 
 init : () -> ( Model, Cmd Msg )
@@ -47,7 +63,7 @@ view model =
   in
     div [] [
         p [] [ text isMIDIConnectedText ]
-      , p [] [ text ("MIDI Code: " ++ String.fromInt model.currentMIDICode) ]
+      , p [] [ text ("MIDI Code: " ++ displayNote model.currentNote) ]
     ]
 
 
@@ -56,19 +72,17 @@ view model =
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
-      InitMIDI isMIDIConnectedBool ->
-        ( { model |
-            isMIDIConnected = 
-              if isMIDIConnectedBool == True then
-                 Just True
-              else
-                Just False
-          }
+      InitMIDI isMIDIConnectedBool -> 
+        ( { model | isMIDIConnected = Just isMIDIConnectedBool}
         , Cmd.none
         )
-      
+
+     
       NotePlayed noteCode ->
-        ( { model | currentMIDICode = noteCode }
+        ( { model |
+            currentNote =
+              Just (createNote noteCode)
+          }
         , Cmd.none
         )
 
@@ -85,6 +99,7 @@ subscriptions model =
   , handleNotePlayed NotePlayed
   ]
 
+
 -- MAIN
 
 main =
@@ -94,4 +109,31 @@ main =
     , update = update
     , subscriptions = subscriptions
     }
+
+
+createNote : Int -> Note
+createNote midiCode =
+  { noteName = midiToNoteName midiCode
+  , midi = midiCode  -- clamp 0 127 noteCode -- ???????
+  , frequency = midiToFrequency midiCode
+  }
+
+displayNote : Maybe Note -> String
+displayNote note =
+  case note of
+    Nothing ->
+      "nothing here"
+    Just x ->
+      first x.noteName ++ (second x.noteName |> String.fromInt)
+
+
+-- NOTE CONVERSION HELPER FUNCTIONS
+
+midiToNoteName : Int -> NoteName
+midiToNoteName midiCode =
+  ("C", 4)
+
+midiToFrequency : Int -> Float
+midiToFrequency midiCode =
+  261.6255653006
 
