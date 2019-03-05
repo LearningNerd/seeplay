@@ -1,8 +1,8 @@
 module Example exposing (..)
 
-
+import Tuple exposing (..)
 import Expect exposing (Expectation, FloatingPointTolerance(..))
-import Fuzz exposing (Fuzzer, int, list, string)
+import Fuzz exposing (Fuzzer, int, list, string, intRange)
 import Test exposing (..)
 
 import Main exposing (..)
@@ -43,15 +43,31 @@ noteDataConversion =
                   , \x -> Expect.within (Relative 0.01) 261.626 x.frequency
                   ] (createNote midiCode)
 
-    {--      
-          -- fuzz runs the test 100 times with randomly-generated inputs!
-          , fuzz string "restores the original string if you run it again" <|
-              \randomlyGeneratedString ->
-                  randomlyGeneratedString
-                      |> String.reverse
-                      |> String.reverse
-                      |> Expect.equal randomlyGeneratedString
+          -- y u no work? :(
+
+          {-- fuzz 
+          , fuzz (intRange 108 500) "fuzzyyyyy" <|
+              \randomMIDICode ->
+                  randomMIDICode
+                      |> midiToNoteName
+                      |> first
+                      |> Expect.equal "C"
     --}
             ]
       ]
 
+views : Test
+views =
+  let
+      -- testNothingModel = { isMIDIConnected = Nothing, currenotNote = Nothing }
+      testNothing = Nothing
+  in
+    describe "Displaying view"
+      [ describe "for midi connection status"
+
+          [ test "with uninitialized model" <|
+              \_ ->
+                  displayMIDIStatus testNothing
+                      |> Expect.equal "Connect a MIDI instrument to play!"
+          ]
+      ] 

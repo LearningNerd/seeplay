@@ -46,19 +46,9 @@ init _ =
 
 view : Model -> Html Msg
 view model =
-  let
-      isMIDIConnectedText = 
-        case model.isMIDIConnected of
-          Nothing ->
-            "Connect a MIDI instrument to play!"
-          Just True ->
-            "Your MIDI device is connected, yay! See the note below? Play it on your instrument!"
-          Just False ->
-            "Hmm, something went wrong with connecting to your MIDI device. Trying refreshing this page or turning your MIDI device off and on again."
-  in
     div [] [
-        p [] [ text isMIDIConnectedText ]
-      , p [] [ text ("MIDI Code: " ++ displayNote model.currentNote) ]
+        p [] [ text (displayMIDIStatus model.isMIDIConnected)]
+      , p [] [ text ("Note: " ++ displayNote model.currentNote) ]
     ]
 
 
@@ -105,6 +95,15 @@ main =
     , subscriptions = subscriptions
     }
 
+displayMIDIStatus : Maybe Bool -> String
+displayMIDIStatus isConnected = 
+        case isConnected of
+          Nothing ->
+            "Connect a MIDI instrument to play!"
+          Just True ->
+            "Your MIDI device is connected, yay! See the note below? Play it on your instrument!"
+          Just False ->
+            "Hmm, something went wrong with connecting to your MIDI device. Try refreshing this page or turning your MIDI device off and on again."
 
 createNote : Int -> Note
 createNote midiCode =
@@ -119,7 +118,9 @@ displayNote note =
     Nothing ->
       "nothing here"
     Just x ->
-      first x.noteName ++ (second x.noteName |> String.fromInt)
+      "Name: " ++ first x.noteName ++ (second x.noteName |> String.fromInt)
+      ++ ", MIDI: " ++ String.fromInt x.midi
+      ++ ", Frequency: " ++ String.fromFloat x.frequency
 
 
 -- NOTE CONVERSION HELPER FUNCTIONS
