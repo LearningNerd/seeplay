@@ -10,6 +10,11 @@ import Html.Attributes exposing (..)
 port handleInitMIDI : (Bool -> msg) -> Sub msg
 port handleNotePlayed : (Int -> msg) -> Sub msg
 
+-- Fake data from fakemidi.js (manual testing in browser)
+port fakeHandleInitMIDI : (Bool -> msg) -> Sub msg
+port fakeHandleNotePlayed : (Int -> msg) -> Sub msg
+
+
 
 -- MODEL
 
@@ -82,6 +87,11 @@ subscriptions model =
   Sub.batch
   [ handleInitMIDI InitMIDI
   , handleNotePlayed NotePlayed
+  -- ************************************************
+  -- Fake data from fakemidi.js for manual testing:
+  -- ************************************************
+  , fakeHandleInitMIDI InitMIDI
+  , fakeHandleNotePlayed NotePlayed
   ]
 
 
