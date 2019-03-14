@@ -5040,6 +5040,52 @@ var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 			return 3;
 	}
 };
+var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var elm$svg$Svg$circle = elm$svg$Svg$trustedNode('circle');
+var elm$svg$Svg$line = elm$svg$Svg$trustedNode('line');
+var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
+var elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
+var elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
+var elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
+var elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
+var elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
+var elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
+var elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
+var elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
+var elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
+var elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
+var elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
+var author$project$Main$svgView = A2(
+	elm$svg$Svg$svg,
+	_List_fromArray(
+		[
+			elm$svg$Svg$Attributes$width('120'),
+			elm$svg$Svg$Attributes$height('120'),
+			elm$svg$Svg$Attributes$viewBox('0 0 120 120')
+		]),
+	_List_fromArray(
+		[
+			A2(
+			elm$svg$Svg$circle,
+			_List_fromArray(
+				[
+					elm$svg$Svg$Attributes$cx('50'),
+					elm$svg$Svg$Attributes$cy('50'),
+					elm$svg$Svg$Attributes$r('50')
+				]),
+			_List_Nil),
+			A2(
+			elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					elm$svg$Svg$Attributes$x1('0'),
+					elm$svg$Svg$Attributes$y1('80'),
+					elm$svg$Svg$Attributes$x2('100'),
+					elm$svg$Svg$Attributes$y2('20'),
+					elm$svg$Svg$Attributes$stroke('black')
+				]),
+			_List_Nil)
+		]));
 var elm$html$Html$div = _VirtualDom_node('div');
 var elm$html$Html$p = _VirtualDom_node('p');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
@@ -5082,7 +5128,8 @@ var author$project$Main$view = function (model) {
 					[
 						elm$html$Html$text(
 						'.....score ....: ' + elm$core$String$fromInt(model.score))
-					]))
+					])),
+				author$project$Main$svgView
 			]));
 };
 var elm$browser$Browser$External = function (a) {
