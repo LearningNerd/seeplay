@@ -66,20 +66,91 @@ init _ =
 
 
 
--- SVG
+-- SVG stuff
 
 
-svgView =
-    svg
-        [ S.width "120"
-        , S.height "120"
-        , S.viewBox "0 0 120 120"
+type alias Margins =
+    { top : Float, right : Float, bottom : Float, left : Float }
+
+
+staffLines : Float -> Float -> Margins -> Int -> Svg msg
+staffLines staffWidth lineHeight margins yPos =
+    let
+        lineYString =
+            String.fromFloat (margins.top + (toFloat yPos * lineHeight))
+    in
+    line
+        [ S.x1 (String.fromFloat margins.left)
+        , S.y1 lineYString
+        , S.x2 (String.fromFloat (margins.left + staffWidth))
+        , S.y2 lineYString
+        , S.stroke "black"
         ]
-        [ circle [ S.cx "50", S.cy "50", S.r "50" ] []
-        , staff 
-        ]
+        []
 
-staff = line [ S.x1 "0", S.y1 "0", S.x2 "100", S.y2 "100", S.stroke "black" ] []
+
+staff : Float -> Float -> Margins -> List (Svg msg)
+staff staffWidth lineHeight margins =
+    List.map (staffLines staffWidth lineHeight margins) [ 1, 2, 3, 4, 5, 6 ]
+
+
+
+-- getNoteHeight lineHeight note = -- map from MIDI codes to y positions
+
+
+drawNote : Float -> Float -> Margins -> Int -> Svg msg
+drawNote staffWidth lineHeight margins yPos =
+    let
+        yPosFloat =
+            toFloat yPos
+
+        cxString =
+            String.fromFloat (margins.left + (yPosFloat * staffWidth / 12))
+
+        cyString =
+            String.fromFloat (margins.top + (yPosFloat * lineHeight / 2))
+    in
+      circle
+        [ S.cx cxString
+        , S.cy cyString
+        , S.r (String.fromFloat (lineHeight / 2))
+        ]
+        []
+
+
+allNotes : Float -> Float -> Margins -> List (Svg msg)
+allNotes staffWidth lineHeight margins =
+    List.map (drawNote staffWidth lineHeight margins) (List.range 1 12)
+
+
+
+-- (List.map toFloat (List.range 1 12))
+
+
+svgView : Float -> Float -> Margins -> Svg Msg
+svgView width height margins =
+    let
+        lineHeight =
+            height / 6
+
+        widthS =
+            String.fromFloat (width + margins.left + margins.right)
+
+        heightS =
+            String.fromFloat (height + margins.top + margins.bottom)
+    in
+      svg
+        [ S.width widthS
+        , S.height heightS
+        , S.viewBox ("0 0 " ++ widthS ++ " " ++ heightS)
+        , class "center"
+        ]
+        (staff width lineHeight margins ++ allNotes width lineHeight margins)
+
+
+drawNotes =
+    svgView 500 200 { top = 50, left = 50, bottom = 50, right = 50 }
+
 
 
 -- VIEW
@@ -92,7 +163,7 @@ view model =
         , p [] [ HTML.text ("Note: " ++ displayNote model.currentNote) ]
         , p [] [ HTML.text ("CORRECT NOTE: " ++ displayNote (Just model.correctNote)) ]
         , p [] [ HTML.text (".....score ....: " ++ String.fromInt model.score) ]
-        , svgView
+        , drawNotes
         ]
 
 

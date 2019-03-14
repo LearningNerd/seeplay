@@ -5042,119 +5042,25 @@ var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 };
 var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
 var elm$svg$Svg$circle = elm$svg$Svg$trustedNode('circle');
-var elm$svg$Svg$line = elm$svg$Svg$trustedNode('line');
-var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
 var elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
 var elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
-var elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
 var elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
-var elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
-var elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
-var elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
-var elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
-var elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
-var elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
-var elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
-var author$project$Main$svgView = A2(
-	elm$svg$Svg$svg,
-	_List_fromArray(
-		[
-			elm$svg$Svg$Attributes$width('120'),
-			elm$svg$Svg$Attributes$height('120'),
-			elm$svg$Svg$Attributes$viewBox('0 0 120 120')
-		]),
-	_List_fromArray(
-		[
-			A2(
+var author$project$Main$drawNote = F4(
+	function (staffWidth, lineHeight, margins, yPos) {
+		var yPosFloat = yPos;
+		var cyString = elm$core$String$fromFloat(margins.top + ((yPosFloat * lineHeight) / 2));
+		var cxString = elm$core$String$fromFloat(margins.left + ((yPosFloat * staffWidth) / 12));
+		return A2(
 			elm$svg$Svg$circle,
 			_List_fromArray(
 				[
-					elm$svg$Svg$Attributes$cx('50'),
-					elm$svg$Svg$Attributes$cy('50'),
-					elm$svg$Svg$Attributes$r('50')
+					elm$svg$Svg$Attributes$cx(cxString),
+					elm$svg$Svg$Attributes$cy(cyString),
+					elm$svg$Svg$Attributes$r(
+					elm$core$String$fromFloat(lineHeight / 2))
 				]),
-			_List_Nil),
-			A2(
-			elm$svg$Svg$line,
-			_List_fromArray(
-				[
-					elm$svg$Svg$Attributes$x1('0'),
-					elm$svg$Svg$Attributes$y1('80'),
-					elm$svg$Svg$Attributes$x2('100'),
-					elm$svg$Svg$Attributes$y2('20'),
-					elm$svg$Svg$Attributes$stroke('black')
-				]),
-			_List_Nil)
-		]));
-var elm$html$Html$div = _VirtualDom_node('div');
-var elm$html$Html$p = _VirtualDom_node('p');
-var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
-var author$project$Main$view = function (model) {
-	return A2(
-		elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				A2(
-				elm$html$Html$p,
-				_List_Nil,
-				_List_fromArray(
-					[
-						elm$html$Html$text(
-						author$project$Main$displayMIDIStatus(model.isMIDIConnected))
-					])),
-				A2(
-				elm$html$Html$p,
-				_List_Nil,
-				_List_fromArray(
-					[
-						elm$html$Html$text(
-						'Note: ' + author$project$Main$displayNote(model.currentNote))
-					])),
-				A2(
-				elm$html$Html$p,
-				_List_Nil,
-				_List_fromArray(
-					[
-						elm$html$Html$text(
-						'CORRECT NOTE: ' + author$project$Main$displayNote(
-							elm$core$Maybe$Just(model.correctNote)))
-					])),
-				A2(
-				elm$html$Html$p,
-				_List_Nil,
-				_List_fromArray(
-					[
-						elm$html$Html$text(
-						'.....score ....: ' + elm$core$String$fromInt(model.score))
-					])),
-				author$project$Main$svgView
-			]));
-};
-var elm$browser$Browser$External = function (a) {
-	return {$: 'External', a: a};
-};
-var elm$browser$Browser$Internal = function (a) {
-	return {$: 'Internal', a: a};
-};
-var elm$browser$Browser$Dom$NotFound = function (a) {
-	return {$: 'NotFound', a: a};
-};
-var elm$core$Basics$never = function (_n0) {
-	never:
-	while (true) {
-		var nvr = _n0.a;
-		var $temp$_n0 = nvr;
-		_n0 = $temp$_n0;
-		continue never;
-	}
-};
-var elm$core$Task$Perform = function (a) {
-	return {$: 'Perform', a: a};
-};
-var elm$core$Task$succeed = _Scheduler_succeed;
-var elm$core$Task$init = elm$core$Task$succeed(_Utils_Tuple0);
+			_List_Nil);
+	});
 var elm$core$List$foldrHelper = F4(
 	function (fn, acc, ctr, ls) {
 		if (!ls.b) {
@@ -5224,6 +5130,141 @@ var elm$core$List$map = F2(
 			_List_Nil,
 			xs);
 	});
+var author$project$Main$allNotes = F3(
+	function (staffWidth, lineHeight, margins) {
+		return A2(
+			elm$core$List$map,
+			A3(author$project$Main$drawNote, staffWidth, lineHeight, margins),
+			A2(elm$core$List$range, 1, 12));
+	});
+var elm$svg$Svg$line = elm$svg$Svg$trustedNode('line');
+var elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
+var elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
+var elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
+var elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
+var elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
+var author$project$Main$staffLines = F4(
+	function (staffWidth, lineHeight, margins, yPos) {
+		var lineYString = elm$core$String$fromFloat(margins.top + (yPos * lineHeight));
+		return A2(
+			elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					elm$svg$Svg$Attributes$x1(
+					elm$core$String$fromFloat(margins.left)),
+					elm$svg$Svg$Attributes$y1(lineYString),
+					elm$svg$Svg$Attributes$x2(
+					elm$core$String$fromFloat(margins.left + staffWidth)),
+					elm$svg$Svg$Attributes$y2(lineYString),
+					elm$svg$Svg$Attributes$stroke('black')
+				]),
+			_List_Nil);
+	});
+var author$project$Main$staff = F3(
+	function (staffWidth, lineHeight, margins) {
+		return A2(
+			elm$core$List$map,
+			A3(author$project$Main$staffLines, staffWidth, lineHeight, margins),
+			_List_fromArray(
+				[1, 2, 3, 4, 5, 6]));
+	});
+var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
+var elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
+var elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
+var elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
+var elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
+var author$project$Main$svgView = F3(
+	function (width, height, margins) {
+		var widthS = elm$core$String$fromFloat((width + margins.left) + margins.right);
+		var lineHeight = height / 6;
+		var heightS = elm$core$String$fromFloat((height + margins.top) + margins.bottom);
+		return A2(
+			elm$svg$Svg$svg,
+			_List_fromArray(
+				[
+					elm$svg$Svg$Attributes$width(widthS),
+					elm$svg$Svg$Attributes$height(heightS),
+					elm$svg$Svg$Attributes$viewBox('0 0 ' + (widthS + (' ' + heightS))),
+					elm$svg$Svg$Attributes$class('center')
+				]),
+			_Utils_ap(
+				A3(author$project$Main$staff, width, lineHeight, margins),
+				A3(author$project$Main$allNotes, width, lineHeight, margins)));
+	});
+var author$project$Main$drawNotes = A3(
+	author$project$Main$svgView,
+	500,
+	200,
+	{bottom: 50, left: 50, right: 50, top: 50});
+var elm$html$Html$div = _VirtualDom_node('div');
+var elm$html$Html$p = _VirtualDom_node('p');
+var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
+var author$project$Main$view = function (model) {
+	return A2(
+		elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						elm$html$Html$text(
+						author$project$Main$displayMIDIStatus(model.isMIDIConnected))
+					])),
+				A2(
+				elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						elm$html$Html$text(
+						'Note: ' + author$project$Main$displayNote(model.currentNote))
+					])),
+				A2(
+				elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						elm$html$Html$text(
+						'CORRECT NOTE: ' + author$project$Main$displayNote(
+							elm$core$Maybe$Just(model.correctNote)))
+					])),
+				A2(
+				elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						elm$html$Html$text(
+						'.....score ....: ' + elm$core$String$fromInt(model.score))
+					])),
+				author$project$Main$drawNotes
+			]));
+};
+var elm$browser$Browser$External = function (a) {
+	return {$: 'External', a: a};
+};
+var elm$browser$Browser$Internal = function (a) {
+	return {$: 'Internal', a: a};
+};
+var elm$browser$Browser$Dom$NotFound = function (a) {
+	return {$: 'NotFound', a: a};
+};
+var elm$core$Basics$never = function (_n0) {
+	never:
+	while (true) {
+		var nvr = _n0.a;
+		var $temp$_n0 = nvr;
+		_n0 = $temp$_n0;
+		continue never;
+	}
+};
+var elm$core$Task$Perform = function (a) {
+	return {$: 'Perform', a: a};
+};
+var elm$core$Task$succeed = _Scheduler_succeed;
+var elm$core$Task$init = elm$core$Task$succeed(_Utils_Tuple0);
 var elm$core$Task$andThen = _Scheduler_andThen;
 var elm$core$Task$map = F2(
 	function (func, taskA) {
