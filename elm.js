@@ -2351,6 +2351,52 @@ function _Platform_mergeExportsDebug(moduleName, obj, exports)
 
 
 
+function _Time_now(millisToPosix)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		callback(_Scheduler_succeed(millisToPosix(Date.now())));
+	});
+}
+
+var _Time_setInterval = F2(function(interval, task)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var id = setInterval(function() { _Scheduler_rawSpawn(task); }, interval);
+		return function() { clearInterval(id); };
+	});
+});
+
+function _Time_here()
+{
+	return _Scheduler_binding(function(callback)
+	{
+		callback(_Scheduler_succeed(
+			A2(elm$time$Time$customZone, -(new Date().getTimezoneOffset()), _List_Nil)
+		));
+	});
+}
+
+
+function _Time_getZoneName()
+{
+	return _Scheduler_binding(function(callback)
+	{
+		try
+		{
+			var name = elm$time$Time$Name(Intl.DateTimeFormat().resolvedOptions().timeZone);
+		}
+		catch (e)
+		{
+			var name = elm$time$Time$Offset(new Date().getTimezoneOffset());
+		}
+		callback(_Scheduler_succeed(name));
+	});
+}
+
+
+
 
 // HELPERS
 
@@ -4676,11 +4722,8 @@ var author$project$Main$createNote = function (midiCode) {
 		noteName: author$project$Main$midiToNoteName(midiCode)
 	};
 };
-var author$project$Main$pickRandomNote = function (_n0) {
-	return author$project$Main$createNote(60);
-};
 var author$project$Main$initialModel = {
-	correctNote: author$project$Main$pickRandomNote(_Utils_Tuple0),
+	correctNote: author$project$Main$createNote(60),
 	currentNote: elm$core$Maybe$Nothing,
 	isMIDIConnected: elm$core$Maybe$Nothing,
 	score: 0
@@ -4970,97 +5013,9 @@ var author$project$Main$subscriptions = function (model) {
 				author$project$Main$fakeHandleNotePlayed(author$project$Main$NotePlayed)
 			]));
 };
-var author$project$Main$updateScore = F3(
-	function (score, correctNote, currentNote) {
-		return _Utils_eq(currentNote.midi, correctNote.midi) ? (score + 1) : score;
-	});
-var author$project$Main$update = F2(
-	function (msg, model) {
-		if (msg.$ === 'InitMIDI') {
-			var isMIDIConnectedBool = msg.a;
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{
-						isMIDIConnected: elm$core$Maybe$Just(isMIDIConnectedBool)
-					}),
-				elm$core$Platform$Cmd$none);
-		} else {
-			var noteCode = msg.a;
-			var newNote = author$project$Main$createNote(noteCode);
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{
-						currentNote: elm$core$Maybe$Just(newNote),
-						score: A3(author$project$Main$updateScore, model.score, model.correctNote, newNote)
-					}),
-				elm$core$Platform$Cmd$none);
-		}
-	});
-var author$project$Main$displayMIDIStatus = function (isConnected) {
-	if (isConnected.$ === 'Nothing') {
-		return 'Connect a MIDI instrument to play!';
-	} else {
-		if (isConnected.a) {
-			return 'Your MIDI device is connected, yay! See the note below? Play it on your instrument!';
-		} else {
-			return 'Hmm, something went wrong with connecting to your MIDI device. Try refreshing this page or turning your MIDI device off and on again.';
-		}
-	}
+var author$project$Main$UpdateCorrectNote = function (a) {
+	return {$: 'UpdateCorrectNote', a: a};
 };
-var elm$core$String$fromFloat = _String_fromNumber;
-var elm$core$Tuple$second = function (_n0) {
-	var y = _n0.b;
-	return y;
-};
-var author$project$Main$displayNote = function (note) {
-	if (note.$ === 'Nothing') {
-		return 'nothing here';
-	} else {
-		var x = note.a;
-		return 'Name: ' + (x.noteName.a + (elm$core$String$fromInt(x.noteName.b) + (', MIDI: ' + (elm$core$String$fromInt(x.midi) + (', Frequency: ' + elm$core$String$fromFloat(x.frequency))))));
-	}
-};
-var elm$core$Basics$identity = function (x) {
-	return x;
-};
-var elm$json$Json$Decode$map = _Json_map1;
-var elm$json$Json$Decode$map2 = _Json_map2;
-var elm$json$Json$Decode$succeed = _Json_succeed;
-var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
-	switch (handler.$) {
-		case 'Normal':
-			return 0;
-		case 'MayStopPropagation':
-			return 1;
-		case 'MayPreventDefault':
-			return 2;
-		default:
-			return 3;
-	}
-};
-var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
-var elm$svg$Svg$circle = elm$svg$Svg$trustedNode('circle');
-var elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
-var elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
-var elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
-var author$project$Main$drawNote = F4(
-	function (staffWidth, lineHeight, margins, yPos) {
-		var yPosFloat = yPos;
-		var cyString = elm$core$String$fromFloat(margins.top + ((yPosFloat * lineHeight) / 2));
-		var cxString = elm$core$String$fromFloat(margins.left + ((yPosFloat * staffWidth) / 12));
-		return A2(
-			elm$svg$Svg$circle,
-			_List_fromArray(
-				[
-					elm$svg$Svg$Attributes$cx(cxString),
-					elm$svg$Svg$Attributes$cy(cyString),
-					elm$svg$Svg$Attributes$r(
-					elm$core$String$fromFloat(lineHeight / 2))
-				]),
-			_List_Nil);
-	});
 var elm$core$List$foldrHelper = F4(
 	function (fn, acc, ctr, ls) {
 		if (!ls.b) {
@@ -5130,12 +5085,338 @@ var elm$core$List$map = F2(
 			_List_Nil,
 			xs);
 	});
-var author$project$Main$allNotes = F3(
-	function (staffWidth, lineHeight, margins) {
+var elm$random$Random$addOne = function (value) {
+	return _Utils_Tuple2(1, value);
+};
+var elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var elm$core$Basics$abs = function (n) {
+	return (n < 0) ? (-n) : n;
+};
+var elm$core$List$sum = function (numbers) {
+	return A3(elm$core$List$foldl, elm$core$Basics$add, 0, numbers);
+};
+var elm$core$Basics$identity = function (x) {
+	return x;
+};
+var elm$random$Random$Generator = function (a) {
+	return {$: 'Generator', a: a};
+};
+var elm$random$Random$Seed = F2(
+	function (a, b) {
+		return {$: 'Seed', a: a, b: b};
+	});
+var elm$random$Random$next = function (_n0) {
+	var state0 = _n0.a;
+	var incr = _n0.b;
+	return A2(elm$random$Random$Seed, ((state0 * 1664525) + incr) >>> 0, incr);
+};
+var elm$core$Bitwise$xor = _Bitwise_xor;
+var elm$random$Random$peel = function (_n0) {
+	var state = _n0.a;
+	var word = (state ^ (state >>> ((state >>> 28) + 4))) * 277803737;
+	return ((word >>> 22) ^ word) >>> 0;
+};
+var elm$random$Random$float = F2(
+	function (a, b) {
+		return elm$random$Random$Generator(
+			function (seed0) {
+				var seed1 = elm$random$Random$next(seed0);
+				var range = elm$core$Basics$abs(b - a);
+				var n1 = elm$random$Random$peel(seed1);
+				var n0 = elm$random$Random$peel(seed0);
+				var lo = (134217727 & n1) * 1.0;
+				var hi = (67108863 & n0) * 1.0;
+				var val = ((hi * 1.34217728e8) + lo) / 9.007199254740992e15;
+				var scaled = (val * range) + a;
+				return _Utils_Tuple2(
+					scaled,
+					elm$random$Random$next(seed1));
+			});
+	});
+var elm$random$Random$getByWeight = F3(
+	function (_n0, others, countdown) {
+		getByWeight:
+		while (true) {
+			var weight = _n0.a;
+			var value = _n0.b;
+			if (!others.b) {
+				return value;
+			} else {
+				var second = others.a;
+				var otherOthers = others.b;
+				if (_Utils_cmp(
+					countdown,
+					elm$core$Basics$abs(weight)) < 1) {
+					return value;
+				} else {
+					var $temp$_n0 = second,
+						$temp$others = otherOthers,
+						$temp$countdown = countdown - elm$core$Basics$abs(weight);
+					_n0 = $temp$_n0;
+					others = $temp$others;
+					countdown = $temp$countdown;
+					continue getByWeight;
+				}
+			}
+		}
+	});
+var elm$random$Random$map = F2(
+	function (func, _n0) {
+		var genA = _n0.a;
+		return elm$random$Random$Generator(
+			function (seed0) {
+				var _n1 = genA(seed0);
+				var a = _n1.a;
+				var seed1 = _n1.b;
+				return _Utils_Tuple2(
+					func(a),
+					seed1);
+			});
+	});
+var elm$random$Random$weighted = F2(
+	function (first, others) {
+		var normalize = function (_n0) {
+			var weight = _n0.a;
+			return elm$core$Basics$abs(weight);
+		};
+		var total = normalize(first) + elm$core$List$sum(
+			A2(elm$core$List$map, normalize, others));
 		return A2(
-			elm$core$List$map,
-			A3(author$project$Main$drawNote, staffWidth, lineHeight, margins),
-			A2(elm$core$List$range, 1, 12));
+			elm$random$Random$map,
+			A2(elm$random$Random$getByWeight, first, others),
+			A2(elm$random$Random$float, 0, total));
+	});
+var elm$random$Random$uniform = F2(
+	function (value, valueList) {
+		return A2(
+			elm$random$Random$weighted,
+			elm$random$Random$addOne(value),
+			A2(elm$core$List$map, elm$random$Random$addOne, valueList));
+	});
+var author$project$Main$getRandomMidi = A2(
+	elm$random$Random$uniform,
+	60,
+	_List_fromArray(
+		[62, 64, 65, 67, 69, 71, 72, 74, 76, 77, 79]));
+var author$project$Main$updateScore = F3(
+	function (score, correctNote, currentNote) {
+		return _Utils_eq(currentNote.midi, correctNote.midi) ? _Utils_Tuple2(score + 1, true) : _Utils_Tuple2(score, false);
+	});
+var elm$core$Tuple$second = function (_n0) {
+	var y = _n0.b;
+	return y;
+};
+var elm$random$Random$Generate = function (a) {
+	return {$: 'Generate', a: a};
+};
+var elm$core$Task$andThen = _Scheduler_andThen;
+var elm$core$Task$succeed = _Scheduler_succeed;
+var elm$random$Random$initialSeed = function (x) {
+	var _n0 = elm$random$Random$next(
+		A2(elm$random$Random$Seed, 0, 1013904223));
+	var state1 = _n0.a;
+	var incr = _n0.b;
+	var state2 = (state1 + x) >>> 0;
+	return elm$random$Random$next(
+		A2(elm$random$Random$Seed, state2, incr));
+};
+var elm$time$Time$Name = function (a) {
+	return {$: 'Name', a: a};
+};
+var elm$time$Time$Offset = function (a) {
+	return {$: 'Offset', a: a};
+};
+var elm$time$Time$Zone = F2(
+	function (a, b) {
+		return {$: 'Zone', a: a, b: b};
+	});
+var elm$time$Time$customZone = elm$time$Time$Zone;
+var elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var elm$time$Time$millisToPosix = elm$time$Time$Posix;
+var elm$time$Time$now = _Time_now(elm$time$Time$millisToPosix);
+var elm$time$Time$posixToMillis = function (_n0) {
+	var millis = _n0.a;
+	return millis;
+};
+var elm$random$Random$init = A2(
+	elm$core$Task$andThen,
+	function (time) {
+		return elm$core$Task$succeed(
+			elm$random$Random$initialSeed(
+				elm$time$Time$posixToMillis(time)));
+	},
+	elm$time$Time$now);
+var elm$core$Platform$sendToApp = _Platform_sendToApp;
+var elm$random$Random$step = F2(
+	function (_n0, seed) {
+		var generator = _n0.a;
+		return generator(seed);
+	});
+var elm$random$Random$onEffects = F3(
+	function (router, commands, seed) {
+		if (!commands.b) {
+			return elm$core$Task$succeed(seed);
+		} else {
+			var generator = commands.a.a;
+			var rest = commands.b;
+			var _n1 = A2(elm$random$Random$step, generator, seed);
+			var value = _n1.a;
+			var newSeed = _n1.b;
+			return A2(
+				elm$core$Task$andThen,
+				function (_n2) {
+					return A3(elm$random$Random$onEffects, router, rest, newSeed);
+				},
+				A2(elm$core$Platform$sendToApp, router, value));
+		}
+	});
+var elm$random$Random$onSelfMsg = F3(
+	function (_n0, _n1, seed) {
+		return elm$core$Task$succeed(seed);
+	});
+var elm$random$Random$cmdMap = F2(
+	function (func, _n0) {
+		var generator = _n0.a;
+		return elm$random$Random$Generate(
+			A2(elm$random$Random$map, func, generator));
+	});
+_Platform_effectManagers['Random'] = _Platform_createManager(elm$random$Random$init, elm$random$Random$onEffects, elm$random$Random$onSelfMsg, elm$random$Random$cmdMap);
+var elm$random$Random$command = _Platform_leaf('Random');
+var elm$random$Random$generate = F2(
+	function (tagger, generator) {
+		return elm$random$Random$command(
+			elm$random$Random$Generate(
+				A2(elm$random$Random$map, tagger, generator)));
+	});
+var author$project$Main$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'InitMIDI':
+				var isMIDIConnectedBool = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							isMIDIConnected: elm$core$Maybe$Just(isMIDIConnectedBool)
+						}),
+					elm$core$Platform$Cmd$none);
+			case 'NotePlayed':
+				var noteCode = msg.a;
+				var newNote = author$project$Main$createNote(noteCode);
+				var scoreResult = A3(author$project$Main$updateScore, model.score, model.correctNote, newNote);
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							currentNote: elm$core$Maybe$Just(newNote),
+							score: scoreResult.a
+						}),
+					scoreResult.b ? A2(elm$random$Random$generate, author$project$Main$UpdateCorrectNote, author$project$Main$getRandomMidi) : elm$core$Platform$Cmd$none);
+			case 'GetRandomMidi':
+				return _Utils_Tuple2(
+					model,
+					A2(elm$random$Random$generate, author$project$Main$UpdateCorrectNote, author$project$Main$getRandomMidi));
+			default:
+				var midiCode = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							correctNote: author$project$Main$createNote(midiCode)
+						}),
+					elm$core$Platform$Cmd$none);
+		}
+	});
+var author$project$Main$GetRandomMidi = {$: 'GetRandomMidi'};
+var author$project$Main$displayMIDIStatus = function (isConnected) {
+	if (isConnected.$ === 'Nothing') {
+		return 'Connect a MIDI instrument to play!';
+	} else {
+		if (isConnected.a) {
+			return 'Your MIDI device is connected, yay! See the note below? Play it on your instrument!';
+		} else {
+			return 'Hmm, something went wrong with connecting to your MIDI device. Try refreshing this page or turning your MIDI device off and on again.';
+		}
+	}
+};
+var elm$core$String$fromFloat = _String_fromNumber;
+var author$project$Main$displayNote = function (note) {
+	if (note.$ === 'Nothing') {
+		return 'nothing here';
+	} else {
+		var x = note.a;
+		return 'Name: ' + (x.noteName.a + (elm$core$String$fromInt(x.noteName.b) + (', MIDI: ' + (elm$core$String$fromInt(x.midi) + (', Frequency: ' + elm$core$String$fromFloat(x.frequency))))));
+	}
+};
+var author$project$Main$getNoteHeight = function (midiCode) {
+	switch (midiCode) {
+		case 60:
+			return 12;
+		case 62:
+			return 11;
+		case 64:
+			return 10;
+		case 65:
+			return 9;
+		case 67:
+			return 8;
+		case 69:
+			return 7;
+		case 71:
+			return 6;
+		case 72:
+			return 5;
+		case 74:
+			return 4;
+		case 76:
+			return 3;
+		case 77:
+			return 2;
+		case 79:
+			return 1;
+		default:
+			return 12;
+	}
+};
+var elm$json$Json$Decode$map = _Json_map1;
+var elm$json$Json$Decode$map2 = _Json_map2;
+var elm$json$Json$Decode$succeed = _Json_succeed;
+var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
+	switch (handler.$) {
+		case 'Normal':
+			return 0;
+		case 'MayStopPropagation':
+			return 1;
+		case 'MayPreventDefault':
+			return 2;
+		default:
+			return 3;
+	}
+};
+var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var elm$svg$Svg$circle = elm$svg$Svg$trustedNode('circle');
+var elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
+var elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
+var elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
+var author$project$Main$drawNote = F4(
+	function (staffWidth, lineHeight, margins, correctNote) {
+		var yPosFloat = author$project$Main$getNoteHeight(correctNote.midi);
+		var cyString = elm$core$String$fromFloat(margins.top + ((yPosFloat * lineHeight) / 2));
+		var cxString = elm$core$String$fromFloat(staffWidth / 2);
+		return A2(
+			elm$svg$Svg$circle,
+			_List_fromArray(
+				[
+					elm$svg$Svg$Attributes$cx(cxString),
+					elm$svg$Svg$Attributes$cy(cyString),
+					elm$svg$Svg$Attributes$r(
+					elm$core$String$fromFloat(lineHeight / 2))
+				]),
+			_List_Nil);
 	});
 var elm$svg$Svg$line = elm$svg$Svg$trustedNode('line');
 var elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
@@ -5165,16 +5446,37 @@ var author$project$Main$staff = F3(
 		return A2(
 			elm$core$List$map,
 			A3(author$project$Main$staffLines, staffWidth, lineHeight, margins),
+			A2(elm$core$List$range, 1, 5));
+	});
+var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
+var elm$svg$Svg$text_ = elm$svg$Svg$trustedNode('text');
+var elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
+var elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
+var elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
+var author$project$Main$trebleClef = F2(
+	function (x, y) {
+		var yS = elm$core$String$fromFloat(y);
+		var xS = elm$core$String$fromFloat(x);
+		return A2(
+			elm$svg$Svg$text_,
 			_List_fromArray(
-				[1, 2, 3, 4, 5, 6]));
+				[
+					elm$svg$Svg$Attributes$x(xS),
+					elm$svg$Svg$Attributes$y(yS),
+					elm$svg$Svg$Attributes$class('treble')
+				]),
+			_List_fromArray(
+				[
+					elm$html$Html$text('𝄞')
+				]));
 	});
 var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
-var elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
 var elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
 var elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
 var elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
-var author$project$Main$svgView = F3(
-	function (width, height, margins) {
+var author$project$Main$svgView = F4(
+	function (correctNote, width, height, margins) {
 		var widthS = elm$core$String$fromFloat((width + margins.left) + margins.right);
 		var lineHeight = height / 6;
 		var heightS = elm$core$String$fromFloat((height + margins.top) + margins.bottom);
@@ -5188,18 +5490,46 @@ var author$project$Main$svgView = F3(
 					elm$svg$Svg$Attributes$class('center')
 				]),
 			_Utils_ap(
-				A3(author$project$Main$staff, width, lineHeight, margins),
-				A3(author$project$Main$allNotes, width, lineHeight, margins)));
+				_Utils_ap(
+					A3(author$project$Main$staff, width, lineHeight, margins),
+					_List_fromArray(
+						[
+							A4(author$project$Main$drawNote, width, lineHeight, margins, correctNote)
+						])),
+				_List_fromArray(
+					[
+						A2(author$project$Main$trebleClef, 50, 237)
+					])));
 	});
-var author$project$Main$drawNotes = A3(
-	author$project$Main$svgView,
-	500,
-	200,
-	{bottom: 50, left: 50, right: 50, top: 50});
+var elm$html$Html$button = _VirtualDom_node('button');
 var elm$html$Html$div = _VirtualDom_node('div');
 var elm$html$Html$p = _VirtualDom_node('p');
-var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
+var elm$json$Json$Encode$string = _Json_wrap;
+var elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			elm$json$Json$Encode$string(string));
+	});
+var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
+var elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			elm$virtual_dom$VirtualDom$on,
+			event,
+			elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		elm$html$Html$Events$on,
+		'click',
+		elm$json$Json$Decode$succeed(msg));
+};
 var author$project$Main$view = function (model) {
 	return A2(
 		elm$html$Html$div,
@@ -5213,6 +5543,17 @@ var author$project$Main$view = function (model) {
 					[
 						elm$html$Html$text(
 						author$project$Main$displayMIDIStatus(model.isMIDIConnected))
+					])),
+				A2(
+				elm$html$Html$button,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('startbutton'),
+						elm$html$Html$Events$onClick(author$project$Main$GetRandomMidi)
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text('Start playing!')
 					])),
 				A2(
 				elm$html$Html$p,
@@ -5239,7 +5580,12 @@ var author$project$Main$view = function (model) {
 						elm$html$Html$text(
 						'.....score ....: ' + elm$core$String$fromInt(model.score))
 					])),
-				author$project$Main$drawNotes
+				A4(
+				author$project$Main$svgView,
+				model.correctNote,
+				500,
+				200,
+				{bottom: 50, left: 50, right: 50, top: 50})
 			]));
 };
 var elm$browser$Browser$External = function (a) {
@@ -5263,9 +5609,7 @@ var elm$core$Basics$never = function (_n0) {
 var elm$core$Task$Perform = function (a) {
 	return {$: 'Perform', a: a};
 };
-var elm$core$Task$succeed = _Scheduler_succeed;
 var elm$core$Task$init = elm$core$Task$succeed(_Utils_Tuple0);
-var elm$core$Task$andThen = _Scheduler_andThen;
 var elm$core$Task$map = F2(
 	function (func, taskA) {
 		return A2(
@@ -5298,7 +5642,6 @@ var elm$core$Task$sequence = function (tasks) {
 		elm$core$Task$succeed(_List_Nil),
 		tasks);
 };
-var elm$core$Platform$sendToApp = _Platform_sendToApp;
 var elm$core$Task$spawnCmd = F2(
 	function (router, _n0) {
 		var task = _n0.a;

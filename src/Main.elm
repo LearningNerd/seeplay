@@ -1,10 +1,11 @@
-port module Main exposing (Model, Msg(..), Note, NoteName, createNote, displayMIDIStatus, displayNote, fakeHandleInitMIDI, fakeHandleNotePlayed, handleInitMIDI, handleNotePlayed, init, initialModel, main, midiToFrequency, midiToNoteName, pickRandomNote, subscriptions, update, updateScore, view)
-
--- import Html.Attributes as A exposing (..)
+port module Main exposing (..)
 
 import Array exposing (..)
 import Browser
 import Html as HTML exposing (..)
+import Html.Attributes as A exposing (..)
+import Html.Events exposing (..)
+import Random
 import Svg exposing (..)
 import Svg.Attributes as S exposing (..)
 import Tuple exposing (..)
@@ -48,11 +49,12 @@ type alias Model =
     , score : Int
     }
 
+ 
 
 initialModel : Model
 initialModel =
     { isMIDIConnected = Nothing
-    , correctNote = pickRandomNote ()
+    , correctNote = createNote 60
     , currentNote = Nothing
     , score = 0
     }
@@ -73,6 +75,17 @@ type alias Margins =
     { top : Float, right : Float, bottom : Float, left : Float }
 
 
+trebleClef x y =
+    let
+        xS =
+            String.fromFloat x
+
+        yS =
+            String.fromFloat y
+    in
+    text_ [ S.x xS, S.y yS, S.class "treble" ] [ HTML.text "𝄞" ]
+
+
 staffLines : Float -> Float -> Margins -> Int -> Svg msg
 staffLines staffWidth lineHeight margins yPos =
     let
@@ -91,26 +104,40 @@ staffLines staffWidth lineHeight margins yPos =
 
 staff : Float -> Float -> Margins -> List (Svg msg)
 staff staffWidth lineHeight margins =
-    List.map (staffLines staffWidth lineHeight margins) [ 1, 2, 3, 4, 5, 6 ]
+    List.map (staffLines staffWidth lineHeight margins) (List.range 1 5)
 
 
 
--- getNoteHeight lineHeight note = -- map from MIDI codes to y positions
+getNoteHeight midiCode = 
+  case midiCode of
+    60 -> 12
+    62 -> 11
+    64 -> 10
+    65 -> 9
+    67 -> 8
+    69 -> 7
+    71 -> 6
+    72 -> 5
+    74 -> 4
+    76 -> 3
+    77 -> 2
+    79 -> 1
+    _ -> 12
 
-
-drawNote : Float -> Float -> Margins -> Int -> Svg msg
-drawNote staffWidth lineHeight margins yPos =
+drawNote : Float -> Float -> Margins -> Note -> Svg msg
+drawNote staffWidth lineHeight margins correctNote =
     let
         yPosFloat =
-            toFloat yPos
-
+            -- toFloat (72 - correctNote.midi)
+            toFloat (getNoteHeight correctNote.midi)
+    
         cxString =
-            String.fromFloat (margins.left + (yPosFloat * staffWidth / 12))
+            String.fromFloat (staffWidth/2)
 
         cyString =
             String.fromFloat (margins.top + (yPosFloat * lineHeight / 2))
     in
-      circle
+    circle
         [ S.cx cxString
         , S.cy cyString
         , S.r (String.fromFloat (lineHeight / 2))
@@ -118,17 +145,17 @@ drawNote staffWidth lineHeight margins yPos =
         []
 
 
+
+{--
 allNotes : Float -> Float -> Margins -> List (Svg msg)
 allNotes staffWidth lineHeight margins =
-    List.map (drawNote staffWidth lineHeight margins) (List.range 1 12)
-
-
-
+    List.map (drawNote staffWidth lineHeight margins) (List.range 60 60)
+--}
 -- (List.map toFloat (List.range 1 12))
 
 
-svgView : Float -> Float -> Margins -> Svg Msg
-svgView width height margins =
+svgView : Note -> Float -> Float -> Margins -> Svg Msg
+svgView correctNote width height margins =
     let
         lineHeight =
             height / 6
@@ -139,17 +166,15 @@ svgView width height margins =
         heightS =
             String.fromFloat (height + margins.top + margins.bottom)
     in
-      svg
+    svg
         [ S.width widthS
         , S.height heightS
         , S.viewBox ("0 0 " ++ widthS ++ " " ++ heightS)
-        , class "center"
+        , S.class "center"
         ]
-        (staff width lineHeight margins ++ allNotes width lineHeight margins)
-
-
-drawNotes =
-    svgView 500 200 { top = 50, left = 50, bottom = 50, right = 50 }
+        ((staff width lineHeight margins ++ [drawNote width lineHeight margins correctNote])
+            ++ [ trebleClef 50 237 ]
+        )
 
 
 
@@ -160,10 +185,11 @@ view : Model -> Html Msg
 view model =
     div []
         [ p [] [ HTML.text (displayMIDIStatus model.isMIDIConnected) ]
+        , button [ A.class "startbutton", onClick GetRandomMidi] [ HTML.text "Start playing!" ]
         , p [] [ HTML.text ("Note: " ++ displayNote model.currentNote) ]
         , p [] [ HTML.text ("CORRECT NOTE: " ++ displayNote (Just model.correctNote)) ]
         , p [] [ HTML.text (".....score ....: " ++ String.fromInt model.score) ]
-        , drawNotes
+        , svgView model.correctNote 500 200 { top = 50, left = 50, bottom = 50, right = 50 }
         ]
 
 
@@ -173,6 +199,7 @@ view model =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
+
     case msg of
         InitMIDI isMIDIConnectedBool ->
             ( { model | isMIDIConnected = Just isMIDIConnectedBool }
@@ -181,15 +208,28 @@ update msg model =
 
         NotePlayed noteCode ->
             let
-                newNote =
-                    createNote noteCode
+                newNote = createNote noteCode
+                scoreResult = updateScore model.score model.correctNote newNote
             in
             ( { model
                 | currentNote =
                     Just newNote
                 , score =
-                    updateScore model.score model.correctNote newNote
+                    first scoreResult
               }
+            , if (second scoreResult) == True then
+                 Random.generate UpdateCorrectNote getRandomMidi
+              else
+                Cmd.none
+            )
+
+        GetRandomMidi ->
+            ( model
+            , Random.generate UpdateCorrectNote getRandomMidi
+            )
+
+        UpdateCorrectNote midiCode ->
+            ( { model | correctNote = createNote midiCode }
             , Cmd.none
             )
 
@@ -201,6 +241,8 @@ update msg model =
 type Msg
     = InitMIDI Bool
     | NotePlayed Int
+    | UpdateCorrectNote Int
+    | GetRandomMidi
 
 
 subscriptions : Model -> Sub Msg
@@ -267,22 +309,28 @@ displayNote note =
                 ++ String.fromFloat x.frequency
 
 
+getRandomMidi : Random.Generator Int
+getRandomMidi =
+  Random.uniform 60 [
+    62,
+    64,
+    65,
+    67,
+    69,
+    71,
+    72,
+    74,
+    76,
+    77,
+    79]
 
--- TODO: learn how to generate random numbers...
-
-
-pickRandomNote : a -> Note
-pickRandomNote _ =
-    createNote 60
-
-
-updateScore : Int -> Note -> Note -> Int
+updateScore : Int -> Note -> Note -> ( Int, Bool )
 updateScore score correctNote currentNote =
     if currentNote.midi == correctNote.midi then
-        score + 1
+        ( score + 1, True )
 
     else
-        score
+        ( score, False )
 
 
 
