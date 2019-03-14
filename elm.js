@@ -853,6 +853,43 @@ var _Basics_xor = F2(function(a, b) { return a !== b; });
 
 
 
+var _Bitwise_and = F2(function(a, b)
+{
+	return a & b;
+});
+
+var _Bitwise_or = F2(function(a, b)
+{
+	return a | b;
+});
+
+var _Bitwise_xor = F2(function(a, b)
+{
+	return a ^ b;
+});
+
+function _Bitwise_complement(a)
+{
+	return ~a;
+};
+
+var _Bitwise_shiftLeftBy = F2(function(offset, a)
+{
+	return a << offset;
+});
+
+var _Bitwise_shiftRightBy = F2(function(offset, a)
+{
+	return a >> offset;
+});
+
+var _Bitwise_shiftRightZfBy = F2(function(offset, a)
+{
+	return a >>> offset;
+});
+
+
+
 function _Char_toCode(char)
 {
 	var code = char.charCodeAt(0);
@@ -4310,17 +4347,6 @@ function _Browser_load(url)
 		}
 	}));
 }
-var elm$core$Maybe$Nothing = {$: 'Nothing'};
-var author$project$Main$initialModel = {currentMIDICode: 0, isMIDIConnected: elm$core$Maybe$Nothing};
-var elm$core$Basics$False = {$: 'False'};
-var elm$core$Basics$True = {$: 'True'};
-var elm$core$Result$isOk = function (result) {
-	if (result.$ === 'Ok') {
-		return true;
-	} else {
-		return false;
-	}
-};
 var elm$core$Basics$EQ = {$: 'EQ'};
 var elm$core$Basics$GT = {$: 'GT'};
 var elm$core$Basics$LT = {$: 'LT'};
@@ -4401,18 +4427,25 @@ var elm$core$Array$foldr = F3(
 var elm$core$Array$toList = function (array) {
 	return A3(elm$core$Array$foldr, elm$core$List$cons, _List_Nil, array);
 };
-var elm$core$Array$branchFactor = 32;
+var elm$core$Basics$mul = _Basics_mul;
+var elm$core$Basics$pow = _Basics_pow;
+var elm$core$Basics$toFloat = _Basics_toFloat;
+var author$project$Main$midiToFrequency = function (midiCode) {
+	var semitoneRatio = 1.0594630943592953;
+	var lowestFreq = 8.1757989156;
+	return lowestFreq * A2(elm$core$Basics$pow, semitoneRatio, midiCode);
+};
 var elm$core$Array$Array_elm_builtin = F4(
 	function (a, b, c, d) {
 		return {$: 'Array_elm_builtin', a: a, b: b, c: c, d: d};
 	});
+var elm$core$Array$branchFactor = 32;
 var elm$core$Basics$ceiling = _Basics_ceiling;
 var elm$core$Basics$fdiv = _Basics_fdiv;
 var elm$core$Basics$logBase = F2(
 	function (base, number) {
 		return _Basics_log(number) / _Basics_log(base);
 	});
-var elm$core$Basics$toFloat = _Basics_toFloat;
 var elm$core$Array$shiftStep = elm$core$Basics$ceiling(
 	A2(elm$core$Basics$logBase, 2, elm$core$Array$branchFactor));
 var elm$core$Elm$JsArray$empty = _JsArray_empty;
@@ -4504,7 +4537,6 @@ var elm$core$Basics$max = F2(
 	function (x, y) {
 		return (_Utils_cmp(x, y) > 0) ? x : y;
 	});
-var elm$core$Basics$mul = _Basics_mul;
 var elm$core$Basics$sub = _Basics_sub;
 var elm$core$Elm$JsArray$length = _JsArray_length;
 var elm$core$Array$builderToArray = F2(
@@ -4530,8 +4562,137 @@ var elm$core$Array$builderToArray = F2(
 				builder.tail);
 		}
 	});
-var elm$core$Basics$idiv = _Basics_idiv;
+var elm$core$Basics$True = {$: 'True'};
 var elm$core$Basics$lt = _Utils_lt;
+var elm$core$Array$fromListHelp = F3(
+	function (list, nodeList, nodeListSize) {
+		fromListHelp:
+		while (true) {
+			var _n0 = A2(elm$core$Elm$JsArray$initializeFromList, elm$core$Array$branchFactor, list);
+			var jsArray = _n0.a;
+			var remainingItems = _n0.b;
+			if (_Utils_cmp(
+				elm$core$Elm$JsArray$length(jsArray),
+				elm$core$Array$branchFactor) < 0) {
+				return A2(
+					elm$core$Array$builderToArray,
+					true,
+					{nodeList: nodeList, nodeListSize: nodeListSize, tail: jsArray});
+			} else {
+				var $temp$list = remainingItems,
+					$temp$nodeList = A2(
+					elm$core$List$cons,
+					elm$core$Array$Leaf(jsArray),
+					nodeList),
+					$temp$nodeListSize = nodeListSize + 1;
+				list = $temp$list;
+				nodeList = $temp$nodeList;
+				nodeListSize = $temp$nodeListSize;
+				continue fromListHelp;
+			}
+		}
+	});
+var elm$core$Array$fromList = function (list) {
+	if (!list.b) {
+		return elm$core$Array$empty;
+	} else {
+		return A3(elm$core$Array$fromListHelp, list, _List_Nil, 0);
+	}
+};
+var elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
+var elm$core$Array$bitMask = 4294967295 >>> (32 - elm$core$Array$shiftStep);
+var elm$core$Bitwise$and = _Bitwise_and;
+var elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
+var elm$core$Array$getHelp = F3(
+	function (shift, index, tree) {
+		getHelp:
+		while (true) {
+			var pos = elm$core$Array$bitMask & (index >>> shift);
+			var _n0 = A2(elm$core$Elm$JsArray$unsafeGet, pos, tree);
+			if (_n0.$ === 'SubTree') {
+				var subTree = _n0.a;
+				var $temp$shift = shift - elm$core$Array$shiftStep,
+					$temp$index = index,
+					$temp$tree = subTree;
+				shift = $temp$shift;
+				index = $temp$index;
+				tree = $temp$tree;
+				continue getHelp;
+			} else {
+				var values = _n0.a;
+				return A2(elm$core$Elm$JsArray$unsafeGet, elm$core$Array$bitMask & index, values);
+			}
+		}
+	});
+var elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
+var elm$core$Array$tailIndex = function (len) {
+	return (len >>> 5) << 5;
+};
+var elm$core$Basics$ge = _Utils_ge;
+var elm$core$Basics$or = _Basics_or;
+var elm$core$Maybe$Just = function (a) {
+	return {$: 'Just', a: a};
+};
+var elm$core$Maybe$Nothing = {$: 'Nothing'};
+var elm$core$Array$get = F2(
+	function (index, _n0) {
+		var len = _n0.a;
+		var startShift = _n0.b;
+		var tree = _n0.c;
+		var tail = _n0.d;
+		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? elm$core$Maybe$Nothing : ((_Utils_cmp(
+			index,
+			elm$core$Array$tailIndex(len)) > -1) ? elm$core$Maybe$Just(
+			A2(elm$core$Elm$JsArray$unsafeGet, elm$core$Array$bitMask & index, tail)) : elm$core$Maybe$Just(
+			A3(elm$core$Array$getHelp, startShift, index, tree)));
+	});
+var elm$core$Basics$idiv = _Basics_idiv;
+var elm$core$Basics$remainderBy = _Basics_remainderBy;
+var author$project$Main$midiToNoteName = function (midiCode) {
+	var pitchClasses = elm$core$Array$fromList(
+		_List_fromArray(
+			['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']));
+	var octave = ((midiCode / 12) | 0) - 1;
+	var index = midiCode % 12;
+	var pitchClass = function () {
+		var _n0 = A2(elm$core$Array$get, index, pitchClasses);
+		if (_n0.$ === 'Nothing') {
+			return 'C';
+		} else {
+			var x = _n0.a;
+			return x;
+		}
+	}();
+	return _Utils_Tuple2(pitchClass, octave);
+};
+var elm$core$Basics$clamp = F3(
+	function (low, high, number) {
+		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
+	});
+var author$project$Main$createNote = function (midiCode) {
+	return {
+		frequency: author$project$Main$midiToFrequency(midiCode),
+		midi: A3(elm$core$Basics$clamp, 21, 108, midiCode),
+		noteName: author$project$Main$midiToNoteName(midiCode)
+	};
+};
+var author$project$Main$pickRandomNote = function (_n0) {
+	return author$project$Main$createNote(60);
+};
+var author$project$Main$initialModel = {
+	correctNote: author$project$Main$pickRandomNote(_Utils_Tuple0),
+	currentNote: elm$core$Maybe$Nothing,
+	isMIDIConnected: elm$core$Maybe$Nothing,
+	score: 0
+};
+var elm$core$Basics$False = {$: 'False'};
+var elm$core$Result$isOk = function (result) {
+	if (result.$ === 'Ok') {
+		return true;
+	} else {
+		return false;
+	}
+};
 var elm$core$Elm$JsArray$initialize = _JsArray_initialize;
 var elm$core$Array$initializeHelp = F5(
 	function (fn, fromIndex, len, nodeList, tail) {
@@ -4560,7 +4721,6 @@ var elm$core$Array$initializeHelp = F5(
 		}
 	});
 var elm$core$Basics$le = _Utils_le;
-var elm$core$Basics$remainderBy = _Basics_remainderBy;
 var elm$core$Array$initialize = F2(
 	function (len, fn) {
 		if (len <= 0) {
@@ -4572,9 +4732,6 @@ var elm$core$Array$initialize = F2(
 			return A5(elm$core$Array$initializeHelp, fn, initialFromIndex, len, _List_Nil, tail);
 		}
 	});
-var elm$core$Maybe$Just = function (a) {
-	return {$: 'Just', a: a};
-};
 var elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
@@ -4598,7 +4755,6 @@ var elm$json$Json$Decode$OneOf = function (a) {
 };
 var elm$core$Basics$and = _Basics_and;
 var elm$core$Basics$append = _Utils_append;
-var elm$core$Basics$or = _Basics_or;
 var elm$core$Char$toCode = _Char_toCode;
 var elm$core$Char$isLower = function (_char) {
 	var code = elm$core$Char$toCode(_char);
@@ -4798,8 +4954,10 @@ var author$project$Main$NotePlayed = function (a) {
 	return {$: 'NotePlayed', a: a};
 };
 var elm$json$Json$Decode$bool = _Json_decodeBool;
-var author$project$Main$handleInitMIDI = _Platform_incomingPort('handleInitMIDI', elm$json$Json$Decode$bool);
+var author$project$Main$fakeHandleInitMIDI = _Platform_incomingPort('fakeHandleInitMIDI', elm$json$Json$Decode$bool);
 var elm$json$Json$Decode$int = _Json_decodeInt;
+var author$project$Main$fakeHandleNotePlayed = _Platform_incomingPort('fakeHandleNotePlayed', elm$json$Json$Decode$int);
+var author$project$Main$handleInitMIDI = _Platform_incomingPort('handleInitMIDI', elm$json$Json$Decode$bool);
 var author$project$Main$handleNotePlayed = _Platform_incomingPort('handleNotePlayed', elm$json$Json$Decode$int);
 var elm$core$Platform$Sub$batch = _Platform_batch;
 var author$project$Main$subscriptions = function (model) {
@@ -4807,9 +4965,15 @@ var author$project$Main$subscriptions = function (model) {
 		_List_fromArray(
 			[
 				author$project$Main$handleInitMIDI(author$project$Main$InitMIDI),
-				author$project$Main$handleNotePlayed(author$project$Main$NotePlayed)
+				author$project$Main$handleNotePlayed(author$project$Main$NotePlayed),
+				author$project$Main$fakeHandleInitMIDI(author$project$Main$InitMIDI),
+				author$project$Main$fakeHandleNotePlayed(author$project$Main$NotePlayed)
 			]));
 };
+var author$project$Main$updateScore = F3(
+	function (score, correctNote, currentNote) {
+		return _Utils_eq(currentNote.midi, correctNote.midi) ? (score + 1) : score;
+	});
 var author$project$Main$update = F2(
 	function (msg, model) {
 		if (msg.$ === 'InitMIDI') {
@@ -4818,18 +4982,46 @@ var author$project$Main$update = F2(
 				_Utils_update(
 					model,
 					{
-						isMIDIConnected: isMIDIConnectedBool ? elm$core$Maybe$Just(true) : elm$core$Maybe$Just(false)
+						isMIDIConnected: elm$core$Maybe$Just(isMIDIConnectedBool)
 					}),
 				elm$core$Platform$Cmd$none);
 		} else {
 			var noteCode = msg.a;
+			var newNote = author$project$Main$createNote(noteCode);
 			return _Utils_Tuple2(
 				_Utils_update(
 					model,
-					{currentMIDICode: noteCode}),
+					{
+						currentNote: elm$core$Maybe$Just(newNote),
+						score: A3(author$project$Main$updateScore, model.score, model.correctNote, newNote)
+					}),
 				elm$core$Platform$Cmd$none);
 		}
 	});
+var author$project$Main$displayMIDIStatus = function (isConnected) {
+	if (isConnected.$ === 'Nothing') {
+		return 'Connect a MIDI instrument to play!';
+	} else {
+		if (isConnected.a) {
+			return 'Your MIDI device is connected, yay! See the note below? Play it on your instrument!';
+		} else {
+			return 'Hmm, something went wrong with connecting to your MIDI device. Try refreshing this page or turning your MIDI device off and on again.';
+		}
+	}
+};
+var elm$core$String$fromFloat = _String_fromNumber;
+var elm$core$Tuple$second = function (_n0) {
+	var y = _n0.b;
+	return y;
+};
+var author$project$Main$displayNote = function (note) {
+	if (note.$ === 'Nothing') {
+		return 'nothing here';
+	} else {
+		var x = note.a;
+		return 'Name: ' + (x.noteName.a + (elm$core$String$fromInt(x.noteName.b) + (', MIDI: ' + (elm$core$String$fromInt(x.midi) + (', Frequency: ' + elm$core$String$fromFloat(x.frequency))))));
+	}
+};
 var elm$core$Basics$identity = function (x) {
 	return x;
 };
@@ -4853,18 +5045,6 @@ var elm$html$Html$p = _VirtualDom_node('p');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
 var author$project$Main$view = function (model) {
-	var isMIDIConnectedText = function () {
-		var _n0 = model.isMIDIConnected;
-		if (_n0.$ === 'Nothing') {
-			return 'Connect a MIDI instrument to play!';
-		} else {
-			if (_n0.a) {
-				return 'Your MIDI device is connected, yay! See the note below? Play it on your instrument!';
-			} else {
-				return 'Hmm, something went wrong with connecting to your MIDI device. Trying refreshing this page or turning your MIDI device off and on again.';
-			}
-		}
-	}();
 	return A2(
 		elm$html$Html$div,
 		_List_Nil,
@@ -4875,7 +5055,8 @@ var author$project$Main$view = function (model) {
 				_List_Nil,
 				_List_fromArray(
 					[
-						elm$html$Html$text(isMIDIConnectedText)
+						elm$html$Html$text(
+						author$project$Main$displayMIDIStatus(model.isMIDIConnected))
 					])),
 				A2(
 				elm$html$Html$p,
@@ -4883,7 +5064,24 @@ var author$project$Main$view = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$text(
-						'MIDI Code: ' + elm$core$String$fromInt(model.currentMIDICode))
+						'Note: ' + author$project$Main$displayNote(model.currentNote))
+					])),
+				A2(
+				elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						elm$html$Html$text(
+						'CORRECT NOTE: ' + author$project$Main$displayNote(
+							elm$core$Maybe$Just(model.correctNote)))
+					])),
+				A2(
+				elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						elm$html$Html$text(
+						'.....score ....: ' + elm$core$String$fromInt(model.score))
 					]))
 			]));
 };

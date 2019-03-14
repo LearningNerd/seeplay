@@ -4,8 +4,11 @@ port module Main exposing (..)
 import Tuple exposing (..)
 import Array exposing (..)
 import Browser
-import Html exposing (..)
+import Html as HTML exposing (..)
 import Html.Attributes exposing (..)
+
+import GraphicSVG as SVG exposing (..)
+
 
 port handleInitMIDI : (Bool -> msg) -> Sub msg
 port handleNotePlayed : (Int -> msg) -> Sub msg
@@ -30,14 +33,18 @@ type alias Note =
 type alias Model =
   {
     isMIDIConnected: Maybe Bool
+  , correctNote: Note
   , currentNote: Maybe Note
+  , score: Int
   }
 
 initialModel : Model
 initialModel =
   {
     isMIDIConnected = Nothing
+  , correctNote = pickRandomNote ()
   , currentNote = Nothing
+  , score = 0
   }
 
 init : () -> ( Model, Cmd Msg )
@@ -52,8 +59,10 @@ init _ =
 view : Model -> Html Msg
 view model =
     div [] [
-        p [] [ text (displayMIDIStatus model.isMIDIConnected)]
-      , p [] [ text ("Note: " ++ displayNote model.currentNote) ]
+        p [] [ HTML.text (displayMIDIStatus model.isMIDIConnected)]
+      , p [] [ HTML.text ("Note: " ++ displayNote model.currentNote) ]
+      , p [] [ HTML.text ("CORRECT NOTE: " ++ displayNote (Just model.correctNote) )]
+      , p [] [ HTML.text (".....score ....: " ++ String.fromInt model.score )]
     ]
 
 
@@ -69,12 +78,17 @@ update msg model =
 
      
       NotePlayed noteCode ->
-        ( { model |
-            currentNote =
-              Just (createNote noteCode)
-          }
-        , Cmd.none
-        )
+        let
+            newNote = createNote noteCode
+        in
+          ( { model |
+              currentNote =
+               Just newNote
+            , score =
+              updateScore model.score model.correctNote newNote
+            }
+          , Cmd.none
+          )
 
 
 -- SUBSCRIPTIONS
@@ -115,6 +129,7 @@ displayMIDIStatus isConnected =
           Just False ->
             "Hmm, something went wrong with connecting to your MIDI device. Try refreshing this page or turning your MIDI device off and on again."
 
+
 createNote : Int -> Note
 createNote midiCode =
   { noteName = midiToNoteName midiCode
@@ -131,6 +146,22 @@ displayNote note =
       "Name: " ++ first x.noteName ++ (second x.noteName |> String.fromInt)
       ++ ", MIDI: " ++ String.fromInt x.midi
       ++ ", Frequency: " ++ String.fromFloat x.frequency
+
+
+-- TODO: learn how to generate random numbers...
+pickRandomNote : a -> Note
+pickRandomNote _ =
+  createNote 60
+
+
+
+updateScore : Int -> Note -> Note -> Int
+updateScore score correctNote currentNote =
+     if currentNote.midi == correctNote.midi then
+      score + 1
+     else 
+      score
+
 
 
 -- NOTE CONVERSION HELPER FUNCTIONS
