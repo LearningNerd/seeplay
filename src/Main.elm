@@ -9,6 +9,8 @@ import Random
 import Svg exposing (..)
 import Svg.Attributes as S exposing (..)
 import Tuple exposing (..)
+import Task
+import Time
 
 
 port handleInitMIDI : (Bool -> msg) -> Sub msg
@@ -47,6 +49,9 @@ type alias Model =
     , correctNote : Note
     , currentNote : Maybe Note
     , score : Int
+    , startTimestamp : Maybe Time.Posix
+    , answerSpeed : Maybe Int -- result of subtracting two times via posixToMillis
+    , testCurrentTimestamp : Maybe Time.Posix
     }
 
  
@@ -57,6 +62,9 @@ initialModel =
     , correctNote = createNote 60
     , currentNote = Nothing
     , score = 0
+    , startTimestamp = Nothing
+    , answerSpeed = Nothing
+    , testCurrentTimestamp = Nothing
     }
 
 
@@ -177,12 +185,29 @@ svgView correctNote width height margins =
         )
 
 
+-- TIME HELPER...
+displayTimestamp timestamp =
+  case timestamp of
+        Nothing -> "EMPTY"
+        Just t -> String.fromInt (Time.posixToMillis t)
+
+getMillis timestamp =
+  case timestamp of
+        Nothing -> 0
+        Just t -> Time.posixToMillis t
+
 
 -- VIEW
 
 
 view : Model -> Html Msg
 view model =
+  let
+      answerSpeedS =
+        case model.answerSpeed of
+          Nothing -> "EMPTY"
+          Just i -> String.fromInt i
+  in
     div []
         [ p [] [ HTML.text (displayMIDIStatus model.isMIDIConnected) ]
         , button [ A.class "startbutton", onClick GetRandomMidi] [ HTML.text "Start playing!" ]
@@ -190,6 +215,10 @@ view model =
         , p [] [ HTML.text ("CORRECT NOTE: " ++ displayNote (Just model.correctNote)) ]
         , p [] [ HTML.text (".....score ....: " ++ String.fromInt model.score) ]
         , svgView model.correctNote 500 200 { top = 50, left = 50, bottom = 50, right = 50 }
+
+        , p [] [ HTML.text ("START TIMESTAMP:  " ++ displayTimestamp model.startTimestamp) ]
+        , p [] [ HTML.text ("ANSWER SPEED (ms):  " ++ answerSpeedS) ]
+        , p [] [ HTML.text ("MS SINCE LAST ANSWER: " ++ String.fromInt ( (getMillis model.testCurrentTimestamp) - (getMillis model.startTimestamp))) ]
         ]
 
 
@@ -230,8 +259,29 @@ update msg model =
 
         UpdateCorrectNote midiCode ->
             ( { model | correctNote = createNote midiCode }
+            , Task.perform RestartTimer Time.now -- request current time...
+            )
+        
+        RestartTimer currentTimestamp ->
+          {-- calculate time since start ...
+          --}
+            ( { model
+                 | answerSpeed = -- if this is the first question,
+                   case model.startTimestamp of
+                     Nothing -> Nothing -- don't update answerSpeed
+                     Just t -> 
+                       Just ((Time.posixToMillis currentTimestamp) - (Time.posixToMillis t)) -- else, update speed!
+                  
+                  , startTimestamp = Just currentTimestamp -- always update start time
+                  , testCurrentTimestamp = Just currentTimestamp
+              }
             , Cmd.none
             )
+
+        TestTick currentTimestamp ->
+          ( { model | testCurrentTimestamp = Just currentTimestamp }
+          , Cmd.none
+          )
 
 
 
@@ -243,14 +293,15 @@ type Msg
     | NotePlayed Int
     | UpdateCorrectNote Int
     | GetRandomMidi
-
+    | RestartTimer Time.Posix
+    | TestTick Time.Posix
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ handleInitMIDI InitMIDI
         , handleNotePlayed NotePlayed
-
+        , Time.every 10 TestTick -- every 10 ms
         -- ************************************************
         -- Fake data from fakemidi.js for manual testing:
         -- ************************************************
