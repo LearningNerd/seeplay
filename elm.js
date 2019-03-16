@@ -5915,7 +5915,7 @@ var author$project$Main$displayMIDIStatus = function (isConnected) {
 		if (isConnected.a) {
 			return 'Your MIDI device is connected, yay! See the note below? Play it on your instrument!';
 		} else {
-			return 'Hmm, something went wrong with connecting to your MIDI device. Try refreshing this page or turning your MIDI device off and on again.';
+			return 'Hmm, looks like your MIDI device got disconnected. Try reconnecting it, or if that doesn\'t work, try refreshing this page or turning your MIDI device off and on again.';
 		}
 	}
 };
