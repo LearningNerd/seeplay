@@ -54,6 +54,7 @@ type alias Score =
 
 type alias Model =
     { isMIDIConnected : Maybe Bool
+    , isPlaying : Bool
     , correctNote : Note
     , currentNote : Maybe Note
     , score : Int
@@ -71,6 +72,7 @@ type alias Model =
 initialModel : Model
 initialModel =
     { isMIDIConnected = Nothing
+    , isPlaying = False
     , correctNote = createNote 60
     , currentNote = Nothing
     , score = 0
@@ -85,8 +87,8 @@ initialModel =
 -- Get session ID from JS flag (starts at 0, or incremented from localstorage)
 init : Int -> ( Model, Cmd Msg )
 init initialSessionId =
-  ( { initialModel | sessionId = initialSessionId },
-    Cmd.none
+  ( { initialModel | sessionId = initialSessionId }
+    , Random.generate UpdateCorrectNote getRandomMidi -- generate first note to guess on app load!
   )
 
 
@@ -211,31 +213,51 @@ getMillis timestamp =
         Just t -> Time.posixToMillis t
 
 
--- VIEW
+-- UI PIECES
+
+waitForMidiView : Model -> Html Msg
+waitForMidiView model = 
+    div [A.class "connectMidi"] [
+          p [] [ HTML.text (displayMIDIStatus model.isMIDIConnected) ]       
+        ]
+
+startScreenView : Model -> Html Msg
+startScreenView model =
+    div [A.class "startScreen"] [
+          button [ A.class "startButton", onClick StartGame] [ HTML.text "Start playing!" ]
+        ]
+
+gameView : Model -> Html Msg
+gameView model =
+    svgView model.correctNote 500 200 { top = 50, left = 50, bottom = 50, right = 50 }
 
 
-view : Model -> Html Msg
-view model =
+testMessagesView : Model -> Html Msg
+testMessagesView model = 
   let
-      answerSpeedS = String.fromInt model.answerSpeed
+    answerSpeedS = String.fromInt model.answerSpeed
   in
-    div []
-        [ p [] [ HTML.text (displayMIDIStatus model.isMIDIConnected) ]
-        , button [ A.class "startbutton", onClick GetRandomMidi] [ HTML.text "Start playing!" ]
-        , p [] [ HTML.text ("Note: " ++ displayNote model.currentNote) ]
+    div [] [ p [] [ HTML.text ("Note: " ++ displayNote model.currentNote) ]
         , p [] [ HTML.text ("CORRECT NOTE: " ++ displayNote (Just model.correctNote)) ]
         , p [] [ HTML.text (".....score ....: " ++ String.fromInt model.score) ]
-        , svgView model.correctNote 500 200 { top = 50, left = 50, bottom = 50, right = 50 }
-
         , p [] [ HTML.text ("START TIMESTAMP:  " ++ displayTimestamp model.startTimestamp) ]
         , p [] [ HTML.text ("ANSWER SPEED (ms):  " ++ answerSpeedS) ]
         , p [] [ HTML.text ("MS SINCE LAST ANSWER: " ++ String.fromInt ( (getMillis model.testCurrentTimestamp) - (getMillis model.startTimestamp))) ]
-        
         , p [] [ HTML.text ("MISSES:  " ++ String.fromInt model.incorrectTries) ]
-        
         , p [] [ HTML.text ("SESSION ID:  " ++ String.fromInt model.sessionId) ]
         ]
 
+-- VIEW
+
+view : Model -> Html Msg
+view model =
+    div []
+        [ case model.isMIDIConnected of
+            Just True ->
+              if model.isPlaying then gameView model else startScreenView model
+            _ ->
+              waitForMidiView model
+        ]
 
 
 -- UPDATE
@@ -246,7 +268,13 @@ update msg model =
 
     case msg of
         InitMIDI isMIDIConnectedBool ->
-            ( { model | isMIDIConnected = Just isMIDIConnectedBool }
+            ( { model | isMIDIConnected = Just isMIDIConnectedBool
+              , isPlaying = if model.isPlaying && isMIDIConnectedBool == False
+                               then
+                                  False
+                               else
+                                  model.isPlaying
+              }
             , Cmd.none
             )
 
@@ -255,9 +283,10 @@ update msg model =
                 newCurrentNote = createNote noteCode
                 isCorrect = getIsCorrect model.correctNote newCurrentNote
                 nextCommand = if isCorrect
-                                 then Random.generate UpdateCorrectNote getRandomMidi
-                                 else Cmd.none
-
+                                 then
+                                    Task.perform RestartTimer Time.now
+                                 else 
+                                    Cmd.none
             in
             ( { model
                 | currentNote =
@@ -270,31 +299,40 @@ update msg model =
             , nextCommand
             )
 
-        GetRandomMidi ->
-            ( model
-            , Random.generate UpdateCorrectNote getRandomMidi
+        StartGame ->
+            ( { model | isPlaying = True }
+            , Task.perform RestartTimer Time.now -- request current time...
             )
 
+        -- called when page loads to initialize correctNote, and again on each correct note played!
         UpdateCorrectNote midiCode ->
             ( { model | correctNote = createNote midiCode }
-            , Task.perform RestartTimer Time.now -- request current time...
+            , Cmd.none
             )
         
         RestartTimer currentTimestamp ->
-          {-- calculate time since start ...
-          --}
           let
             newAnswerSpeed = getNewAnswerSpeed model.startTimestamp currentTimestamp
-            newScoreObject = Score model.correctNote newAnswerSpeed model.incorrectTries 
+            newScoreObjectList = if model.startTimestamp /= Nothing
+                                 then [ Score model.correctNote newAnswerSpeed model.incorrectTries ]
+                                 else [] -- don't append to score list  if this is the FIRST note of the session
+
+            -- only save to local storage if this is NOT the very first note displayed
+            nextCommand = if model.startTimestamp /= Nothing
+                              then 
+                                Cmd.batch [ cache (E.list convertScoreToJSON (model.scoreList ++ newScoreObjectList) )
+                                , Random.generate UpdateCorrectNote getRandomMidi
+                                ]
+                              else Cmd.none
           in
             ( { model
                  | answerSpeed = newAnswerSpeed
                   , startTimestamp = Just currentTimestamp -- always update start time
                   , testCurrentTimestamp = Just currentTimestamp
-                  , scoreList = model.scoreList ++ [newScoreObject]
+                  , scoreList = model.scoreList ++ newScoreObjectList
                   , incorrectTries = 0 -- RESET after getting it correct (and command below will send OLD value, not the new one)
               }
-            , cache (E.list convertScoreToJSON (model.scoreList ++ [newScoreObject]) )
+            , nextCommand
             )
 
         TestTick currentTimestamp ->
@@ -302,7 +340,7 @@ update msg model =
           , Cmd.none
           )
 
--- Edge case: first note....
+-- Edge case: starting the timer when game begins shouldn't update answerSpeed
 getNewAnswerSpeed startTime currentTime =
   case startTime of
     Nothing ->
@@ -325,7 +363,7 @@ type Msg
     = InitMIDI Bool
     | NotePlayed Int
     | UpdateCorrectNote Int
-    | GetRandomMidi
+    | StartGame
     | RestartTimer Time.Posix
     | TestTick Time.Posix
 

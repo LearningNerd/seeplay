@@ -4,6 +4,16 @@ body {
   padding: 0.5em;
 }
 
+button {
+  text-align: center;
+    font-size: 4em;
+    padding: 0.2em 1em;
+    border-radius: 0.5em;
+    background: #c6e8ff;
+    border: 1px solid #a7c6e5;
+    box-shadow: 1px 1px 5px rgba(0,0,0,0.2);
+}
+
 .center {
   width: 100%;
   height: auto;
