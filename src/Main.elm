@@ -51,6 +51,7 @@ type alias Model =
     , score : Int
     , startTimestamp : Maybe Time.Posix
     , answerSpeed : Maybe Int -- result of subtracting two times via posixToMillis
+    , answerAttempts : Int
     , testCurrentTimestamp : Maybe Time.Posix
     }
 
@@ -64,6 +65,7 @@ initialModel =
     , score = 0
     , startTimestamp = Nothing
     , answerSpeed = Nothing
+    , answerAttempts = 0
     , testCurrentTimestamp = Nothing
     }
 
@@ -219,6 +221,8 @@ view model =
         , p [] [ HTML.text ("START TIMESTAMP:  " ++ displayTimestamp model.startTimestamp) ]
         , p [] [ HTML.text ("ANSWER SPEED (ms):  " ++ answerSpeedS) ]
         , p [] [ HTML.text ("MS SINCE LAST ANSWER: " ++ String.fromInt ( (getMillis model.testCurrentTimestamp) - (getMillis model.startTimestamp))) ]
+        
+        , p [] [ HTML.text ("MISSES:  " ++ String.fromInt model.answerAttempts) ]
         ]
 
 
@@ -245,6 +249,10 @@ update msg model =
                     Just newNote
                 , score =
                     first scoreResult
+                , answerAttempts =
+                  case second scoreResult of
+                    True -> 0 -- reset answerAttempts when getting correct answer
+                    False -> model.answerAttempts + 1 -- increase answerAttempts for each wrong guess
               }
             , if (second scoreResult) == True then
                  Random.generate UpdateCorrectNote getRandomMidi

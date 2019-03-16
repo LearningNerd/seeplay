@@ -4723,6 +4723,7 @@ var author$project$Main$createNote = function (midiCode) {
 	};
 };
 var author$project$Main$initialModel = {
+	answerAttempts: 0,
 	answerSpeed: elm$core$Maybe$Nothing,
 	correctNote: author$project$Main$createNote(60),
 	currentNote: elm$core$Maybe$Nothing,
@@ -5797,6 +5798,14 @@ var author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
+							answerAttempts: function () {
+								var _n1 = scoreResult.b;
+								if (_n1) {
+									return 0;
+								} else {
+									return model.answerAttempts + 1;
+								}
+							}(),
 							currentNote: elm$core$Maybe$Just(newNote),
 							score: scoreResult.a
 						}),
@@ -5821,11 +5830,11 @@ var author$project$Main$update = F2(
 						model,
 						{
 							answerSpeed: function () {
-								var _n1 = model.startTimestamp;
-								if (_n1.$ === 'Nothing') {
+								var _n2 = model.startTimestamp;
+								if (_n2.$ === 'Nothing') {
 									return elm$core$Maybe$Nothing;
 								} else {
-									var t = _n1.a;
+									var t = _n2.a;
 									return elm$core$Maybe$Just(
 										elm$time$Time$posixToMillis(currentTimestamp) - elm$time$Time$posixToMillis(t));
 								}
@@ -6149,6 +6158,14 @@ var author$project$Main$view = function (model) {
 						elm$html$Html$text(
 						'MS SINCE LAST ANSWER: ' + elm$core$String$fromInt(
 							author$project$Main$getMillis(model.testCurrentTimestamp) - author$project$Main$getMillis(model.startTimestamp)))
+					])),
+				A2(
+				elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						elm$html$Html$text(
+						'MISSES:  ' + elm$core$String$fromInt(model.answerAttempts))
 					]))
 			]));
 };
