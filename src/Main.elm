@@ -11,6 +11,7 @@ import Svg.Attributes as S exposing (..)
 import Tuple exposing (..)
 import Task
 import Time
+import Json.Encode as E
 
 
 port handleInitMIDI : (Bool -> msg) -> Sub msg
@@ -18,6 +19,8 @@ port handleInitMIDI : (Bool -> msg) -> Sub msg
 
 port handleNotePlayed : (Int -> msg) -> Sub msg
 
+
+port cache : E.Value -> Cmd msg
 
 
 -- Fake data from fakemidi.js (manual testing in browser)
@@ -43,6 +46,11 @@ type alias Note =
     , frequency : Float
     }
 
+type alias Score =
+  { correctNote : Note -- midi code of the Note (not the Note itself!)
+  , answerSpeed : Int
+  , incorrectTries : Int
+  }
 
 type alias Model =
     { isMIDIConnected : Maybe Bool
@@ -50,12 +58,15 @@ type alias Model =
     , currentNote : Maybe Note
     , score : Int
     , startTimestamp : Maybe Time.Posix
-    , answerSpeed : Maybe Int -- result of subtracting two times via posixToMillis
-    , answerAttempts : Int
+    , answerSpeed : Int -- result of subtracting two times via posixToMillis
+    , incorrectTries : Int
+    , scoreList : List Score -- store a list of score records for each practice session ... goes into local storage
     , testCurrentTimestamp : Maybe Time.Posix
+    , sessionId : Int
     }
 
- 
+
+
 
 initialModel : Model
 initialModel =
@@ -64,18 +75,19 @@ initialModel =
     , currentNote = Nothing
     , score = 0
     , startTimestamp = Nothing
-    , answerSpeed = Nothing
-    , answerAttempts = 0
+    , answerSpeed = 0
+    , incorrectTries = 0
+    , scoreList = []
     , testCurrentTimestamp = Nothing
+    , sessionId = 0
     }
 
-
-init : () -> ( Model, Cmd Msg )
-init _ =
-    ( initialModel
-    , Cmd.none
-    )
-
+-- Get session ID from JS flag (starts at 0, or incremented from localstorage)
+init : Int -> ( Model, Cmd Msg )
+init initialSessionId =
+  ( { initialModel | sessionId = initialSessionId },
+    Cmd.none
+  )
 
 
 -- SVG stuff
@@ -205,10 +217,7 @@ getMillis timestamp =
 view : Model -> Html Msg
 view model =
   let
-      answerSpeedS =
-        case model.answerSpeed of
-          Nothing -> "EMPTY"
-          Just i -> String.fromInt i
+      answerSpeedS = String.fromInt model.answerSpeed
   in
     div []
         [ p [] [ HTML.text (displayMIDIStatus model.isMIDIConnected) ]
@@ -222,7 +231,9 @@ view model =
         , p [] [ HTML.text ("ANSWER SPEED (ms):  " ++ answerSpeedS) ]
         , p [] [ HTML.text ("MS SINCE LAST ANSWER: " ++ String.fromInt ( (getMillis model.testCurrentTimestamp) - (getMillis model.startTimestamp))) ]
         
-        , p [] [ HTML.text ("MISSES:  " ++ String.fromInt model.answerAttempts) ]
+        , p [] [ HTML.text ("MISSES:  " ++ String.fromInt model.incorrectTries) ]
+        
+        , p [] [ HTML.text ("SESSION ID:  " ++ String.fromInt model.sessionId) ]
         ]
 
 
@@ -241,23 +252,22 @@ update msg model =
 
         NotePlayed noteCode ->
             let
-                newNote = createNote noteCode
-                scoreResult = updateScore model.score model.correctNote newNote
+                newCurrentNote = createNote noteCode
+                isCorrect = getIsCorrect model.correctNote newCurrentNote
+                nextCommand = if isCorrect
+                                 then Random.generate UpdateCorrectNote getRandomMidi
+                                 else Cmd.none
+
             in
             ( { model
                 | currentNote =
-                    Just newNote
+                    Just newCurrentNote
                 , score =
-                    first scoreResult
-                , answerAttempts =
-                  case second scoreResult of
-                    True -> 0 -- reset answerAttempts when getting correct answer
-                    False -> model.answerAttempts + 1 -- increase answerAttempts for each wrong guess
+                    if isCorrect then model.score + 1 else model.score
+                , incorrectTries =
+                    if isCorrect then model.incorrectTries else model.incorrectTries + 1
               }
-            , if (second scoreResult) == True then
-                 Random.generate UpdateCorrectNote getRandomMidi
-              else
-                Cmd.none
+            , nextCommand
             )
 
         GetRandomMidi ->
@@ -273,17 +283,18 @@ update msg model =
         RestartTimer currentTimestamp ->
           {-- calculate time since start ...
           --}
+          let
+            newAnswerSpeed = getNewAnswerSpeed model.startTimestamp currentTimestamp
+            newScoreObject = Score model.correctNote newAnswerSpeed model.incorrectTries 
+          in
             ( { model
-                 | answerSpeed = -- if this is the first question,
-                   case model.startTimestamp of
-                     Nothing -> Nothing -- don't update answerSpeed
-                     Just t -> 
-                       Just ((Time.posixToMillis currentTimestamp) - (Time.posixToMillis t)) -- else, update speed!
-                  
+                 | answerSpeed = newAnswerSpeed
                   , startTimestamp = Just currentTimestamp -- always update start time
                   , testCurrentTimestamp = Just currentTimestamp
+                  , scoreList = model.scoreList ++ [newScoreObject]
+                  , incorrectTries = 0 -- RESET after getting it correct (and command below will send OLD value, not the new one)
               }
-            , Cmd.none
+            , cache (E.list convertScoreToJSON (model.scoreList ++ [newScoreObject]) )
             )
 
         TestTick currentTimestamp ->
@@ -291,7 +302,21 @@ update msg model =
           , Cmd.none
           )
 
+-- Edge case: first note....
+getNewAnswerSpeed startTime currentTime =
+  case startTime of
+    Nothing ->
+        0
+    Just t ->
+        (Time.posixToMillis currentTime) - (Time.posixToMillis t)
 
+
+-- Convert Score record into a JSON object Value type
+convertScoreToJSON session =
+  E.object [ ("correctNoteMidi", E.int session.correctNote.midi)
+  , ("answerSpeed", E.int session.answerSpeed)
+  , ("incorrectTries", E.int session.incorrectTries)
+  ]
 
 -- SUBSCRIPTIONS
 
@@ -387,11 +412,15 @@ updateScore : Int -> Note -> Note -> ( Int, Bool )
 updateScore score correctNote currentNote =
     if currentNote.midi == correctNote.midi then
         ( score + 1, True )
-
     else
         ( score, False )
 
-
+getIsCorrect : Note -> Note -> Bool
+getIsCorrect correctNote currentNote = 
+    if currentNote.midi == correctNote.midi then
+      True
+    else
+      False
 
 -- NOTE CONVERSION HELPER FUNCTIONS
 

@@ -4723,12 +4723,14 @@ var author$project$Main$createNote = function (midiCode) {
 	};
 };
 var author$project$Main$initialModel = {
-	answerAttempts: 0,
-	answerSpeed: elm$core$Maybe$Nothing,
+	answerSpeed: 0,
 	correctNote: author$project$Main$createNote(60),
 	currentNote: elm$core$Maybe$Nothing,
+	incorrectTries: 0,
 	isMIDIConnected: elm$core$Maybe$Nothing,
 	score: 0,
+	scoreList: _List_Nil,
+	sessionId: 0,
 	startTimestamp: elm$core$Maybe$Nothing,
 	testCurrentTimestamp: elm$core$Maybe$Nothing
 };
@@ -4991,8 +4993,12 @@ var elm$json$Json$Decode$errorToStringHelp = F2(
 	});
 var elm$core$Platform$Cmd$batch = _Platform_batch;
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
-var author$project$Main$init = function (_n0) {
-	return _Utils_Tuple2(author$project$Main$initialModel, elm$core$Platform$Cmd$none);
+var author$project$Main$init = function (initialSessionId) {
+	return _Utils_Tuple2(
+		_Utils_update(
+			author$project$Main$initialModel,
+			{sessionId: initialSessionId}),
+		elm$core$Platform$Cmd$none);
 };
 var author$project$Main$InitMIDI = function (a) {
 	return {$: 'InitMIDI', a: a};
@@ -5536,9 +5542,60 @@ var author$project$Main$subscriptions = function (model) {
 var author$project$Main$RestartTimer = function (a) {
 	return {$: 'RestartTimer', a: a};
 };
+var author$project$Main$Score = F3(
+	function (correctNote, answerSpeed, incorrectTries) {
+		return {answerSpeed: answerSpeed, correctNote: correctNote, incorrectTries: incorrectTries};
+	});
 var author$project$Main$UpdateCorrectNote = function (a) {
 	return {$: 'UpdateCorrectNote', a: a};
 };
+var author$project$Main$cache = _Platform_outgoingPort('cache', elm$core$Basics$identity);
+var elm$json$Json$Encode$int = _Json_wrap;
+var elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			elm$core$List$foldl,
+			F2(
+				function (_n0, obj) {
+					var k = _n0.a;
+					var v = _n0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
+var author$project$Main$convertScoreToJSON = function (session) {
+	return elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'correctNoteMidi',
+				elm$json$Json$Encode$int(session.correctNote.midi)),
+				_Utils_Tuple2(
+				'answerSpeed',
+				elm$json$Json$Encode$int(session.answerSpeed)),
+				_Utils_Tuple2(
+				'incorrectTries',
+				elm$json$Json$Encode$int(session.incorrectTries))
+			]));
+};
+var author$project$Main$getIsCorrect = F2(
+	function (correctNote, currentNote) {
+		return _Utils_eq(currentNote.midi, correctNote.midi) ? true : false;
+	});
+var elm$time$Time$posixToMillis = function (_n0) {
+	var millis = _n0.a;
+	return millis;
+};
+var author$project$Main$getNewAnswerSpeed = F2(
+	function (startTime, currentTime) {
+		if (startTime.$ === 'Nothing') {
+			return 0;
+		} else {
+			var t = startTime.a;
+			return elm$time$Time$posixToMillis(currentTime) - elm$time$Time$posixToMillis(t);
+		}
+	});
 var elm$random$Random$addOne = function (value) {
 	return _Utils_Tuple2(1, value);
 };
@@ -5651,10 +5708,6 @@ var author$project$Main$getRandomMidi = A2(
 	60,
 	_List_fromArray(
 		[62, 64, 65, 67, 69, 71, 72, 74, 76, 77, 79]));
-var author$project$Main$updateScore = F3(
-	function (score, correctNote, currentNote) {
-		return _Utils_eq(currentNote.midi, correctNote.midi) ? _Utils_Tuple2(score + 1, true) : _Utils_Tuple2(score, false);
-	});
 var elm$core$Task$Perform = function (a) {
 	return {$: 'Perform', a: a};
 };
@@ -5709,10 +5762,15 @@ var elm$core$Task$perform = F2(
 			elm$core$Task$Perform(
 				A2(elm$core$Task$map, toMessage, task)));
 	});
-var elm$core$Tuple$second = function (_n0) {
-	var y = _n0.b;
-	return y;
-};
+var elm$json$Json$Encode$list = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				elm$core$List$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
 var elm$random$Random$Generate = function (a) {
 	return {$: 'Generate', a: a};
 };
@@ -5724,10 +5782,6 @@ var elm$random$Random$initialSeed = function (x) {
 	var state2 = (state1 + x) >>> 0;
 	return elm$random$Random$next(
 		A2(elm$random$Random$Seed, state2, incr));
-};
-var elm$time$Time$posixToMillis = function (_n0) {
-	var millis = _n0.a;
-	return millis;
 };
 var elm$random$Random$init = A2(
 	elm$core$Task$andThen,
@@ -5792,24 +5846,18 @@ var author$project$Main$update = F2(
 					elm$core$Platform$Cmd$none);
 			case 'NotePlayed':
 				var noteCode = msg.a;
-				var newNote = author$project$Main$createNote(noteCode);
-				var scoreResult = A3(author$project$Main$updateScore, model.score, model.correctNote, newNote);
+				var newCurrentNote = author$project$Main$createNote(noteCode);
+				var isCorrect = A2(author$project$Main$getIsCorrect, model.correctNote, newCurrentNote);
+				var nextCommand = isCorrect ? A2(elm$random$Random$generate, author$project$Main$UpdateCorrectNote, author$project$Main$getRandomMidi) : elm$core$Platform$Cmd$none;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							answerAttempts: function () {
-								var _n1 = scoreResult.b;
-								if (_n1) {
-									return 0;
-								} else {
-									return model.answerAttempts + 1;
-								}
-							}(),
-							currentNote: elm$core$Maybe$Just(newNote),
-							score: scoreResult.a
+							currentNote: elm$core$Maybe$Just(newCurrentNote),
+							incorrectTries: isCorrect ? model.incorrectTries : (model.incorrectTries + 1),
+							score: isCorrect ? (model.score + 1) : model.score
 						}),
-					scoreResult.b ? A2(elm$random$Random$generate, author$project$Main$UpdateCorrectNote, author$project$Main$getRandomMidi) : elm$core$Platform$Cmd$none);
+					nextCommand);
 			case 'GetRandomMidi':
 				return _Utils_Tuple2(
 					model,
@@ -5825,24 +5873,29 @@ var author$project$Main$update = F2(
 					A2(elm$core$Task$perform, author$project$Main$RestartTimer, elm$time$Time$now));
 			case 'RestartTimer':
 				var currentTimestamp = msg.a;
+				var newAnswerSpeed = A2(author$project$Main$getNewAnswerSpeed, model.startTimestamp, currentTimestamp);
+				var newScoreObject = A3(author$project$Main$Score, model.correctNote, newAnswerSpeed, model.incorrectTries);
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							answerSpeed: function () {
-								var _n2 = model.startTimestamp;
-								if (_n2.$ === 'Nothing') {
-									return elm$core$Maybe$Nothing;
-								} else {
-									var t = _n2.a;
-									return elm$core$Maybe$Just(
-										elm$time$Time$posixToMillis(currentTimestamp) - elm$time$Time$posixToMillis(t));
-								}
-							}(),
+							answerSpeed: newAnswerSpeed,
+							incorrectTries: 0,
+							scoreList: _Utils_ap(
+								model.scoreList,
+								_List_fromArray(
+									[newScoreObject])),
 							startTimestamp: elm$core$Maybe$Just(currentTimestamp),
 							testCurrentTimestamp: elm$core$Maybe$Just(currentTimestamp)
 						}),
-					elm$core$Platform$Cmd$none);
+					author$project$Main$cache(
+						A2(
+							elm$json$Json$Encode$list,
+							author$project$Main$convertScoreToJSON,
+							_Utils_ap(
+								model.scoreList,
+								_List_fromArray(
+									[newScoreObject])))));
 			default:
 				var currentTimestamp = msg.a;
 				return _Utils_Tuple2(
@@ -5867,6 +5920,10 @@ var author$project$Main$displayMIDIStatus = function (isConnected) {
 	}
 };
 var elm$core$String$fromFloat = _String_fromNumber;
+var elm$core$Tuple$second = function (_n0) {
+	var y = _n0.b;
+	return y;
+};
 var author$project$Main$displayNote = function (note) {
 	if (note.$ === 'Nothing') {
 		return 'nothing here';
@@ -6071,15 +6128,7 @@ var elm$html$Html$Events$onClick = function (msg) {
 		elm$json$Json$Decode$succeed(msg));
 };
 var author$project$Main$view = function (model) {
-	var answerSpeedS = function () {
-		var _n0 = model.answerSpeed;
-		if (_n0.$ === 'Nothing') {
-			return 'EMPTY';
-		} else {
-			var i = _n0.a;
-			return elm$core$String$fromInt(i);
-		}
-	}();
+	var answerSpeedS = elm$core$String$fromInt(model.answerSpeed);
 	return A2(
 		elm$html$Html$div,
 		_List_Nil,
@@ -6165,7 +6214,15 @@ var author$project$Main$view = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$text(
-						'MISSES:  ' + elm$core$String$fromInt(model.answerAttempts))
+						'MISSES:  ' + elm$core$String$fromInt(model.incorrectTries))
+					])),
+				A2(
+				elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						elm$html$Html$text(
+						'SESSION ID:  ' + elm$core$String$fromInt(model.sessionId))
 					]))
 			]));
 };
@@ -6319,5 +6376,4 @@ var elm$url$Url$fromString = function (str) {
 var elm$browser$Browser$element = _Browser_element;
 var author$project$Main$main = elm$browser$Browser$element(
 	{init: author$project$Main$init, subscriptions: author$project$Main$subscriptions, update: author$project$Main$update, view: author$project$Main$view});
-_Platform_export({'Main':{'init':author$project$Main$main(
-	elm$json$Json$Decode$succeed(_Utils_Tuple0))(0)}});}(this));
+_Platform_export({'Main':{'init':author$project$Main$main(elm$json$Json$Decode$int)(0)}});}(this));

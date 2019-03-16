@@ -18,10 +18,25 @@
     
     <div id="app"></div>
 
+  <script>
+  </script>
+
     <script src="elm.js"></script>
     <script>
+      var sessionId = localStorage.getItem('sessionId') || 0;
+      sessionId = parseInt(sessionId, 10) + 1;
+console.log(sessionId);
+console.log(typeof sessionId);
+
+        localStorage.setItem('sessionId', sessionId);
+
       var app = Elm.Main.init({
-        node: document.getElementById('app')
+        node: document.getElementById('app'),
+        flags: sessionId
+      });
+
+      app.ports.cache.subscribe(function(data) {
+        localStorage.setItem(sessionId, JSON.stringify(data));
       });
     </script>
   </body>
