@@ -1,7 +1,10 @@
 let isMIDIConnected = false;
 let noteCode = 59;
 
-document.addEventListener("click", () => {
+const testButton = document.createElement("button");
+testButton.textContent = "FAKE IT!";
+
+testButton.addEventListener("click", () => {
   if (!isMIDIConnected) {
     isMIDIConnected = true;
     console.log("Now connected to fake MIDI! Click again to play fake notes.");
@@ -23,4 +26,6 @@ document.addEventListener("click", () => {
   }
 
 });
+
+document.body.prepend(testButton);
 
