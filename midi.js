@@ -90,7 +90,10 @@ function getMIDIMessage(midiMessage) {
 
   if (command === 144 && velocity > 0) {
     // Send MIDI note code to Elm -- integer
-    app.ports.handleNotePlayed.send(noteCode); 
+    app.ports.handleNotePressed.send(noteCode); 
+  } else if (command === 128 || velocity === 0) {
+    // Send MIDI OFF code to Elm -- integer
+    app.ports.handleNoteReleased.send(true); 
   }
 }
 

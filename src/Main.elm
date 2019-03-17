@@ -15,9 +15,8 @@ import Json.Encode as E
 
 
 port handleInitMIDI : (Bool -> msg) -> Sub msg
-
-
-port handleNotePlayed : (Int -> msg) -> Sub msg
+port handleNotePressed : (Int -> msg) -> Sub msg
+port handleNoteReleased : (Bool -> msg) -> Sub msg
 
 
 port cache : E.Value -> Cmd msg
@@ -27,9 +26,8 @@ port cache : E.Value -> Cmd msg
 
 
 port fakeHandleInitMIDI : (Bool -> msg) -> Sub msg
-
-
-port fakeHandleNotePlayed : (Int -> msg) -> Sub msg
+port fakeHandleNotePressed : (Int -> msg) -> Sub msg
+port fakeHandleNoteReleased : (Bool -> msg) -> Sub msg
 
 
 
@@ -148,12 +146,11 @@ getNoteHeight midiCode =
     79 -> 1
     _ -> 12
 
-drawNote : Float -> Float -> Margins -> Note -> Svg msg
-drawNote staffWidth lineHeight margins correctNote =
+drawNote : Float -> Float -> Margins -> Note -> String -> Svg msg
+drawNote staffWidth lineHeight margins note colorString =
     let
         yPosFloat =
-            -- toFloat (72 - correctNote.midi)
-            toFloat (getNoteHeight correctNote.midi)
+            toFloat (getNoteHeight note.midi)
     
         cxString =
             String.fromFloat (staffWidth/2)
@@ -165,6 +162,7 @@ drawNote staffWidth lineHeight margins correctNote =
         [ S.cx cxString
         , S.cy cyString
         , S.r (String.fromFloat (lineHeight / 2))
+        , S.fill colorString
         ]
         []
 
@@ -178,8 +176,8 @@ allNotes staffWidth lineHeight margins =
 -- (List.map toFloat (List.range 1 12))
 
 
-svgView : Note -> Float -> Float -> Margins -> Svg Msg
-svgView correctNote width height margins =
+svgView : Model -> Float -> Float -> Margins -> Svg Msg
+svgView model width height margins =
     let
         lineHeight =
             height / 6
@@ -189,6 +187,16 @@ svgView correctNote width height margins =
 
         heightS =
             String.fromFloat (height + margins.top + margins.bottom)
+        
+        drawNoteFunc = drawNote width lineHeight margins
+        noteColorString = if (getIsCorrect model.correctNote model.currentNote)
+                       then "rgba(0,255,50,1)"
+                       else "rgba(255,20,20,0.2)"
+
+        currentNoteDrawing = case model.currentNote of
+                                 Nothing -> []
+                                 Just n -> [ drawNoteFunc n noteColorString ]
+
     in
     svg
         [ S.width widthS
@@ -196,8 +204,8 @@ svgView correctNote width height margins =
         , S.viewBox ("0 0 " ++ widthS ++ " " ++ heightS)
         , S.class "center"
         ]
-        ((staff width lineHeight margins ++ [drawNote width lineHeight margins correctNote])
-            ++ [ trebleClef 50 237 ]
+        ((staff width lineHeight margins ++ [drawNoteFunc model.correctNote "rgba(0,0,0,0.9)"])
+            ++ currentNoteDrawing ++ [ trebleClef 50 237 ]
         )
 
 
@@ -229,7 +237,7 @@ startScreenView model =
 
 gameView : Model -> Html Msg
 gameView model =
-    svgView model.correctNote 500 200 { top = 50, left = 50, bottom = 50, right = 50 }
+    svgView model 500 200 { top = 50, left = 50, bottom = 50, right = 50 }
 
 
 testMessagesView : Model -> Html Msg
@@ -278,10 +286,14 @@ update msg model =
             , Cmd.none
             )
 
-        NotePlayed noteCode ->
+        -- don't draw notes when they're not being held down
+        NoteReleased _ ->
+          ( { model | currentNote = Nothing }, Cmd.none )
+
+        NotePressed noteCode ->
             let
                 newCurrentNote = createNote noteCode
-                isCorrect = getIsCorrect model.correctNote newCurrentNote
+                isCorrect = getIsCorrect model.correctNote (Just newCurrentNote)
                 nextCommand = if isCorrect
                                  then
                                     Task.perform RestartTimer Time.now
@@ -361,7 +373,8 @@ convertScoreToJSON session =
 
 type Msg
     = InitMIDI Bool
-    | NotePlayed Int
+    | NotePressed Int
+    | NoteReleased Bool
     | UpdateCorrectNote Int
     | StartGame
     | RestartTimer Time.Posix
@@ -371,13 +384,15 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ handleInitMIDI InitMIDI
-        , handleNotePlayed NotePlayed
+        , handleNotePressed NotePressed
+        , handleNoteReleased NoteReleased
         , Time.every 10 TestTick -- every 10 ms
         -- ************************************************
         -- Fake data from fakemidi.js for manual testing:
         -- ************************************************
         , fakeHandleInitMIDI InitMIDI
-        , fakeHandleNotePlayed NotePlayed
+        , fakeHandleNotePressed NotePressed
+        , fakeHandleNoteReleased NoteReleased
         ]
 
 
@@ -453,12 +468,15 @@ updateScore score correctNote currentNote =
     else
         ( score, False )
 
-getIsCorrect : Note -> Note -> Bool
+getIsCorrect : Note -> Maybe Note -> Bool
 getIsCorrect correctNote currentNote = 
-    if currentNote.midi == correctNote.midi then
-      True
-    else
-      False
+    case currentNote of
+      Nothing -> False
+      Just n ->
+        if n.midi == correctNote.midi then
+          True
+        else
+          False
 
 -- NOTE CONVERSION HELPER FUNCTIONS
 

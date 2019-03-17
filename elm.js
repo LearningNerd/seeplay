@@ -5273,8 +5273,11 @@ var author$project$Main$init = function (initialSessionId) {
 var author$project$Main$InitMIDI = function (a) {
 	return {$: 'InitMIDI', a: a};
 };
-var author$project$Main$NotePlayed = function (a) {
-	return {$: 'NotePlayed', a: a};
+var author$project$Main$NotePressed = function (a) {
+	return {$: 'NotePressed', a: a};
+};
+var author$project$Main$NoteReleased = function (a) {
+	return {$: 'NoteReleased', a: a};
 };
 var author$project$Main$TestTick = function (a) {
 	return {$: 'TestTick', a: a};
@@ -5282,9 +5285,11 @@ var author$project$Main$TestTick = function (a) {
 var elm$json$Json$Decode$bool = _Json_decodeBool;
 var author$project$Main$fakeHandleInitMIDI = _Platform_incomingPort('fakeHandleInitMIDI', elm$json$Json$Decode$bool);
 var elm$json$Json$Decode$int = _Json_decodeInt;
-var author$project$Main$fakeHandleNotePlayed = _Platform_incomingPort('fakeHandleNotePlayed', elm$json$Json$Decode$int);
+var author$project$Main$fakeHandleNotePressed = _Platform_incomingPort('fakeHandleNotePressed', elm$json$Json$Decode$int);
+var author$project$Main$fakeHandleNoteReleased = _Platform_incomingPort('fakeHandleNoteReleased', elm$json$Json$Decode$bool);
 var author$project$Main$handleInitMIDI = _Platform_incomingPort('handleInitMIDI', elm$json$Json$Decode$bool);
-var author$project$Main$handleNotePlayed = _Platform_incomingPort('handleNotePlayed', elm$json$Json$Decode$int);
+var author$project$Main$handleNotePressed = _Platform_incomingPort('handleNotePressed', elm$json$Json$Decode$int);
+var author$project$Main$handleNoteReleased = _Platform_incomingPort('handleNoteReleased', elm$json$Json$Decode$bool);
 var elm$core$Platform$Sub$batch = _Platform_batch;
 var elm$time$Time$Every = F2(
 	function (a, b) {
@@ -5712,10 +5717,12 @@ var author$project$Main$subscriptions = function (model) {
 		_List_fromArray(
 			[
 				author$project$Main$handleInitMIDI(author$project$Main$InitMIDI),
-				author$project$Main$handleNotePlayed(author$project$Main$NotePlayed),
+				author$project$Main$handleNotePressed(author$project$Main$NotePressed),
+				author$project$Main$handleNoteReleased(author$project$Main$NoteReleased),
 				A2(elm$time$Time$every, 10, author$project$Main$TestTick),
 				author$project$Main$fakeHandleInitMIDI(author$project$Main$InitMIDI),
-				author$project$Main$fakeHandleNotePlayed(author$project$Main$NotePlayed)
+				author$project$Main$fakeHandleNotePressed(author$project$Main$NotePressed),
+				author$project$Main$fakeHandleNoteReleased(author$project$Main$NoteReleased)
 			]));
 };
 var author$project$Main$RestartTimer = function (a) {
@@ -5757,7 +5764,12 @@ var author$project$Main$convertScoreToJSON = function (session) {
 };
 var author$project$Main$getIsCorrect = F2(
 	function (correctNote, currentNote) {
-		return _Utils_eq(currentNote.midi, correctNote.midi) ? true : false;
+		if (currentNote.$ === 'Nothing') {
+			return false;
+		} else {
+			var n = currentNote.a;
+			return _Utils_eq(n.midi, correctNote.midi) ? true : false;
+		}
 	});
 var author$project$Main$getNewAnswerSpeed = F2(
 	function (startTime, currentTime) {
@@ -5847,10 +5859,19 @@ var author$project$Main$update = F2(
 							isPlaying: (model.isPlaying && (!isMIDIConnectedBool)) ? false : model.isPlaying
 						}),
 					elm$core$Platform$Cmd$none);
-			case 'NotePlayed':
+			case 'NoteReleased':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{currentNote: elm$core$Maybe$Nothing}),
+					elm$core$Platform$Cmd$none);
+			case 'NotePressed':
 				var noteCode = msg.a;
 				var newCurrentNote = author$project$Main$createNote(noteCode);
-				var isCorrect = A2(author$project$Main$getIsCorrect, model.correctNote, newCurrentNote);
+				var isCorrect = A2(
+					author$project$Main$getIsCorrect,
+					model.correctNote,
+					elm$core$Maybe$Just(newCurrentNote));
 				var nextCommand = isCorrect ? A2(elm$core$Task$perform, author$project$Main$RestartTimer, elm$time$Time$now) : elm$core$Platform$Cmd$none;
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -5965,10 +5986,11 @@ var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
 var elm$svg$Svg$circle = elm$svg$Svg$trustedNode('circle');
 var elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
 var elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
+var elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
 var elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
-var author$project$Main$drawNote = F4(
-	function (staffWidth, lineHeight, margins, correctNote) {
-		var yPosFloat = author$project$Main$getNoteHeight(correctNote.midi);
+var author$project$Main$drawNote = F5(
+	function (staffWidth, lineHeight, margins, note, colorString) {
+		var yPosFloat = author$project$Main$getNoteHeight(note.midi);
 		var cyString = elm$core$String$fromFloat(margins.top + ((yPosFloat * lineHeight) / 2));
 		var cxString = elm$core$String$fromFloat(staffWidth / 2);
 		return A2(
@@ -5978,7 +6000,8 @@ var author$project$Main$drawNote = F4(
 					elm$svg$Svg$Attributes$cx(cxString),
 					elm$svg$Svg$Attributes$cy(cyString),
 					elm$svg$Svg$Attributes$r(
-					elm$core$String$fromFloat(lineHeight / 2))
+					elm$core$String$fromFloat(lineHeight / 2)),
+					elm$svg$Svg$Attributes$fill(colorString)
 				]),
 			_List_Nil);
 	});
@@ -6040,10 +6063,24 @@ var elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
 var elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
 var elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
 var author$project$Main$svgView = F4(
-	function (correctNote, width, height, margins) {
+	function (model, width, height, margins) {
 		var widthS = elm$core$String$fromFloat((width + margins.left) + margins.right);
+		var noteColorString = A2(author$project$Main$getIsCorrect, model.correctNote, model.currentNote) ? 'rgba(0,255,50,1)' : 'rgba(255,20,20,0.2)';
 		var lineHeight = height / 6;
 		var heightS = elm$core$String$fromFloat((height + margins.top) + margins.bottom);
+		var drawNoteFunc = A3(author$project$Main$drawNote, width, lineHeight, margins);
+		var currentNoteDrawing = function () {
+			var _n0 = model.currentNote;
+			if (_n0.$ === 'Nothing') {
+				return _List_Nil;
+			} else {
+				var n = _n0.a;
+				return _List_fromArray(
+					[
+						A2(drawNoteFunc, n, noteColorString)
+					]);
+			}
+		}();
 		return A2(
 			elm$svg$Svg$svg,
 			_List_fromArray(
@@ -6058,17 +6095,19 @@ var author$project$Main$svgView = F4(
 					A3(author$project$Main$staff, width, lineHeight, margins),
 					_List_fromArray(
 						[
-							A4(author$project$Main$drawNote, width, lineHeight, margins, correctNote)
+							A2(drawNoteFunc, model.correctNote, 'rgba(0,0,0,0.9)')
 						])),
-				_List_fromArray(
-					[
-						A2(author$project$Main$trebleClef, 50, 237)
-					])));
+				_Utils_ap(
+					currentNoteDrawing,
+					_List_fromArray(
+						[
+							A2(author$project$Main$trebleClef, 50, 237)
+						]))));
 	});
 var author$project$Main$gameView = function (model) {
 	return A4(
 		author$project$Main$svgView,
-		model.correctNote,
+		model,
 		500,
 		200,
 		{bottom: 50, left: 50, right: 50, top: 50});
