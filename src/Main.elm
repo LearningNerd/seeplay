@@ -12,6 +12,7 @@ import Tuple exposing (..)
 import Task
 import Time
 import Json.Encode as E
+import Animation exposing (px)
 
 
 port handleInitMIDI : (Bool -> msg) -> Sub msg
@@ -62,6 +63,7 @@ type alias Model =
     , scoreList : List Score -- store a list of score records for each practice session ... goes into local storage
     , testCurrentTimestamp : Maybe Time.Posix
     , sessionId : Int
+    , style : Animation.State
     }
 
 
@@ -80,6 +82,7 @@ initialModel =
     , scoreList = []
     , testCurrentTimestamp = Nothing
     , sessionId = 0
+    , style = Animation.style [ Animation.opacity 1.0 ]
     }
 
 -- Get session ID from JS flag (starts at 0, or incremented from localstorage)
@@ -260,12 +263,18 @@ testMessagesView model =
 view : Model -> Html Msg
 view model =
     div []
-        [ case model.isMIDIConnected of
+        [ animationTestView model
+        , (
+          case model.isMIDIConnected of
             Just True ->
               if model.isPlaying then gameView model else startScreenView model
             _ ->
               waitForMidiView model
+          )
         ]
+
+animationTestView model =
+  p (Animation.render model.style ++ [ onClick FadeInFadeOut, A.style "background-color" "blue"]) [HTML.text "click meeee"]
 
 
 -- UPDATE
@@ -352,6 +361,37 @@ update msg model =
           , Cmd.none
           )
 
+        FadeInFadeOut -> updateFadeInFadeOut model
+        Animate animMsg-> updateAnimate animMsg model
+
+
+-- ANIMATION EXPERIMENT via:
+-- https://github.com/mdgriffith/elm-style-animation/blob/master/examples/SimpleFadeIn.elm
+
+updateFadeInFadeOut model = 
+          ( { model
+                | style =
+                    Animation.interrupt
+                        [ Animation.to
+                            [ Animation.opacity 0
+                            ]
+                        , Animation.to
+                            [ Animation.opacity 1
+                            ]
+                        ]
+                        model.style
+              }
+            , Cmd.none
+            )
+
+updateAnimate animMsg model =
+            ( { model
+                | style = Animation.update animMsg model.style
+              }
+            , Cmd.none
+            )
+
+
 -- Edge case: starting the timer when game begins shouldn't update answerSpeed
 getNewAnswerSpeed startTime currentTime =
   case startTime of
@@ -379,6 +419,9 @@ type Msg
     | StartGame
     | RestartTimer Time.Posix
     | TestTick Time.Posix
+    | FadeInFadeOut
+    | Animate Animation.Msg
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -393,6 +436,7 @@ subscriptions model =
         , fakeHandleInitMIDI InitMIDI
         , fakeHandleNotePressed NotePressed
         , fakeHandleNoteReleased NoteReleased
+        , Animation.subscription Animate [ model.style ]
         ]
 
 
