@@ -13,19 +13,19 @@
             "elm/random": "1.0.0",
             "elm/svg": "1.0.1",
             "elm/time": "1.0.0",
-            "mdgriffith/elm-style-animation": "4.0.0"
-        },
-        "indirect": {
+            "mdgriffith/elm-style-animation": "4.0.0",
             "elm/url": "1.0.0",
             "elm/virtual-dom": "1.0.2"
+        },
+        "indirect": {
         }
     },
     "test-dependencies": {
         "direct": {
-            "elm-explorations/test": "1.2.1"
+            "elm-explorations/test": "1.2.1",
+            "elm/http": "1.0.0"
         },
         "indirect": {
-            "elm/http": "1.0.0"
         }
     }
 }

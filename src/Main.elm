@@ -568,3 +568,14 @@ midiToFrequency midiCode =
 -- Sources: https://en.wikipedia.org/wiki/Pitch_(music)#Labeling_pitches
 -- http://subsynth.sourceforge.net/midinote2freq.html
 -- and https://newt.phys.unsw.edu.au/jw/notes.html
+
+logMidiCode maybeNote =
+  case maybeNote of
+    Nothing -> "Nothing"
+    Just n -> 
+      let
+          noteNameString = first n.noteName ++ String.fromInt (second n.noteName)
+      in
+        String.fromInt n.midi ++ "(" ++ noteNameString ++ ")"
+
+

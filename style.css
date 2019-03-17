@@ -5,7 +5,7 @@ body {
 }
 
 button {
-  text-align: center;
+    text-align: center;
     font-size: 4em;
     padding: 0.2em 1em;
     border-radius: 0.5em;
@@ -23,3 +23,20 @@ button {
   font-size: 280px;
 }
 
+.testControls {
+  background: #eee;
+  padding: 0.5em;
+  border: 1px solid #ddd;
+  box-shadow: 1px 1px 5px rgba(0,0,0,0.2);
+}
+
+.testControls button {
+    text-align: center;
+    font-size: 1em;
+    padding: 0.2em 1em;
+    margin: 0.1em;
+    border-radius: 0.5em;
+    background: #c6e8ff;
+    border: 1px solid #a7c6e5;
+    box-shadow: 1px 1px 5px rgba(0,0,0,0.2);
+}

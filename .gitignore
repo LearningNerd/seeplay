@@ -5,3 +5,7 @@ repl-temp-*
 
 # Vim swp files
 *.swp
+
+# MacOS stuff
+.DS_Store
+
