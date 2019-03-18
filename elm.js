@@ -4393,9 +4393,11 @@ function _Browser_load(url)
 		}
 	}));
 }
-var author$project$Main$UpdateCorrectNote = function (a) {
-	return {$: 'UpdateCorrectNote', a: a};
-};
+var author$project$Color$rgb = F3(
+	function (r, g, b) {
+		return {alpha: 1, blue: b, green: g, red: r};
+	});
+var author$project$Color$black = A3(author$project$Color$rgb, 0, 0, 0);
 var elm$core$Basics$EQ = {$: 'EQ'};
 var elm$core$Basics$LT = {$: 'LT'};
 var elm$core$Elm$JsArray$foldr = _JsArray_foldr;
@@ -4476,6 +4478,62 @@ var elm$core$Set$toList = function (_n0) {
 	var dict = _n0.a;
 	return elm$core$Dict$keys(dict);
 };
+var elm$core$Basics$toFloat = _Basics_toFloat;
+var elm$core$Maybe$Nothing = {$: 'Nothing'};
+var mdgriffith$elm_style_animation$Animation$Model$Spring = function (a) {
+	return {$: 'Spring', a: a};
+};
+var mdgriffith$elm_style_animation$Animation$initMotion = F2(
+	function (position, unit) {
+		return {
+			interpolation: mdgriffith$elm_style_animation$Animation$Model$Spring(
+				{damping: 26, stiffness: 170}),
+			interpolationOverride: elm$core$Maybe$Nothing,
+			position: position,
+			target: position,
+			unit: unit,
+			velocity: 0
+		};
+	});
+var mdgriffith$elm_style_animation$Animation$Model$ColorProperty = F5(
+	function (a, b, c, d, e) {
+		return {$: 'ColorProperty', a: a, b: b, c: c, d: d, e: e};
+	});
+var mdgriffith$elm_style_animation$Animation$customColor = F2(
+	function (name, _n0) {
+		var red = _n0.red;
+		var green = _n0.green;
+		var blue = _n0.blue;
+		var alpha = _n0.alpha;
+		return A5(
+			mdgriffith$elm_style_animation$Animation$Model$ColorProperty,
+			name,
+			A2(mdgriffith$elm_style_animation$Animation$initMotion, red, ''),
+			A2(mdgriffith$elm_style_animation$Animation$initMotion, green, ''),
+			A2(mdgriffith$elm_style_animation$Animation$initMotion, blue, ''),
+			A2(mdgriffith$elm_style_animation$Animation$initMotion, alpha, ''));
+	});
+var mdgriffith$elm_style_animation$Animation$fill = function (clr) {
+	return A2(mdgriffith$elm_style_animation$Animation$customColor, 'fill', clr);
+};
+var mdgriffith$elm_style_animation$Animation$Model$Property = F2(
+	function (a, b) {
+		return {$: 'Property', a: a, b: b};
+	});
+var mdgriffith$elm_style_animation$Animation$custom = F3(
+	function (name, value, unit) {
+		return A2(
+			mdgriffith$elm_style_animation$Animation$Model$Property,
+			name,
+			A2(mdgriffith$elm_style_animation$Animation$initMotion, value, unit));
+	});
+var mdgriffith$elm_style_animation$Animation$opacity = function (val) {
+	return A3(mdgriffith$elm_style_animation$Animation$custom, 'opacity', val, '');
+};
+var elm$core$Basics$apL = F2(
+	function (f, x) {
+		return f(x);
+	});
 var elm$core$Basics$add = _Basics_add;
 var elm$core$Basics$gt = _Utils_gt;
 var elm$core$List$foldl = F3(
@@ -4569,402 +4627,10 @@ var elm$core$List$map = F2(
 			_List_Nil,
 			xs);
 	});
-var elm$random$Random$addOne = function (value) {
-	return _Utils_Tuple2(1, value);
-};
-var elm$core$Basics$lt = _Utils_lt;
-var elm$core$Basics$negate = function (n) {
-	return -n;
-};
-var elm$core$Basics$abs = function (n) {
-	return (n < 0) ? (-n) : n;
-};
-var elm$core$List$sum = function (numbers) {
-	return A3(elm$core$List$foldl, elm$core$Basics$add, 0, numbers);
-};
-var elm$core$Basics$fdiv = _Basics_fdiv;
+var elm$core$Basics$False = {$: 'False'};
 var elm$core$Basics$identity = function (x) {
 	return x;
 };
-var elm$core$Basics$mul = _Basics_mul;
-var elm$core$Basics$sub = _Basics_sub;
-var elm$core$Basics$toFloat = _Basics_toFloat;
-var elm$core$Bitwise$and = _Bitwise_and;
-var elm$random$Random$Generator = function (a) {
-	return {$: 'Generator', a: a};
-};
-var elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
-var elm$random$Random$Seed = F2(
-	function (a, b) {
-		return {$: 'Seed', a: a, b: b};
-	});
-var elm$random$Random$next = function (_n0) {
-	var state0 = _n0.a;
-	var incr = _n0.b;
-	return A2(elm$random$Random$Seed, ((state0 * 1664525) + incr) >>> 0, incr);
-};
-var elm$core$Bitwise$xor = _Bitwise_xor;
-var elm$random$Random$peel = function (_n0) {
-	var state = _n0.a;
-	var word = (state ^ (state >>> ((state >>> 28) + 4))) * 277803737;
-	return ((word >>> 22) ^ word) >>> 0;
-};
-var elm$random$Random$float = F2(
-	function (a, b) {
-		return elm$random$Random$Generator(
-			function (seed0) {
-				var seed1 = elm$random$Random$next(seed0);
-				var range = elm$core$Basics$abs(b - a);
-				var n1 = elm$random$Random$peel(seed1);
-				var n0 = elm$random$Random$peel(seed0);
-				var lo = (134217727 & n1) * 1.0;
-				var hi = (67108863 & n0) * 1.0;
-				var val = ((hi * 1.34217728e8) + lo) / 9.007199254740992e15;
-				var scaled = (val * range) + a;
-				return _Utils_Tuple2(
-					scaled,
-					elm$random$Random$next(seed1));
-			});
-	});
-var elm$core$Basics$le = _Utils_le;
-var elm$random$Random$getByWeight = F3(
-	function (_n0, others, countdown) {
-		getByWeight:
-		while (true) {
-			var weight = _n0.a;
-			var value = _n0.b;
-			if (!others.b) {
-				return value;
-			} else {
-				var second = others.a;
-				var otherOthers = others.b;
-				if (_Utils_cmp(
-					countdown,
-					elm$core$Basics$abs(weight)) < 1) {
-					return value;
-				} else {
-					var $temp$_n0 = second,
-						$temp$others = otherOthers,
-						$temp$countdown = countdown - elm$core$Basics$abs(weight);
-					_n0 = $temp$_n0;
-					others = $temp$others;
-					countdown = $temp$countdown;
-					continue getByWeight;
-				}
-			}
-		}
-	});
-var elm$random$Random$map = F2(
-	function (func, _n0) {
-		var genA = _n0.a;
-		return elm$random$Random$Generator(
-			function (seed0) {
-				var _n1 = genA(seed0);
-				var a = _n1.a;
-				var seed1 = _n1.b;
-				return _Utils_Tuple2(
-					func(a),
-					seed1);
-			});
-	});
-var elm$random$Random$weighted = F2(
-	function (first, others) {
-		var normalize = function (_n0) {
-			var weight = _n0.a;
-			return elm$core$Basics$abs(weight);
-		};
-		var total = normalize(first) + elm$core$List$sum(
-			A2(elm$core$List$map, normalize, others));
-		return A2(
-			elm$random$Random$map,
-			A2(elm$random$Random$getByWeight, first, others),
-			A2(elm$random$Random$float, 0, total));
-	});
-var elm$random$Random$uniform = F2(
-	function (value, valueList) {
-		return A2(
-			elm$random$Random$weighted,
-			elm$random$Random$addOne(value),
-			A2(elm$core$List$map, elm$random$Random$addOne, valueList));
-	});
-var author$project$Main$getRandomMidi = A2(
-	elm$random$Random$uniform,
-	60,
-	_List_fromArray(
-		[62, 64, 65, 67, 69, 71, 72, 74, 76, 77, 79]));
-var elm$core$Basics$pow = _Basics_pow;
-var author$project$Main$midiToFrequency = function (midiCode) {
-	var semitoneRatio = 1.0594630943592953;
-	var lowestFreq = 8.1757989156;
-	return lowestFreq * A2(elm$core$Basics$pow, semitoneRatio, midiCode);
-};
-var elm$core$Array$Array_elm_builtin = F4(
-	function (a, b, c, d) {
-		return {$: 'Array_elm_builtin', a: a, b: b, c: c, d: d};
-	});
-var elm$core$Array$branchFactor = 32;
-var elm$core$Basics$ceiling = _Basics_ceiling;
-var elm$core$Basics$logBase = F2(
-	function (base, number) {
-		return _Basics_log(number) / _Basics_log(base);
-	});
-var elm$core$Array$shiftStep = elm$core$Basics$ceiling(
-	A2(elm$core$Basics$logBase, 2, elm$core$Array$branchFactor));
-var elm$core$Elm$JsArray$empty = _JsArray_empty;
-var elm$core$Array$empty = A4(elm$core$Array$Array_elm_builtin, 0, elm$core$Array$shiftStep, elm$core$Elm$JsArray$empty, elm$core$Elm$JsArray$empty);
-var elm$core$Array$Leaf = function (a) {
-	return {$: 'Leaf', a: a};
-};
-var elm$core$Array$SubTree = function (a) {
-	return {$: 'SubTree', a: a};
-};
-var elm$core$Elm$JsArray$initializeFromList = _JsArray_initializeFromList;
-var elm$core$Array$compressNodes = F2(
-	function (nodes, acc) {
-		compressNodes:
-		while (true) {
-			var _n0 = A2(elm$core$Elm$JsArray$initializeFromList, elm$core$Array$branchFactor, nodes);
-			var node = _n0.a;
-			var remainingNodes = _n0.b;
-			var newAcc = A2(
-				elm$core$List$cons,
-				elm$core$Array$SubTree(node),
-				acc);
-			if (!remainingNodes.b) {
-				return elm$core$List$reverse(newAcc);
-			} else {
-				var $temp$nodes = remainingNodes,
-					$temp$acc = newAcc;
-				nodes = $temp$nodes;
-				acc = $temp$acc;
-				continue compressNodes;
-			}
-		}
-	});
-var elm$core$Basics$apR = F2(
-	function (x, f) {
-		return f(x);
-	});
-var elm$core$Basics$eq = _Utils_equal;
-var elm$core$Tuple$first = function (_n0) {
-	var x = _n0.a;
-	return x;
-};
-var elm$core$Array$treeFromBuilder = F2(
-	function (nodeList, nodeListSize) {
-		treeFromBuilder:
-		while (true) {
-			var newNodeSize = elm$core$Basics$ceiling(nodeListSize / elm$core$Array$branchFactor);
-			if (newNodeSize === 1) {
-				return A2(elm$core$Elm$JsArray$initializeFromList, elm$core$Array$branchFactor, nodeList).a;
-			} else {
-				var $temp$nodeList = A2(elm$core$Array$compressNodes, nodeList, _List_Nil),
-					$temp$nodeListSize = newNodeSize;
-				nodeList = $temp$nodeList;
-				nodeListSize = $temp$nodeListSize;
-				continue treeFromBuilder;
-			}
-		}
-	});
-var elm$core$Basics$apL = F2(
-	function (f, x) {
-		return f(x);
-	});
-var elm$core$Basics$floor = _Basics_floor;
-var elm$core$Basics$max = F2(
-	function (x, y) {
-		return (_Utils_cmp(x, y) > 0) ? x : y;
-	});
-var elm$core$Elm$JsArray$length = _JsArray_length;
-var elm$core$Array$builderToArray = F2(
-	function (reverseNodeList, builder) {
-		if (!builder.nodeListSize) {
-			return A4(
-				elm$core$Array$Array_elm_builtin,
-				elm$core$Elm$JsArray$length(builder.tail),
-				elm$core$Array$shiftStep,
-				elm$core$Elm$JsArray$empty,
-				builder.tail);
-		} else {
-			var treeLen = builder.nodeListSize * elm$core$Array$branchFactor;
-			var depth = elm$core$Basics$floor(
-				A2(elm$core$Basics$logBase, elm$core$Array$branchFactor, treeLen - 1));
-			var correctNodeList = reverseNodeList ? elm$core$List$reverse(builder.nodeList) : builder.nodeList;
-			var tree = A2(elm$core$Array$treeFromBuilder, correctNodeList, builder.nodeListSize);
-			return A4(
-				elm$core$Array$Array_elm_builtin,
-				elm$core$Elm$JsArray$length(builder.tail) + treeLen,
-				A2(elm$core$Basics$max, 5, depth * elm$core$Array$shiftStep),
-				tree,
-				builder.tail);
-		}
-	});
-var elm$core$Basics$True = {$: 'True'};
-var elm$core$Array$fromListHelp = F3(
-	function (list, nodeList, nodeListSize) {
-		fromListHelp:
-		while (true) {
-			var _n0 = A2(elm$core$Elm$JsArray$initializeFromList, elm$core$Array$branchFactor, list);
-			var jsArray = _n0.a;
-			var remainingItems = _n0.b;
-			if (_Utils_cmp(
-				elm$core$Elm$JsArray$length(jsArray),
-				elm$core$Array$branchFactor) < 0) {
-				return A2(
-					elm$core$Array$builderToArray,
-					true,
-					{nodeList: nodeList, nodeListSize: nodeListSize, tail: jsArray});
-			} else {
-				var $temp$list = remainingItems,
-					$temp$nodeList = A2(
-					elm$core$List$cons,
-					elm$core$Array$Leaf(jsArray),
-					nodeList),
-					$temp$nodeListSize = nodeListSize + 1;
-				list = $temp$list;
-				nodeList = $temp$nodeList;
-				nodeListSize = $temp$nodeListSize;
-				continue fromListHelp;
-			}
-		}
-	});
-var elm$core$Array$fromList = function (list) {
-	if (!list.b) {
-		return elm$core$Array$empty;
-	} else {
-		return A3(elm$core$Array$fromListHelp, list, _List_Nil, 0);
-	}
-};
-var elm$core$Array$bitMask = 4294967295 >>> (32 - elm$core$Array$shiftStep);
-var elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
-var elm$core$Array$getHelp = F3(
-	function (shift, index, tree) {
-		getHelp:
-		while (true) {
-			var pos = elm$core$Array$bitMask & (index >>> shift);
-			var _n0 = A2(elm$core$Elm$JsArray$unsafeGet, pos, tree);
-			if (_n0.$ === 'SubTree') {
-				var subTree = _n0.a;
-				var $temp$shift = shift - elm$core$Array$shiftStep,
-					$temp$index = index,
-					$temp$tree = subTree;
-				shift = $temp$shift;
-				index = $temp$index;
-				tree = $temp$tree;
-				continue getHelp;
-			} else {
-				var values = _n0.a;
-				return A2(elm$core$Elm$JsArray$unsafeGet, elm$core$Array$bitMask & index, values);
-			}
-		}
-	});
-var elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
-var elm$core$Array$tailIndex = function (len) {
-	return (len >>> 5) << 5;
-};
-var elm$core$Basics$ge = _Utils_ge;
-var elm$core$Basics$or = _Basics_or;
-var elm$core$Maybe$Just = function (a) {
-	return {$: 'Just', a: a};
-};
-var elm$core$Maybe$Nothing = {$: 'Nothing'};
-var elm$core$Array$get = F2(
-	function (index, _n0) {
-		var len = _n0.a;
-		var startShift = _n0.b;
-		var tree = _n0.c;
-		var tail = _n0.d;
-		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? elm$core$Maybe$Nothing : ((_Utils_cmp(
-			index,
-			elm$core$Array$tailIndex(len)) > -1) ? elm$core$Maybe$Just(
-			A2(elm$core$Elm$JsArray$unsafeGet, elm$core$Array$bitMask & index, tail)) : elm$core$Maybe$Just(
-			A3(elm$core$Array$getHelp, startShift, index, tree)));
-	});
-var elm$core$Basics$idiv = _Basics_idiv;
-var elm$core$Basics$remainderBy = _Basics_remainderBy;
-var author$project$Main$midiToNoteName = function (midiCode) {
-	var pitchClasses = elm$core$Array$fromList(
-		_List_fromArray(
-			['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']));
-	var octave = ((midiCode / 12) | 0) - 1;
-	var index = midiCode % 12;
-	var pitchClass = function () {
-		var _n0 = A2(elm$core$Array$get, index, pitchClasses);
-		if (_n0.$ === 'Nothing') {
-			return 'C';
-		} else {
-			var x = _n0.a;
-			return x;
-		}
-	}();
-	return _Utils_Tuple2(pitchClass, octave);
-};
-var elm$core$Basics$clamp = F3(
-	function (low, high, number) {
-		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
-	});
-var author$project$Main$createNote = function (midiCode) {
-	return {
-		frequency: author$project$Main$midiToFrequency(midiCode),
-		midi: A3(elm$core$Basics$clamp, 21, 108, midiCode),
-		noteName: author$project$Main$midiToNoteName(midiCode)
-	};
-};
-var author$project$Main$rgb = F3(
-	function (r, g, b) {
-		return {alpha: 1, blue: b, green: g, red: r};
-	});
-var mdgriffith$elm_style_animation$Animation$Model$Spring = function (a) {
-	return {$: 'Spring', a: a};
-};
-var mdgriffith$elm_style_animation$Animation$initMotion = F2(
-	function (position, unit) {
-		return {
-			interpolation: mdgriffith$elm_style_animation$Animation$Model$Spring(
-				{damping: 26, stiffness: 170}),
-			interpolationOverride: elm$core$Maybe$Nothing,
-			position: position,
-			target: position,
-			unit: unit,
-			velocity: 0
-		};
-	});
-var mdgriffith$elm_style_animation$Animation$Model$ColorProperty = F5(
-	function (a, b, c, d, e) {
-		return {$: 'ColorProperty', a: a, b: b, c: c, d: d, e: e};
-	});
-var mdgriffith$elm_style_animation$Animation$customColor = F2(
-	function (name, _n0) {
-		var red = _n0.red;
-		var green = _n0.green;
-		var blue = _n0.blue;
-		var alpha = _n0.alpha;
-		return A5(
-			mdgriffith$elm_style_animation$Animation$Model$ColorProperty,
-			name,
-			A2(mdgriffith$elm_style_animation$Animation$initMotion, red, ''),
-			A2(mdgriffith$elm_style_animation$Animation$initMotion, green, ''),
-			A2(mdgriffith$elm_style_animation$Animation$initMotion, blue, ''),
-			A2(mdgriffith$elm_style_animation$Animation$initMotion, alpha, ''));
-	});
-var mdgriffith$elm_style_animation$Animation$fill = function (clr) {
-	return A2(mdgriffith$elm_style_animation$Animation$customColor, 'fill', clr);
-};
-var mdgriffith$elm_style_animation$Animation$Model$Property = F2(
-	function (a, b) {
-		return {$: 'Property', a: a, b: b};
-	});
-var mdgriffith$elm_style_animation$Animation$custom = F3(
-	function (name, value, unit) {
-		return A2(
-			mdgriffith$elm_style_animation$Animation$Model$Property,
-			name,
-			A2(mdgriffith$elm_style_animation$Animation$initMotion, value, unit));
-	});
-var mdgriffith$elm_style_animation$Animation$opacity = function (val) {
-	return A3(mdgriffith$elm_style_animation$Animation$custom, 'opacity', val, '');
-};
-var elm$core$Basics$False = {$: 'False'};
 var elm$time$Time$Posix = function (a) {
 	return {$: 'Posix', a: a};
 };
@@ -4985,6 +4651,7 @@ var mdgriffith$elm_style_animation$Animation$initialState = function (current) {
 			}
 		});
 };
+var elm$core$Basics$eq = _Utils_equal;
 var elm$core$Basics$pi = _Basics_pi;
 var mdgriffith$elm_style_animation$Animation$Model$AtSpeed = function (a) {
 	return {$: 'AtSpeed', a: a};
@@ -5059,6 +4726,10 @@ var mdgriffith$elm_style_animation$Animation$Model$ShadowProperty = F3(
 	function (a, b, c) {
 		return {$: 'ShadowProperty', a: a, b: b, c: c};
 	});
+var elm$core$Tuple$first = function (_n0) {
+	var x = _n0.a;
+	return x;
+};
 var elm$core$Tuple$second = function (_n0) {
 	var y = _n0.b;
 	return y;
@@ -5421,6 +5092,10 @@ var mdgriffith$elm_style_animation$Animation$setDefaultInterpolation = function 
 		},
 		prop);
 };
+var elm$core$Basics$apR = F2(
+	function (x, f) {
+		return f(x);
+	});
 var elm$core$Basics$not = _Basics_not;
 var elm$core$List$filter = F2(
 	function (isGood, list) {
@@ -5433,6 +5108,9 @@ var elm$core$List$filter = F2(
 			_List_Nil,
 			list);
 	});
+var elm$core$Maybe$Just = function (a) {
+	return {$: 'Just', a: a};
+};
 var elm$core$List$head = function (list) {
 	if (list.b) {
 		var x = list.a;
@@ -5558,6 +5236,7 @@ var mdgriffith$elm_style_animation$Animation$Render$groupWhile = F2(
 				A2(mdgriffith$elm_style_animation$Animation$Render$groupWhile, eq, zs));
 		}
 	});
+var elm$core$Basics$True = {$: 'True'};
 var elm$core$List$any = F2(
 	function (isOkay, list) {
 		any:
@@ -5629,26 +5308,231 @@ var mdgriffith$elm_style_animation$Animation$style = function (props) {
 			mdgriffith$elm_style_animation$Animation$setDefaultInterpolation,
 			mdgriffith$elm_style_animation$Animation$Render$warnForDoubleListedProperties(props)));
 };
-var author$project$Main$initialCorrectNoteStyle = mdgriffith$elm_style_animation$Animation$style(
+var author$project$Animations$initialCorrectNoteStyle = mdgriffith$elm_style_animation$Animation$style(
 	_List_fromArray(
 		[
 			mdgriffith$elm_style_animation$Animation$opacity(1.0),
-			mdgriffith$elm_style_animation$Animation$fill(
-			A3(author$project$Main$rgb, 0, 0, 0))
+			mdgriffith$elm_style_animation$Animation$fill(author$project$Color$black)
 		]));
-var author$project$Main$initialCurrentNoteStyle = mdgriffith$elm_style_animation$Animation$style(
+var author$project$Color$red = A3(author$project$Color$rgb, 255, 20, 20);
+var author$project$Animations$initialCurrentNoteStyle = mdgriffith$elm_style_animation$Animation$style(
 	_List_fromArray(
 		[
 			mdgriffith$elm_style_animation$Animation$opacity(0.0),
-			mdgriffith$elm_style_animation$Animation$fill(
-			A3(author$project$Main$rgb, 255, 20, 20))
+			mdgriffith$elm_style_animation$Animation$fill(author$project$Color$red)
 		]));
-var author$project$Main$initialModel = {
+var elm$core$Basics$mul = _Basics_mul;
+var elm$core$Basics$pow = _Basics_pow;
+var author$project$Note$midiToFrequency = function (midiCode) {
+	var semitoneRatio = 1.0594630943592953;
+	var lowestFreq = 8.1757989156;
+	return lowestFreq * A2(elm$core$Basics$pow, semitoneRatio, midiCode);
+};
+var elm$core$Array$Array_elm_builtin = F4(
+	function (a, b, c, d) {
+		return {$: 'Array_elm_builtin', a: a, b: b, c: c, d: d};
+	});
+var elm$core$Array$branchFactor = 32;
+var elm$core$Basics$ceiling = _Basics_ceiling;
+var elm$core$Basics$fdiv = _Basics_fdiv;
+var elm$core$Basics$logBase = F2(
+	function (base, number) {
+		return _Basics_log(number) / _Basics_log(base);
+	});
+var elm$core$Array$shiftStep = elm$core$Basics$ceiling(
+	A2(elm$core$Basics$logBase, 2, elm$core$Array$branchFactor));
+var elm$core$Elm$JsArray$empty = _JsArray_empty;
+var elm$core$Array$empty = A4(elm$core$Array$Array_elm_builtin, 0, elm$core$Array$shiftStep, elm$core$Elm$JsArray$empty, elm$core$Elm$JsArray$empty);
+var elm$core$Array$Leaf = function (a) {
+	return {$: 'Leaf', a: a};
+};
+var elm$core$Array$SubTree = function (a) {
+	return {$: 'SubTree', a: a};
+};
+var elm$core$Elm$JsArray$initializeFromList = _JsArray_initializeFromList;
+var elm$core$Array$compressNodes = F2(
+	function (nodes, acc) {
+		compressNodes:
+		while (true) {
+			var _n0 = A2(elm$core$Elm$JsArray$initializeFromList, elm$core$Array$branchFactor, nodes);
+			var node = _n0.a;
+			var remainingNodes = _n0.b;
+			var newAcc = A2(
+				elm$core$List$cons,
+				elm$core$Array$SubTree(node),
+				acc);
+			if (!remainingNodes.b) {
+				return elm$core$List$reverse(newAcc);
+			} else {
+				var $temp$nodes = remainingNodes,
+					$temp$acc = newAcc;
+				nodes = $temp$nodes;
+				acc = $temp$acc;
+				continue compressNodes;
+			}
+		}
+	});
+var elm$core$Array$treeFromBuilder = F2(
+	function (nodeList, nodeListSize) {
+		treeFromBuilder:
+		while (true) {
+			var newNodeSize = elm$core$Basics$ceiling(nodeListSize / elm$core$Array$branchFactor);
+			if (newNodeSize === 1) {
+				return A2(elm$core$Elm$JsArray$initializeFromList, elm$core$Array$branchFactor, nodeList).a;
+			} else {
+				var $temp$nodeList = A2(elm$core$Array$compressNodes, nodeList, _List_Nil),
+					$temp$nodeListSize = newNodeSize;
+				nodeList = $temp$nodeList;
+				nodeListSize = $temp$nodeListSize;
+				continue treeFromBuilder;
+			}
+		}
+	});
+var elm$core$Basics$floor = _Basics_floor;
+var elm$core$Basics$max = F2(
+	function (x, y) {
+		return (_Utils_cmp(x, y) > 0) ? x : y;
+	});
+var elm$core$Basics$sub = _Basics_sub;
+var elm$core$Elm$JsArray$length = _JsArray_length;
+var elm$core$Array$builderToArray = F2(
+	function (reverseNodeList, builder) {
+		if (!builder.nodeListSize) {
+			return A4(
+				elm$core$Array$Array_elm_builtin,
+				elm$core$Elm$JsArray$length(builder.tail),
+				elm$core$Array$shiftStep,
+				elm$core$Elm$JsArray$empty,
+				builder.tail);
+		} else {
+			var treeLen = builder.nodeListSize * elm$core$Array$branchFactor;
+			var depth = elm$core$Basics$floor(
+				A2(elm$core$Basics$logBase, elm$core$Array$branchFactor, treeLen - 1));
+			var correctNodeList = reverseNodeList ? elm$core$List$reverse(builder.nodeList) : builder.nodeList;
+			var tree = A2(elm$core$Array$treeFromBuilder, correctNodeList, builder.nodeListSize);
+			return A4(
+				elm$core$Array$Array_elm_builtin,
+				elm$core$Elm$JsArray$length(builder.tail) + treeLen,
+				A2(elm$core$Basics$max, 5, depth * elm$core$Array$shiftStep),
+				tree,
+				builder.tail);
+		}
+	});
+var elm$core$Basics$lt = _Utils_lt;
+var elm$core$Array$fromListHelp = F3(
+	function (list, nodeList, nodeListSize) {
+		fromListHelp:
+		while (true) {
+			var _n0 = A2(elm$core$Elm$JsArray$initializeFromList, elm$core$Array$branchFactor, list);
+			var jsArray = _n0.a;
+			var remainingItems = _n0.b;
+			if (_Utils_cmp(
+				elm$core$Elm$JsArray$length(jsArray),
+				elm$core$Array$branchFactor) < 0) {
+				return A2(
+					elm$core$Array$builderToArray,
+					true,
+					{nodeList: nodeList, nodeListSize: nodeListSize, tail: jsArray});
+			} else {
+				var $temp$list = remainingItems,
+					$temp$nodeList = A2(
+					elm$core$List$cons,
+					elm$core$Array$Leaf(jsArray),
+					nodeList),
+					$temp$nodeListSize = nodeListSize + 1;
+				list = $temp$list;
+				nodeList = $temp$nodeList;
+				nodeListSize = $temp$nodeListSize;
+				continue fromListHelp;
+			}
+		}
+	});
+var elm$core$Array$fromList = function (list) {
+	if (!list.b) {
+		return elm$core$Array$empty;
+	} else {
+		return A3(elm$core$Array$fromListHelp, list, _List_Nil, 0);
+	}
+};
+var elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
+var elm$core$Array$bitMask = 4294967295 >>> (32 - elm$core$Array$shiftStep);
+var elm$core$Bitwise$and = _Bitwise_and;
+var elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
+var elm$core$Array$getHelp = F3(
+	function (shift, index, tree) {
+		getHelp:
+		while (true) {
+			var pos = elm$core$Array$bitMask & (index >>> shift);
+			var _n0 = A2(elm$core$Elm$JsArray$unsafeGet, pos, tree);
+			if (_n0.$ === 'SubTree') {
+				var subTree = _n0.a;
+				var $temp$shift = shift - elm$core$Array$shiftStep,
+					$temp$index = index,
+					$temp$tree = subTree;
+				shift = $temp$shift;
+				index = $temp$index;
+				tree = $temp$tree;
+				continue getHelp;
+			} else {
+				var values = _n0.a;
+				return A2(elm$core$Elm$JsArray$unsafeGet, elm$core$Array$bitMask & index, values);
+			}
+		}
+	});
+var elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
+var elm$core$Array$tailIndex = function (len) {
+	return (len >>> 5) << 5;
+};
+var elm$core$Basics$ge = _Utils_ge;
+var elm$core$Basics$or = _Basics_or;
+var elm$core$Array$get = F2(
+	function (index, _n0) {
+		var len = _n0.a;
+		var startShift = _n0.b;
+		var tree = _n0.c;
+		var tail = _n0.d;
+		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? elm$core$Maybe$Nothing : ((_Utils_cmp(
+			index,
+			elm$core$Array$tailIndex(len)) > -1) ? elm$core$Maybe$Just(
+			A2(elm$core$Elm$JsArray$unsafeGet, elm$core$Array$bitMask & index, tail)) : elm$core$Maybe$Just(
+			A3(elm$core$Array$getHelp, startShift, index, tree)));
+	});
+var elm$core$Basics$idiv = _Basics_idiv;
+var elm$core$Basics$remainderBy = _Basics_remainderBy;
+var author$project$Note$midiToNoteName = function (midiCode) {
+	var pitchClasses = elm$core$Array$fromList(
+		_List_fromArray(
+			['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']));
+	var octave = ((midiCode / 12) | 0) - 1;
+	var index = midiCode % 12;
+	var pitchClass = function () {
+		var _n0 = A2(elm$core$Array$get, index, pitchClasses);
+		if (_n0.$ === 'Nothing') {
+			return 'C';
+		} else {
+			var x = _n0.a;
+			return x;
+		}
+	}();
+	return _Utils_Tuple2(pitchClass, octave);
+};
+var elm$core$Basics$clamp = F3(
+	function (low, high, number) {
+		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
+	});
+var author$project$Note$createNote = function (midiCode) {
+	return {
+		frequency: author$project$Note$midiToFrequency(midiCode),
+		midi: A3(elm$core$Basics$clamp, 21, 108, midiCode),
+		noteName: author$project$Note$midiToNoteName(midiCode)
+	};
+};
+var author$project$Model$initialModel = {
 	answerSpeed: 0,
-	correctNote: author$project$Main$createNote(60),
-	correctNoteStyle: author$project$Main$initialCorrectNoteStyle,
+	correctNote: author$project$Note$createNote(60),
+	correctNoteStyle: author$project$Animations$initialCorrectNoteStyle,
 	currentNote: elm$core$Maybe$Nothing,
-	currentNoteStyle: author$project$Main$initialCurrentNoteStyle,
+	currentNoteStyle: author$project$Animations$initialCurrentNoteStyle,
 	incorrectTries: 0,
 	isMIDIConnected: elm$core$Maybe$Nothing,
 	isPlaying: false,
@@ -5663,6 +5547,122 @@ var author$project$Main$initialModel = {
 			])),
 	testCurrentTimestamp: elm$core$Maybe$Nothing
 };
+var author$project$Msg$UpdateCorrectNote = function (a) {
+	return {$: 'UpdateCorrectNote', a: a};
+};
+var elm$random$Random$addOne = function (value) {
+	return _Utils_Tuple2(1, value);
+};
+var elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var elm$core$Basics$abs = function (n) {
+	return (n < 0) ? (-n) : n;
+};
+var elm$core$List$sum = function (numbers) {
+	return A3(elm$core$List$foldl, elm$core$Basics$add, 0, numbers);
+};
+var elm$random$Random$Generator = function (a) {
+	return {$: 'Generator', a: a};
+};
+var elm$random$Random$Seed = F2(
+	function (a, b) {
+		return {$: 'Seed', a: a, b: b};
+	});
+var elm$random$Random$next = function (_n0) {
+	var state0 = _n0.a;
+	var incr = _n0.b;
+	return A2(elm$random$Random$Seed, ((state0 * 1664525) + incr) >>> 0, incr);
+};
+var elm$core$Bitwise$xor = _Bitwise_xor;
+var elm$random$Random$peel = function (_n0) {
+	var state = _n0.a;
+	var word = (state ^ (state >>> ((state >>> 28) + 4))) * 277803737;
+	return ((word >>> 22) ^ word) >>> 0;
+};
+var elm$random$Random$float = F2(
+	function (a, b) {
+		return elm$random$Random$Generator(
+			function (seed0) {
+				var seed1 = elm$random$Random$next(seed0);
+				var range = elm$core$Basics$abs(b - a);
+				var n1 = elm$random$Random$peel(seed1);
+				var n0 = elm$random$Random$peel(seed0);
+				var lo = (134217727 & n1) * 1.0;
+				var hi = (67108863 & n0) * 1.0;
+				var val = ((hi * 1.34217728e8) + lo) / 9.007199254740992e15;
+				var scaled = (val * range) + a;
+				return _Utils_Tuple2(
+					scaled,
+					elm$random$Random$next(seed1));
+			});
+	});
+var elm$core$Basics$le = _Utils_le;
+var elm$random$Random$getByWeight = F3(
+	function (_n0, others, countdown) {
+		getByWeight:
+		while (true) {
+			var weight = _n0.a;
+			var value = _n0.b;
+			if (!others.b) {
+				return value;
+			} else {
+				var second = others.a;
+				var otherOthers = others.b;
+				if (_Utils_cmp(
+					countdown,
+					elm$core$Basics$abs(weight)) < 1) {
+					return value;
+				} else {
+					var $temp$_n0 = second,
+						$temp$others = otherOthers,
+						$temp$countdown = countdown - elm$core$Basics$abs(weight);
+					_n0 = $temp$_n0;
+					others = $temp$others;
+					countdown = $temp$countdown;
+					continue getByWeight;
+				}
+			}
+		}
+	});
+var elm$random$Random$map = F2(
+	function (func, _n0) {
+		var genA = _n0.a;
+		return elm$random$Random$Generator(
+			function (seed0) {
+				var _n1 = genA(seed0);
+				var a = _n1.a;
+				var seed1 = _n1.b;
+				return _Utils_Tuple2(
+					func(a),
+					seed1);
+			});
+	});
+var elm$random$Random$weighted = F2(
+	function (first, others) {
+		var normalize = function (_n0) {
+			var weight = _n0.a;
+			return elm$core$Basics$abs(weight);
+		};
+		var total = normalize(first) + elm$core$List$sum(
+			A2(elm$core$List$map, normalize, others));
+		return A2(
+			elm$random$Random$map,
+			A2(elm$random$Random$getByWeight, first, others),
+			A2(elm$random$Random$float, 0, total));
+	});
+var elm$random$Random$uniform = F2(
+	function (value, valueList) {
+		return A2(
+			elm$random$Random$weighted,
+			elm$random$Random$addOne(value),
+			A2(elm$core$List$map, elm$random$Random$addOne, valueList));
+	});
+var author$project$Note$getRandomMidi = A2(
+	elm$random$Random$uniform,
+	60,
+	_List_fromArray(
+		[62, 64, 65, 67, 69, 71, 72, 74, 76, 77, 79]));
 var elm$random$Random$Generate = function (a) {
 	return {$: 'Generate', a: a};
 };
@@ -5991,30 +5991,9 @@ var elm$random$Random$generate = F2(
 var author$project$Main$init = function (initialSessionId) {
 	return _Utils_Tuple2(
 		_Utils_update(
-			author$project$Main$initialModel,
+			author$project$Model$initialModel,
 			{sessionId: initialSessionId}),
-		A2(elm$random$Random$generate, author$project$Main$UpdateCorrectNote, author$project$Main$getRandomMidi));
-};
-var author$project$Main$Animate = function (a) {
-	return {$: 'Animate', a: a};
-};
-var author$project$Main$AnimateCorrectNote = function (a) {
-	return {$: 'AnimateCorrectNote', a: a};
-};
-var author$project$Main$AnimateCurrentNote = function (a) {
-	return {$: 'AnimateCurrentNote', a: a};
-};
-var author$project$Main$InitMIDI = function (a) {
-	return {$: 'InitMIDI', a: a};
-};
-var author$project$Main$NotePressed = function (a) {
-	return {$: 'NotePressed', a: a};
-};
-var author$project$Main$NoteReleased = function (a) {
-	return {$: 'NoteReleased', a: a};
-};
-var author$project$Main$TestTick = function (a) {
-	return {$: 'TestTick', a: a};
+		A2(elm$random$Random$generate, author$project$Msg$UpdateCorrectNote, author$project$Note$getRandomMidi));
 };
 var elm$json$Json$Decode$bool = _Json_decodeBool;
 var author$project$Main$fakeHandleInitMIDI = _Platform_incomingPort('fakeHandleInitMIDI', elm$json$Json$Decode$bool);
@@ -6024,6 +6003,32 @@ var author$project$Main$fakeHandleNoteReleased = _Platform_incomingPort('fakeHan
 var author$project$Main$handleInitMIDI = _Platform_incomingPort('handleInitMIDI', elm$json$Json$Decode$bool);
 var author$project$Main$handleNotePressed = _Platform_incomingPort('handleNotePressed', elm$json$Json$Decode$int);
 var author$project$Main$handleNoteReleased = _Platform_incomingPort('handleNoteReleased', elm$json$Json$Decode$bool);
+var author$project$Msg$Animate = function (a) {
+	return {$: 'Animate', a: a};
+};
+var author$project$Msg$CorrectNoteStyle = function (a) {
+	return {$: 'CorrectNoteStyle', a: a};
+};
+var author$project$Msg$CurrentNoteStyle = function (a) {
+	return {$: 'CurrentNoteStyle', a: a};
+};
+var author$project$Msg$InitMIDI = function (a) {
+	return {$: 'InitMIDI', a: a};
+};
+var author$project$Msg$NotePressed = function (a) {
+	return {$: 'NotePressed', a: a};
+};
+var author$project$Msg$NoteReleased = function (a) {
+	return {$: 'NoteReleased', a: a};
+};
+var author$project$Msg$TestTick = function (a) {
+	return {$: 'TestTick', a: a};
+};
+var elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
+	});
 var elm$core$Platform$Sub$batch = _Platform_batch;
 var elm$time$Time$Every = F2(
 	function (a, b) {
@@ -6425,11 +6430,6 @@ var elm$time$Time$onSelfMsg = F3(
 				A2(elm$core$Task$andThen, tellTaggers, elm$time$Time$now));
 		}
 	});
-var elm$core$Basics$composeL = F3(
-	function (g, f, x) {
-		return g(
-			f(x));
-	});
 var elm$time$Time$subMap = F2(
 	function (f, _n0) {
 		var interval = _n0.a;
@@ -6804,39 +6804,26 @@ var author$project$Main$subscriptions = function (model) {
 	return elm$core$Platform$Sub$batch(
 		_List_fromArray(
 			[
-				author$project$Main$handleInitMIDI(author$project$Main$InitMIDI),
-				author$project$Main$handleNotePressed(author$project$Main$NotePressed),
-				author$project$Main$handleNoteReleased(author$project$Main$NoteReleased),
-				A2(elm$time$Time$every, 10, author$project$Main$TestTick),
-				author$project$Main$fakeHandleInitMIDI(author$project$Main$InitMIDI),
-				author$project$Main$fakeHandleNotePressed(author$project$Main$NotePressed),
-				author$project$Main$fakeHandleNoteReleased(author$project$Main$NoteReleased),
+				author$project$Main$handleInitMIDI(author$project$Msg$InitMIDI),
+				author$project$Main$handleNotePressed(author$project$Msg$NotePressed),
+				author$project$Main$handleNoteReleased(author$project$Msg$NoteReleased),
+				A2(elm$time$Time$every, 10, author$project$Msg$TestTick),
+				author$project$Main$fakeHandleInitMIDI(author$project$Msg$InitMIDI),
+				author$project$Main$fakeHandleNotePressed(author$project$Msg$NotePressed),
+				author$project$Main$fakeHandleNoteReleased(author$project$Msg$NoteReleased),
 				A2(
 				mdgriffith$elm_style_animation$Animation$subscription,
-				author$project$Main$Animate,
-				_List_fromArray(
-					[model.style])),
-				A2(
-				mdgriffith$elm_style_animation$Animation$subscription,
-				author$project$Main$AnimateCorrectNote,
+				A2(elm$core$Basics$composeL, author$project$Msg$Animate, author$project$Msg$CorrectNoteStyle),
 				_List_fromArray(
 					[model.correctNoteStyle])),
 				A2(
 				mdgriffith$elm_style_animation$Animation$subscription,
-				author$project$Main$AnimateCurrentNote,
+				A2(elm$core$Basics$composeL, author$project$Msg$Animate, author$project$Msg$CurrentNoteStyle),
 				_List_fromArray(
 					[model.currentNoteStyle]))
 			]));
 };
-var author$project$Main$CorrectNoteFadeAnimCompleted = {$: 'CorrectNoteFadeAnimCompleted'};
-var author$project$Main$CurrentNoteFadeAnimCompleted = {$: 'CurrentNoteFadeAnimCompleted'};
-var author$project$Main$RestartTimer = function (a) {
-	return {$: 'RestartTimer', a: a};
-};
-var author$project$Main$Score = F3(
-	function (correctNote, answerSpeed, incorrectTries) {
-		return {answerSpeed: answerSpeed, correctNote: correctNote, incorrectTries: incorrectTries};
-	});
+var author$project$Color$green = A3(author$project$Color$rgb, 0, 255, 0);
 var author$project$Main$cache = _Platform_outgoingPort('cache', elm$core$Basics$identity);
 var elm$json$Json$Encode$int = _Json_wrap;
 var elm$json$Json$Encode$object = function (pairs) {
@@ -6885,6 +6872,15 @@ var author$project$Main$getNewAnswerSpeed = F2(
 			return elm$time$Time$posixToMillis(currentTime) - elm$time$Time$posixToMillis(t);
 		}
 	});
+var author$project$Model$Score = F3(
+	function (correctNote, answerSpeed, incorrectTries) {
+		return {answerSpeed: answerSpeed, correctNote: correctNote, incorrectTries: incorrectTries};
+	});
+var author$project$Msg$CorrectNoteFadeAnimCompleted = {$: 'CorrectNoteFadeAnimCompleted'};
+var author$project$Msg$CurrentNoteFadeAnimCompleted = {$: 'CurrentNoteFadeAnimCompleted'};
+var author$project$Msg$RestartTimer = function (a) {
+	return {$: 'RestartTimer', a: a};
+};
 var elm$core$Basics$neq = _Utils_notEqual;
 var elm$core$List$partition = F2(
 	function (pred, list) {
@@ -8432,40 +8428,40 @@ var mdgriffith$elm_style_animation$Animation$Messenger$update = F2(
 	function (tick, animation) {
 		return A2(mdgriffith$elm_style_animation$Animation$Model$updateAnimation, tick, animation);
 	});
-var author$project$Main$updateAnimate = F2(
-	function (animMsg, model) {
-		var _n0 = A2(mdgriffith$elm_style_animation$Animation$Messenger$update, animMsg, model.style);
-		var newStyle = _n0.a;
-		var cmd = _n0.b;
-		return _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{style: newStyle}),
-			cmd);
-	});
-var author$project$Main$updateAnimateCorrectNote = F2(
-	function (animMsg, model) {
-		var _n0 = A2(mdgriffith$elm_style_animation$Animation$Messenger$update, animMsg, model.correctNoteStyle);
-		var newStyle = _n0.a;
-		var cmd = _n0.b;
-		return _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{correctNoteStyle: newStyle}),
-			cmd);
-	});
-var author$project$Main$updateAnimateCurrentNote = F2(
-	function (animMsg, model) {
-		var _n0 = A2(mdgriffith$elm_style_animation$Animation$Messenger$update, animMsg, model.currentNoteStyle);
-		var newStyle = _n0.a;
-		var cmd = _n0.b;
-		return _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{currentNoteStyle: newStyle}),
-			cmd);
+var author$project$UpdateAnimations$update = F2(
+	function (msg, model) {
+		if (msg.$ === 'CorrectNoteStyle') {
+			var animMsg = msg.a;
+			var _n1 = A2(mdgriffith$elm_style_animation$Animation$Messenger$update, animMsg, model.correctNoteStyle);
+			var newStyle = _n1.a;
+			var cmd = _n1.b;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{correctNoteStyle: newStyle}),
+				cmd);
+		} else {
+			var animMsg = msg.a;
+			var _n2 = A2(mdgriffith$elm_style_animation$Animation$Messenger$update, animMsg, model.currentNoteStyle);
+			var newStyle = _n2.a;
+			var cmd = _n2.b;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{currentNoteStyle: newStyle}),
+				cmd);
+		}
 	});
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
+var elm$json$Json$Encode$list = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				elm$core$List$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
 var mdgriffith$elm_style_animation$Animation$extractInitialWait = function (steps) {
 	var _n0 = elm$core$List$head(steps);
 	if (_n0.$ === 'Nothing') {
@@ -8505,6 +8501,12 @@ var mdgriffith$elm_style_animation$Animation$interrupt = F2(
 					running: true
 				}));
 	});
+var mdgriffith$elm_style_animation$Animation$Model$Set = function (a) {
+	return {$: 'Set', a: a};
+};
+var mdgriffith$elm_style_animation$Animation$set = function (props) {
+	return mdgriffith$elm_style_animation$Animation$Model$Set(props);
+};
 var mdgriffith$elm_style_animation$Animation$Model$To = function (a) {
 	return {$: 'To', a: a};
 };
@@ -8513,42 +8515,6 @@ var mdgriffith$elm_style_animation$Animation$to = function (props) {
 };
 var mdgriffith$elm_style_animation$Animation$wait = function (till) {
 	return mdgriffith$elm_style_animation$Animation$Model$Wait(till);
-};
-var author$project$Main$updateFadeInFadeOut = function (model) {
-	return _Utils_Tuple2(
-		_Utils_update(
-			model,
-			{
-				style: A2(
-					mdgriffith$elm_style_animation$Animation$interrupt,
-					_List_fromArray(
-						[
-							mdgriffith$elm_style_animation$Animation$to(
-							_List_fromArray(
-								[
-									mdgriffith$elm_style_animation$Animation$opacity(0)
-								])),
-							mdgriffith$elm_style_animation$Animation$wait(
-							elm$time$Time$millisToPosix(2000))
-						]),
-					model.style)
-			}),
-		elm$core$Platform$Cmd$none);
-};
-var elm$json$Json$Encode$list = F2(
-	function (func, entries) {
-		return _Json_wrap(
-			A3(
-				elm$core$List$foldl,
-				_Json_addEntry(func),
-				_Json_emptyArray(_Utils_Tuple0),
-				entries));
-	});
-var mdgriffith$elm_style_animation$Animation$Model$Set = function (a) {
-	return {$: 'Set', a: a};
-};
-var mdgriffith$elm_style_animation$Animation$set = function (props) {
-	return mdgriffith$elm_style_animation$Animation$Model$Set(props);
 };
 var mdgriffith$elm_style_animation$Animation$Model$Send = function (a) {
 	return {$: 'Send', a: a};
@@ -8585,7 +8551,7 @@ var author$project$Main$update = F2(
 											[
 												mdgriffith$elm_style_animation$Animation$opacity(0.0)
 											])),
-										mdgriffith$elm_style_animation$Animation$Messenger$send(author$project$Main$CurrentNoteFadeAnimCompleted)
+										mdgriffith$elm_style_animation$Animation$Messenger$send(author$project$Msg$CurrentNoteFadeAnimCompleted)
 									]),
 								model.currentNoteStyle)
 						}),
@@ -8598,7 +8564,7 @@ var author$project$Main$update = F2(
 					elm$core$Platform$Cmd$none);
 			case 'NotePressed':
 				var noteCode = msg.a;
-				var newCurrentNote = author$project$Main$createNote(noteCode);
+				var newCurrentNote = author$project$Note$createNote(noteCode);
 				var isCorrect = A2(
 					author$project$Main$getIsCorrect,
 					model.correctNote,
@@ -8610,8 +8576,7 @@ var author$project$Main$update = F2(
 							mdgriffith$elm_style_animation$Animation$to(
 							_List_fromArray(
 								[
-									mdgriffith$elm_style_animation$Animation$fill(
-									A3(author$project$Main$rgb, 0, 255, 0))
+									mdgriffith$elm_style_animation$Animation$fill(author$project$Color$green)
 								])),
 							mdgriffith$elm_style_animation$Animation$wait(
 							elm$time$Time$millisToPosix(60)),
@@ -8620,10 +8585,10 @@ var author$project$Main$update = F2(
 								[
 									mdgriffith$elm_style_animation$Animation$opacity(0.0)
 								])),
-							mdgriffith$elm_style_animation$Animation$Messenger$send(author$project$Main$CorrectNoteFadeAnimCompleted)
+							mdgriffith$elm_style_animation$Animation$Messenger$send(author$project$Msg$CorrectNoteFadeAnimCompleted)
 						]),
-					model.correctNoteStyle) : author$project$Main$initialCorrectNoteStyle;
-				var newCurrentNoteStyle = isCorrect ? author$project$Main$initialCurrentNoteStyle : A2(
+					model.correctNoteStyle) : author$project$Animations$initialCorrectNoteStyle;
+				var newCurrentNoteStyle = isCorrect ? author$project$Animations$initialCurrentNoteStyle : A2(
 					mdgriffith$elm_style_animation$Animation$interrupt,
 					_List_fromArray(
 						[
@@ -8659,24 +8624,23 @@ var author$project$Main$update = F2(
 								_List_fromArray(
 									[
 										mdgriffith$elm_style_animation$Animation$opacity(0.0),
-										mdgriffith$elm_style_animation$Animation$fill(
-										A3(author$project$Main$rgb, 0, 0, 0))
+										mdgriffith$elm_style_animation$Animation$fill(author$project$Color$black)
 									]))
 						}),
-					A2(elm$core$Task$perform, author$project$Main$RestartTimer, elm$time$Time$now));
+					A2(elm$core$Task$perform, author$project$Msg$RestartTimer, elm$time$Time$now));
 			case 'StartGame':
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{isPlaying: true}),
-					A2(elm$core$Task$perform, author$project$Main$RestartTimer, elm$time$Time$now));
+					A2(elm$core$Task$perform, author$project$Msg$RestartTimer, elm$time$Time$now));
 			case 'UpdateCorrectNote':
 				var midiCode = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							correctNote: author$project$Main$createNote(midiCode),
+							correctNote: author$project$Note$createNote(midiCode),
 							correctNoteStyle: A2(
 								mdgriffith$elm_style_animation$Animation$interrupt,
 								_List_fromArray(
@@ -8695,7 +8659,7 @@ var author$project$Main$update = F2(
 				var newAnswerSpeed = A2(author$project$Main$getNewAnswerSpeed, model.startTimestamp, currentTimestamp);
 				var newScoreObjectList = (!_Utils_eq(model.startTimestamp, elm$core$Maybe$Nothing)) ? _List_fromArray(
 					[
-						A3(author$project$Main$Score, model.correctNote, newAnswerSpeed, model.incorrectTries)
+						A3(author$project$Model$Score, model.correctNote, newAnswerSpeed, model.incorrectTries)
 					]) : _List_Nil;
 				var nextCommand = (!_Utils_eq(model.startTimestamp, elm$core$Maybe$Nothing)) ? elm$core$Platform$Cmd$batch(
 					_List_fromArray(
@@ -8705,7 +8669,7 @@ var author$project$Main$update = F2(
 								elm$json$Json$Encode$list,
 								author$project$Main$convertScoreToJSON,
 								_Utils_ap(model.scoreList, newScoreObjectList))),
-							A2(elm$random$Random$generate, author$project$Main$UpdateCorrectNote, author$project$Main$getRandomMidi)
+							A2(elm$random$Random$generate, author$project$Msg$UpdateCorrectNote, author$project$Note$getRandomMidi)
 						])) : elm$core$Platform$Cmd$none;
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -8727,17 +8691,9 @@ var author$project$Main$update = F2(
 							testCurrentTimestamp: elm$core$Maybe$Just(currentTimestamp)
 						}),
 					elm$core$Platform$Cmd$none);
-			case 'FadeInFadeOut':
-				return author$project$Main$updateFadeInFadeOut(model);
-			case 'Animate':
-				var animMsg = msg.a;
-				return A2(author$project$Main$updateAnimate, animMsg, model);
-			case 'AnimateCurrentNote':
-				var animMsg = msg.a;
-				return A2(author$project$Main$updateAnimateCurrentNote, animMsg, model);
 			default:
 				var animMsg = msg.a;
-				return A2(author$project$Main$updateAnimateCorrectNote, animMsg, model);
+				return A2(author$project$UpdateAnimations$update, animMsg, model);
 		}
 	});
 var author$project$Main$getNoteHeight = function (midiCode) {
@@ -9447,7 +9403,7 @@ var author$project$Main$gameView = function (model) {
 		200,
 		{bottom: 50, left: 50, right: 50, top: 50});
 };
-var author$project$Main$StartGame = {$: 'StartGame'};
+var author$project$Msg$StartGame = {$: 'StartGame'};
 var elm$html$Html$button = _VirtualDom_node('button');
 var elm$html$Html$div = _VirtualDom_node('div');
 var elm$json$Json$Encode$string = _Json_wrap;
@@ -9490,7 +9446,7 @@ var author$project$Main$startScreenView = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$Attributes$class('startButton'),
-						elm$html$Html$Events$onClick(author$project$Main$StartGame)
+						elm$html$Html$Events$onClick(author$project$Msg$StartGame)
 					]),
 				_List_fromArray(
 					[

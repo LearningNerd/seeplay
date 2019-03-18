@@ -12,8 +12,15 @@ import Tuple exposing (..)
 import Task
 import Time
 import Json.Encode as E
-import Animation exposing (px)
+import Animation
 import Animation.Messenger
+
+import Model exposing (Model, Score, initialModel)
+import Color
+import Animations
+import Msg exposing (..)
+import Note exposing (Note)
+import UpdateAnimations
 
 port handleInitMIDI : (Bool -> msg) -> Sub msg
 port handleNotePressed : (Int -> msg) -> Sub msg
@@ -24,97 +31,12 @@ port cache : E.Value -> Cmd msg
 
 
 -- Fake data from fakemidi.js (manual testing in browser)
-
-
 port fakeHandleInitMIDI : (Bool -> msg) -> Sub msg
 port fakeHandleNotePressed : (Int -> msg) -> Sub msg
 port fakeHandleNoteReleased : (Bool -> msg) -> Sub msg
 
 
--- MOVE TO a Color.Palette module ????
-type alias Color =
-    { red : Int, blue : Int, green : Int, alpha : Float }
-rgba r g b a =
-    { red = r, blue = b, green = g, alpha = a }
-rgb r g b =
-    { red = r, blue = b, green = g, alpha = 1 }
-
-
--- MODEL
-
-
-type alias NoteName =
-    ( String, Int )
-
-
-type alias Note =
-    { noteName : NoteName -- ("C", 4)
-    , midi : Int -- from 21 to 108, for piano
-    , frequency : Float
-    }
-
-type alias Score =
-  { correctNote : Note -- midi code of the Note (not the Note itself!)
-  , answerSpeed : Int
-  , incorrectTries : Int
-  }
-
-type alias Model =
-    { isMIDIConnected : Maybe Bool
-    , isPlaying : Bool
-    , correctNote : Note
-    , currentNote : Maybe Note
-    , score : Int
-    , startTimestamp : Maybe Time.Posix
-    , answerSpeed : Int -- result of subtracting two times via posixToMillis
-    , incorrectTries : Int
-    , scoreList : List Score -- store a list of score records for each practice session ... goes into local storage
-    , testCurrentTimestamp : Maybe Time.Posix
-    , sessionId : Int
-    , style : Animation.Messenger.State Msg
-    , currentNoteStyle : Animation.Messenger.State Msg
-    , correctNoteStyle : Animation.Messenger.State Msg
-    }
-
-
-
-
-initialModel : Model
-initialModel =
-    { isMIDIConnected = Nothing
-    , isPlaying = False
-    , correctNote = createNote 60
-    , currentNote = Nothing
-    , score = 0
-    , startTimestamp = Nothing
-    , answerSpeed = 0
-    , incorrectTries = 0
-    , scoreList = []
-    , testCurrentTimestamp = Nothing
-    , sessionId = 0
-    , style = Animation.style [ Animation.opacity 1.0 ]
-    , currentNoteStyle = initialCurrentNoteStyle
-    , correctNoteStyle = initialCorrectNoteStyle
-    }
-
--- Get session ID from JS flag (starts at 0, or incremented from localstorage)
-init : Int -> ( Model, Cmd Msg )
-init initialSessionId =
-  ( { initialModel | sessionId = initialSessionId }
-    , Random.generate UpdateCorrectNote getRandomMidi -- generate first note to guess on app load!
-  )
-
-
 -- SVG stuff
-
--- initialCurrentNoteStyle : Animation.Messenger.State Msg
-initialCurrentNoteStyle =
-  Animation.style [ Animation.opacity 0.0, Animation.fill (rgb 255 20 20) ]
-
--- initialCorrectNoteStyle : Animation.Messenger.State Msg
-initialCorrectNoteStyle =
-  Animation.style [ Animation.opacity 1.0, Animation.fill (rgb 0 0 0) ]
-
 type alias Margins =
     { top : Float, right : Float, bottom : Float, left : Float }
 
@@ -277,19 +199,13 @@ testMessagesView model =
 view : Model -> Html Msg
 view model =
     div []
-        [ -- if model.hasTestThingy then animationTestView model else HTML.text ""
-        -- , (
-          case model.isMIDIConnected of
+        [ case model.isMIDIConnected of
             Just True ->
               if model.isPlaying then gameView model else startScreenView model
+            
             _ ->
               waitForMidiView model
-          -- )
         ]
-
-animationTestView model =
-  p (Animation.render model.style ++ [ onClick FadeInFadeOut, A.style "background-color" "blue"]) [HTML.text "click meeee"]
-
 
 -- UPDATE
 
@@ -318,12 +234,6 @@ update msg model =
                                                    , Animation.Messenger.send (CurrentNoteFadeAnimCompleted)
                                                    ]
                                                    model.currentNoteStyle
-{--                  , correctNoteStyle =
-                    Animation.interrupt
-                        [ Animation.to [ Animation.fill (rgb 0 255 0)]
-                        ]
-                        model.currentNoteStyle
-   --}     
               }
               , Cmd.none
             )
@@ -332,11 +242,11 @@ update msg model =
 
         NotePressed noteCode ->
             let
-                newCurrentNote = createNote noteCode
+                newCurrentNote = Note.createNote noteCode
                 isCorrect = getIsCorrect model.correctNote (Just newCurrentNote)
                 newCorrectNoteStyle = if isCorrect
                     then
-                                 Animation.interrupt [ Animation.to [ Animation.fill (rgb 0 255 0) ]
+                                 Animation.interrupt [ Animation.to [ Animation.fill Color.green]
                                  , Animation.wait (Time.millisToPosix 60)
                                  , Animation.to [ Animation.opacity 0.0 ]
                                     -- , Animation.fill (rgb 0 0 0)
@@ -346,10 +256,10 @@ update msg model =
                                  ] model.correctNoteStyle
                     else 
                                 -- model.correctNoteStyle
-                                initialCorrectNoteStyle
+                                Animations.initialCorrectNoteStyle
                 newCurrentNoteStyle = if isCorrect
                     then
-                        initialCurrentNoteStyle
+                        Animations.initialCurrentNoteStyle
                     else
                         Animation.interrupt [ Animation.set [Animation.opacity 0.0 ]
                                             , Animation.to [ Animation.opacity 0.4 ]
@@ -371,7 +281,7 @@ update msg model =
             )
         
         CorrectNoteFadeAnimCompleted ->
-          ( { model | correctNoteStyle = Animation.style [ Animation.opacity 0.0, Animation.fill (rgb 0 0 0) ] }
+          ( { model | correctNoteStyle = Animation.style [ Animation.opacity 0.0, Animation.fill Color.black ] }
           , Task.perform RestartTimer Time.now
           )
 
@@ -382,7 +292,7 @@ update msg model =
 
         -- called when page loads to initialize correctNote, and again on each correct note played!
         UpdateCorrectNote midiCode ->
-            ( { model | correctNote = createNote midiCode
+            ( { model | correctNote = Note.createNote midiCode
               , correctNoteStyle = Animation.interrupt [ Animation.to [ Animation.opacity 1.0] ] model.correctNoteStyle
               }
             , Cmd.none
@@ -399,7 +309,7 @@ update msg model =
             nextCommand = if model.startTimestamp /= Nothing
                               then 
                                 Cmd.batch [ cache (E.list convertScoreToJSON (model.scoreList ++ newScoreObjectList) )
-                                , Random.generate UpdateCorrectNote getRandomMidi
+                                , Random.generate UpdateCorrectNote Note.getRandomMidi
                                 ]
                               else Cmd.none
           in
@@ -418,62 +328,8 @@ update msg model =
           , Cmd.none
           )
 
-        FadeInFadeOut -> updateFadeInFadeOut model
-        Animate animMsg-> updateAnimate animMsg model
-
-        -- .... gotta refactor this lolz! need to map over every thingy that needs animating
-        AnimateCurrentNote animMsg -> updateAnimateCurrentNote animMsg model
-        AnimateCorrectNote animMsg -> updateAnimateCorrectNote animMsg model
-
--- ANIMATION EXPERIMENT via:
--- https://github.com/mdgriffith/elm-style-animation/blob/master/examples/SimpleFadeIn.elm
-
-updateFadeInFadeOut model = 
-          ( { model
-                | style =
-                    Animation.interrupt
-                        [ Animation.to
-                            [ Animation.opacity 0
-                            ]
-                        , Animation.wait (Time.millisToPosix 2000)
-                        ]
-                        model.style
-              }
-            , Cmd.none
-            )
-
-updateAnimate animMsg model =
-        let
-            (newStyle, cmd) =
-              Animation.Messenger.update animMsg model.style
-        in
-            ( { model
-                | style = newStyle
-              }
-            , cmd -- send any messages triggered by animations
-            )
-updateAnimateCurrentNote animMsg model =
-        let
-            (newStyle, cmd) =
-              Animation.Messenger.update animMsg model.currentNoteStyle
-        in
-            ( { model
-                | currentNoteStyle = newStyle
-              }
-            , cmd -- send any messages triggered by animations
-            )
-updateAnimateCorrectNote animMsg model =
-        let
-            (newStyle, cmd) =
-              Animation.Messenger.update animMsg model.correctNoteStyle
-        in
-            ( { model
-                | correctNoteStyle = newStyle
-              }
-            , cmd -- send any messages triggered by animations
-            )
-
-
+        Animate animMsg ->
+            UpdateAnimations.update animMsg model
 
 
 -- Edge case: starting the timer when game begins shouldn't update answerSpeed
@@ -494,22 +350,6 @@ convertScoreToJSON session =
 
 -- SUBSCRIPTIONS
 
-
-type Msg
-    = InitMIDI Bool
-    | NotePressed Int
-    | NoteReleased Bool
-    | UpdateCorrectNote Int
-    | StartGame
-    | RestartTimer Time.Posix
-    | TestTick Time.Posix
-    | FadeInFadeOut
-    | Animate Animation.Msg
-    | AnimateCorrectNote Animation.Msg
-    | AnimateCurrentNote Animation.Msg
-    | CorrectNoteFadeAnimCompleted
-    | CurrentNoteFadeAnimCompleted
-
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
@@ -523,9 +363,8 @@ subscriptions model =
         , fakeHandleInitMIDI InitMIDI
         , fakeHandleNotePressed NotePressed
         , fakeHandleNoteReleased NoteReleased
-        , Animation.subscription Animate [ model.style ]
-        , Animation.subscription AnimateCorrectNote [ model.correctNoteStyle ]
-        , Animation.subscription AnimateCurrentNote [ model.currentNoteStyle ]
+        , Animation.subscription (Animate << CorrectNoteStyle) [ model.correctNoteStyle ]
+        , Animation.subscription (Animate << CurrentNoteStyle) [ model.currentNoteStyle ]
         ]
 
 
@@ -541,6 +380,13 @@ main =
         , subscriptions = subscriptions
         }
 
+init : Int -> ( Model, Cmd Msg )
+init initialSessionId =
+    -- Get session ID from JS flag (starts at 0, or incremented from localstorage)
+  ( { initialModel | sessionId = initialSessionId }
+    , Random.generate UpdateCorrectNote Note.getRandomMidi -- generate first note to guess on app load!
+  )
+
 
 displayMIDIStatus : Maybe Bool -> String
 displayMIDIStatus isConnected =
@@ -553,15 +399,6 @@ displayMIDIStatus isConnected =
 
         Just False ->
             "Hmm, looks like your MIDI device got disconnected. Try reconnecting it, or if that doesn't work, try refreshing this page or turning your MIDI device off and on again."
-
-
-createNote : Int -> Note
-createNote midiCode =
-    { noteName = midiToNoteName midiCode
-    , midi = clamp 21 108 midiCode -- assuming piano MIDI!
-    , frequency = midiToFrequency midiCode
-    }
-
 
 displayNote : Maybe Note -> String
 displayNote note =
@@ -579,21 +416,6 @@ displayNote note =
                 ++ String.fromFloat x.frequency
 
 
-getRandomMidi : Random.Generator Int
-getRandomMidi =
-  Random.uniform 60 [
-    62,
-    64,
-    65,
-    67,
-    69,
-    71,
-    72,
-    74,
-    76,
-    77,
-    79]
-
 updateScore : Int -> Note -> Note -> ( Int, Bool )
 updateScore score correctNote currentNote =
     if currentNote.midi == correctNote.midi then
@@ -610,61 +432,4 @@ getIsCorrect correctNote currentNote =
           True
         else
           False
-
--- NOTE CONVERSION HELPER FUNCTIONS
-
-
-midiToNoteName : Int -> NoteName
-midiToNoteName midiCode =
-    let
-        pitchClasses =
-            Array.fromList
-                [ "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B" ]
-
-        index =
-            remainderBy 12 midiCode
-
-        pitchClass =
-            case Array.get index pitchClasses of
-                Nothing ->
-                    "C"
-
-                -- if index out of bounds (impastable!!)
-                Just x ->
-                    x
-
-        octave =
-            (midiCode // 12) - 1
-    in
-    ( pitchClass, octave )
-
-
-midiToFrequency : Int -> Float
-midiToFrequency midiCode =
-    let
-        -- 2 ^ (1/12) is the frequency ratio of each note...????
-        semitoneRatio =
-            1.0594630943592953
-
-        -- MIDI code 0 starts at about 8 Hz frequency
-        lowestFreq =
-            8.1757989156
-    in
-    lowestFreq * (semitoneRatio ^ toFloat midiCode)
-
-
-
--- Sources: https://en.wikipedia.org/wiki/Pitch_(music)#Labeling_pitches
--- http://subsynth.sourceforge.net/midinote2freq.html
--- and https://newt.phys.unsw.edu.au/jw/notes.html
-
-logMidiCode maybeNote =
-  case maybeNote of
-    Nothing -> "Nothing"
-    Just n -> 
-      let
-          noteNameString = first n.noteName ++ String.fromInt (second n.noteName)
-      in
-        String.fromInt n.midi ++ "(" ++ noteNameString ++ ")"
-
 
