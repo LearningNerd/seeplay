@@ -4910,7 +4910,10 @@ var author$project$Main$createNote = function (midiCode) {
 		noteName: author$project$Main$midiToNoteName(midiCode)
 	};
 };
-var elm$core$Basics$False = {$: 'False'};
+var author$project$Main$rgb = F3(
+	function (r, g, b) {
+		return {alpha: 1, blue: b, green: g, red: r};
+	});
 var mdgriffith$elm_style_animation$Animation$Model$Spring = function (a) {
 	return {$: 'Spring', a: a};
 };
@@ -4926,6 +4929,27 @@ var mdgriffith$elm_style_animation$Animation$initMotion = F2(
 			velocity: 0
 		};
 	});
+var mdgriffith$elm_style_animation$Animation$Model$ColorProperty = F5(
+	function (a, b, c, d, e) {
+		return {$: 'ColorProperty', a: a, b: b, c: c, d: d, e: e};
+	});
+var mdgriffith$elm_style_animation$Animation$customColor = F2(
+	function (name, _n0) {
+		var red = _n0.red;
+		var green = _n0.green;
+		var blue = _n0.blue;
+		var alpha = _n0.alpha;
+		return A5(
+			mdgriffith$elm_style_animation$Animation$Model$ColorProperty,
+			name,
+			A2(mdgriffith$elm_style_animation$Animation$initMotion, red, ''),
+			A2(mdgriffith$elm_style_animation$Animation$initMotion, green, ''),
+			A2(mdgriffith$elm_style_animation$Animation$initMotion, blue, ''),
+			A2(mdgriffith$elm_style_animation$Animation$initMotion, alpha, ''));
+	});
+var mdgriffith$elm_style_animation$Animation$fill = function (clr) {
+	return A2(mdgriffith$elm_style_animation$Animation$customColor, 'fill', clr);
+};
 var mdgriffith$elm_style_animation$Animation$Model$Property = F2(
 	function (a, b) {
 		return {$: 'Property', a: a, b: b};
@@ -4940,6 +4964,7 @@ var mdgriffith$elm_style_animation$Animation$custom = F3(
 var mdgriffith$elm_style_animation$Animation$opacity = function (val) {
 	return A3(mdgriffith$elm_style_animation$Animation$custom, 'opacity', val, '');
 };
+var elm$core$Basics$False = {$: 'False'};
 var elm$time$Time$Posix = function (a) {
 	return {$: 'Posix', a: a};
 };
@@ -5007,10 +5032,6 @@ var mdgriffith$elm_style_animation$Animation$defaultInterpolationByProperty = fu
 var mdgriffith$elm_style_animation$Animation$Model$AngleProperty = F2(
 	function (a, b) {
 		return {$: 'AngleProperty', a: a, b: b};
-	});
-var mdgriffith$elm_style_animation$Animation$Model$ColorProperty = F5(
-	function (a, b, c, d, e) {
-		return {$: 'ColorProperty', a: a, b: b, c: c, d: d, e: e};
 	});
 var mdgriffith$elm_style_animation$Animation$Model$ExactProperty = F2(
 	function (a, b) {
@@ -5608,10 +5629,26 @@ var mdgriffith$elm_style_animation$Animation$style = function (props) {
 			mdgriffith$elm_style_animation$Animation$setDefaultInterpolation,
 			mdgriffith$elm_style_animation$Animation$Render$warnForDoubleListedProperties(props)));
 };
+var author$project$Main$initialCorrectNoteStyle = mdgriffith$elm_style_animation$Animation$style(
+	_List_fromArray(
+		[
+			mdgriffith$elm_style_animation$Animation$opacity(1.0),
+			mdgriffith$elm_style_animation$Animation$fill(
+			A3(author$project$Main$rgb, 0, 0, 0))
+		]));
+var author$project$Main$initialCurrentNoteStyle = mdgriffith$elm_style_animation$Animation$style(
+	_List_fromArray(
+		[
+			mdgriffith$elm_style_animation$Animation$opacity(0.0),
+			mdgriffith$elm_style_animation$Animation$fill(
+			A3(author$project$Main$rgb, 255, 20, 20))
+		]));
 var author$project$Main$initialModel = {
 	answerSpeed: 0,
 	correctNote: author$project$Main$createNote(60),
+	correctNoteStyle: author$project$Main$initialCorrectNoteStyle,
 	currentNote: elm$core$Maybe$Nothing,
+	currentNoteStyle: author$project$Main$initialCurrentNoteStyle,
 	incorrectTries: 0,
 	isMIDIConnected: elm$core$Maybe$Nothing,
 	isPlaying: false,
@@ -5960,6 +5997,12 @@ var author$project$Main$init = function (initialSessionId) {
 };
 var author$project$Main$Animate = function (a) {
 	return {$: 'Animate', a: a};
+};
+var author$project$Main$AnimateCorrectNote = function (a) {
+	return {$: 'AnimateCorrectNote', a: a};
+};
+var author$project$Main$AnimateCurrentNote = function (a) {
+	return {$: 'AnimateCurrentNote', a: a};
 };
 var author$project$Main$InitMIDI = function (a) {
 	return {$: 'InitMIDI', a: a};
@@ -6772,9 +6815,21 @@ var author$project$Main$subscriptions = function (model) {
 				mdgriffith$elm_style_animation$Animation$subscription,
 				author$project$Main$Animate,
 				_List_fromArray(
-					[model.style]))
+					[model.style])),
+				A2(
+				mdgriffith$elm_style_animation$Animation$subscription,
+				author$project$Main$AnimateCorrectNote,
+				_List_fromArray(
+					[model.correctNoteStyle])),
+				A2(
+				mdgriffith$elm_style_animation$Animation$subscription,
+				author$project$Main$AnimateCurrentNote,
+				_List_fromArray(
+					[model.currentNoteStyle]))
 			]));
 };
+var author$project$Main$CorrectNoteFadeAnimCompleted = {$: 'CorrectNoteFadeAnimCompleted'};
+var author$project$Main$CurrentNoteFadeAnimCompleted = {$: 'CurrentNoteFadeAnimCompleted'};
 var author$project$Main$RestartTimer = function (a) {
 	return {$: 'RestartTimer', a: a};
 };
@@ -6830,8 +6885,6 @@ var author$project$Main$getNewAnswerSpeed = F2(
 			return elm$time$Time$posixToMillis(currentTime) - elm$time$Time$posixToMillis(t);
 		}
 	});
-var elm$core$Platform$Cmd$batch = _Platform_batch;
-var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var elm$core$Basics$neq = _Utils_notEqual;
 var elm$core$List$partition = F2(
 	function (pred, list) {
@@ -6851,6 +6904,7 @@ var elm$core$List$partition = F2(
 			_Utils_Tuple2(_List_Nil, _List_Nil),
 			list);
 	});
+var elm$core$Platform$Cmd$batch = _Platform_batch;
 var elm$core$Basics$round = _Basics_round;
 var mdgriffith$elm_style_animation$Animation$Model$refreshTiming = F2(
 	function (now, timing) {
@@ -8374,20 +8428,44 @@ var mdgriffith$elm_style_animation$Animation$Model$updateAnimation = F2(
 					},
 					sentMessages)));
 	});
-var mdgriffith$elm_style_animation$Animation$update = F2(
+var mdgriffith$elm_style_animation$Animation$Messenger$update = F2(
 	function (tick, animation) {
-		return A2(mdgriffith$elm_style_animation$Animation$Model$updateAnimation, tick, animation).a;
+		return A2(mdgriffith$elm_style_animation$Animation$Model$updateAnimation, tick, animation);
 	});
 var author$project$Main$updateAnimate = F2(
 	function (animMsg, model) {
+		var _n0 = A2(mdgriffith$elm_style_animation$Animation$Messenger$update, animMsg, model.style);
+		var newStyle = _n0.a;
+		var cmd = _n0.b;
 		return _Utils_Tuple2(
 			_Utils_update(
 				model,
-				{
-					style: A2(mdgriffith$elm_style_animation$Animation$update, animMsg, model.style)
-				}),
-			elm$core$Platform$Cmd$none);
+				{style: newStyle}),
+			cmd);
 	});
+var author$project$Main$updateAnimateCorrectNote = F2(
+	function (animMsg, model) {
+		var _n0 = A2(mdgriffith$elm_style_animation$Animation$Messenger$update, animMsg, model.correctNoteStyle);
+		var newStyle = _n0.a;
+		var cmd = _n0.b;
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{correctNoteStyle: newStyle}),
+			cmd);
+	});
+var author$project$Main$updateAnimateCurrentNote = F2(
+	function (animMsg, model) {
+		var _n0 = A2(mdgriffith$elm_style_animation$Animation$Messenger$update, animMsg, model.currentNoteStyle);
+		var newStyle = _n0.a;
+		var cmd = _n0.b;
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{currentNoteStyle: newStyle}),
+			cmd);
+	});
+var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var mdgriffith$elm_style_animation$Animation$extractInitialWait = function (steps) {
 	var _n0 = elm$core$List$head(steps);
 	if (_n0.$ === 'Nothing') {
@@ -8433,6 +8511,9 @@ var mdgriffith$elm_style_animation$Animation$Model$To = function (a) {
 var mdgriffith$elm_style_animation$Animation$to = function (props) {
 	return mdgriffith$elm_style_animation$Animation$Model$To(props);
 };
+var mdgriffith$elm_style_animation$Animation$wait = function (till) {
+	return mdgriffith$elm_style_animation$Animation$Model$Wait(till);
+};
 var author$project$Main$updateFadeInFadeOut = function (model) {
 	return _Utils_Tuple2(
 		_Utils_update(
@@ -8447,11 +8528,8 @@ var author$project$Main$updateFadeInFadeOut = function (model) {
 								[
 									mdgriffith$elm_style_animation$Animation$opacity(0)
 								])),
-							mdgriffith$elm_style_animation$Animation$to(
-							_List_fromArray(
-								[
-									mdgriffith$elm_style_animation$Animation$opacity(1)
-								]))
+							mdgriffith$elm_style_animation$Animation$wait(
+							elm$time$Time$millisToPosix(2000))
 						]),
 					model.style)
 			}),
@@ -8466,6 +8544,18 @@ var elm$json$Json$Encode$list = F2(
 				_Json_emptyArray(_Utils_Tuple0),
 				entries));
 	});
+var mdgriffith$elm_style_animation$Animation$Model$Set = function (a) {
+	return {$: 'Set', a: a};
+};
+var mdgriffith$elm_style_animation$Animation$set = function (props) {
+	return mdgriffith$elm_style_animation$Animation$Model$Set(props);
+};
+var mdgriffith$elm_style_animation$Animation$Model$Send = function (a) {
+	return {$: 'Send', a: a};
+};
+var mdgriffith$elm_style_animation$Animation$Messenger$send = function (msg) {
+	return mdgriffith$elm_style_animation$Animation$Model$Send(msg);
+};
 var author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -8483,6 +8573,27 @@ var author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
+						{
+							currentNoteStyle: A2(
+								mdgriffith$elm_style_animation$Animation$interrupt,
+								_List_fromArray(
+									[
+										mdgriffith$elm_style_animation$Animation$wait(
+										elm$time$Time$millisToPosix(50)),
+										mdgriffith$elm_style_animation$Animation$to(
+										_List_fromArray(
+											[
+												mdgriffith$elm_style_animation$Animation$opacity(0.0)
+											])),
+										mdgriffith$elm_style_animation$Animation$Messenger$send(author$project$Main$CurrentNoteFadeAnimCompleted)
+									]),
+								model.currentNoteStyle)
+						}),
+					elm$core$Platform$Cmd$none);
+			case 'CurrentNoteFadeAnimCompleted':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
 						{currentNote: elm$core$Maybe$Nothing}),
 					elm$core$Platform$Cmd$none);
 			case 'NotePressed':
@@ -8492,16 +8603,67 @@ var author$project$Main$update = F2(
 					author$project$Main$getIsCorrect,
 					model.correctNote,
 					elm$core$Maybe$Just(newCurrentNote));
-				var nextCommand = isCorrect ? A2(elm$core$Task$perform, author$project$Main$RestartTimer, elm$time$Time$now) : elm$core$Platform$Cmd$none;
+				var newCorrectNoteStyle = isCorrect ? A2(
+					mdgriffith$elm_style_animation$Animation$interrupt,
+					_List_fromArray(
+						[
+							mdgriffith$elm_style_animation$Animation$to(
+							_List_fromArray(
+								[
+									mdgriffith$elm_style_animation$Animation$fill(
+									A3(author$project$Main$rgb, 0, 255, 0))
+								])),
+							mdgriffith$elm_style_animation$Animation$wait(
+							elm$time$Time$millisToPosix(60)),
+							mdgriffith$elm_style_animation$Animation$to(
+							_List_fromArray(
+								[
+									mdgriffith$elm_style_animation$Animation$opacity(0.0)
+								])),
+							mdgriffith$elm_style_animation$Animation$Messenger$send(author$project$Main$CorrectNoteFadeAnimCompleted)
+						]),
+					model.correctNoteStyle) : author$project$Main$initialCorrectNoteStyle;
+				var newCurrentNoteStyle = isCorrect ? author$project$Main$initialCurrentNoteStyle : A2(
+					mdgriffith$elm_style_animation$Animation$interrupt,
+					_List_fromArray(
+						[
+							mdgriffith$elm_style_animation$Animation$set(
+							_List_fromArray(
+								[
+									mdgriffith$elm_style_animation$Animation$opacity(0.0)
+								])),
+							mdgriffith$elm_style_animation$Animation$to(
+							_List_fromArray(
+								[
+									mdgriffith$elm_style_animation$Animation$opacity(0.4)
+								]))
+						]),
+					model.currentNoteStyle);
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
+							correctNoteStyle: newCorrectNoteStyle,
 							currentNote: elm$core$Maybe$Just(newCurrentNote),
+							currentNoteStyle: newCurrentNoteStyle,
 							incorrectTries: isCorrect ? model.incorrectTries : (model.incorrectTries + 1),
 							score: isCorrect ? (model.score + 1) : model.score
 						}),
-					nextCommand);
+					elm$core$Platform$Cmd$none);
+			case 'CorrectNoteFadeAnimCompleted':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							correctNoteStyle: mdgriffith$elm_style_animation$Animation$style(
+								_List_fromArray(
+									[
+										mdgriffith$elm_style_animation$Animation$opacity(0.0),
+										mdgriffith$elm_style_animation$Animation$fill(
+										A3(author$project$Main$rgb, 0, 0, 0))
+									]))
+						}),
+					A2(elm$core$Task$perform, author$project$Main$RestartTimer, elm$time$Time$now));
 			case 'StartGame':
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -8514,7 +8676,18 @@ var author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							correctNote: author$project$Main$createNote(midiCode)
+							correctNote: author$project$Main$createNote(midiCode),
+							correctNoteStyle: A2(
+								mdgriffith$elm_style_animation$Animation$interrupt,
+								_List_fromArray(
+									[
+										mdgriffith$elm_style_animation$Animation$to(
+										_List_fromArray(
+											[
+												mdgriffith$elm_style_animation$Animation$opacity(1.0)
+											]))
+									]),
+								model.correctNoteStyle)
 						}),
 					elm$core$Platform$Cmd$none);
 			case 'RestartTimer':
@@ -8556,34 +8729,53 @@ var author$project$Main$update = F2(
 					elm$core$Platform$Cmd$none);
 			case 'FadeInFadeOut':
 				return author$project$Main$updateFadeInFadeOut(model);
-			default:
+			case 'Animate':
 				var animMsg = msg.a;
 				return A2(author$project$Main$updateAnimate, animMsg, model);
+			case 'AnimateCurrentNote':
+				var animMsg = msg.a;
+				return A2(author$project$Main$updateAnimateCurrentNote, animMsg, model);
+			default:
+				var animMsg = msg.a;
+				return A2(author$project$Main$updateAnimateCorrectNote, animMsg, model);
 		}
 	});
-var author$project$Main$FadeInFadeOut = {$: 'FadeInFadeOut'};
-var elm$html$Html$p = _VirtualDom_node('p');
-var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
-var elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
-var elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
+var author$project$Main$getNoteHeight = function (midiCode) {
+	switch (midiCode) {
+		case 60:
+			return 12;
+		case 62:
+			return 11;
+		case 64:
+			return 10;
+		case 65:
+			return 9;
+		case 67:
+			return 8;
+		case 69:
+			return 7;
+		case 71:
+			return 6;
+		case 72:
+			return 5;
+		case 74:
+			return 4;
+		case 76:
+			return 3;
+		case 77:
+			return 2;
+		case 79:
+			return 1;
+		default:
+			return 12;
+	}
 };
-var elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
-var elm$html$Html$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			elm$virtual_dom$VirtualDom$on,
-			event,
-			elm$virtual_dom$VirtualDom$Normal(decoder));
-	});
-var elm$html$Html$Events$onClick = function (msg) {
-	return A2(
-		elm$html$Html$Events$on,
-		'click',
-		elm$json$Json$Decode$succeed(msg));
-};
+var elm$core$String$fromFloat = _String_fromNumber;
+var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var elm$svg$Svg$circle = elm$svg$Svg$trustedNode('circle');
+var elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
+var elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
+var elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
 var elm$core$List$append = F2(
 	function (xs, ys) {
 		if (!ys.b) {
@@ -8600,6 +8792,8 @@ var elm$core$List$concatMap = F2(
 		return elm$core$List$concat(
 			A2(elm$core$List$map, f, list));
 	});
+var elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
 var mdgriffith$elm_style_animation$Animation$Render$iePrefix = '-ms-';
 var mdgriffith$elm_style_animation$Animation$Render$webkitPrefix = '-webkit-';
 var mdgriffith$elm_style_animation$Animation$Render$prefix = function (stylePair) {
@@ -8652,18 +8846,14 @@ var elm$virtual_dom$VirtualDom$attribute = F2(
 			_VirtualDom_noJavaScriptOrHtmlUri(value));
 	});
 var elm$html$Html$Attributes$attribute = elm$virtual_dom$VirtualDom$attribute;
-var elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
-var elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
 var elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
 var elm$svg$Svg$Attributes$offset = _VirtualDom_attribute('offset');
 var elm$svg$Svg$Attributes$points = _VirtualDom_attribute('points');
-var elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
 var elm$svg$Svg$Attributes$rx = _VirtualDom_attribute('rx');
 var elm$svg$Svg$Attributes$ry = _VirtualDom_attribute('ry');
 var elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
 var elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
 var elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
-var elm$core$String$fromFloat = _String_fromNumber;
 var elm$core$Basics$cos = _Basics_cos;
 var elm$core$Basics$degrees = function (angleInDegrees) {
 	return (angleInDegrees * elm$core$Basics$pi) / 180;
@@ -9136,69 +9326,22 @@ var mdgriffith$elm_style_animation$Animation$Render$render = function (animation
 	return _Utils_ap(styleAttr, otherAttrs);
 };
 var mdgriffith$elm_style_animation$Animation$render = mdgriffith$elm_style_animation$Animation$Render$render;
-var author$project$Main$animationTestView = function (model) {
-	return A2(
-		elm$html$Html$p,
-		_Utils_ap(
-			mdgriffith$elm_style_animation$Animation$render(model.style),
-			_List_fromArray(
-				[
-					elm$html$Html$Events$onClick(author$project$Main$FadeInFadeOut),
-					A2(elm$html$Html$Attributes$style, 'background-color', 'blue')
-				])),
-		_List_fromArray(
-			[
-				elm$html$Html$text('click meeee')
-			]));
-};
-var author$project$Main$getNoteHeight = function (midiCode) {
-	switch (midiCode) {
-		case 60:
-			return 12;
-		case 62:
-			return 11;
-		case 64:
-			return 10;
-		case 65:
-			return 9;
-		case 67:
-			return 8;
-		case 69:
-			return 7;
-		case 71:
-			return 6;
-		case 72:
-			return 5;
-		case 74:
-			return 4;
-		case 76:
-			return 3;
-		case 77:
-			return 2;
-		case 79:
-			return 1;
-		default:
-			return 12;
-	}
-};
-var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
-var elm$svg$Svg$circle = elm$svg$Svg$trustedNode('circle');
-var elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
 var author$project$Main$drawNote = F5(
-	function (staffWidth, lineHeight, margins, note, colorString) {
+	function (staffWidth, lineHeight, margins, note, animStyle) {
 		var yPosFloat = author$project$Main$getNoteHeight(note.midi);
 		var cyString = elm$core$String$fromFloat(margins.top + ((yPosFloat * lineHeight) / 2));
 		var cxString = elm$core$String$fromFloat(staffWidth / 2);
 		return A2(
 			elm$svg$Svg$circle,
-			_List_fromArray(
-				[
-					elm$svg$Svg$Attributes$cx(cxString),
-					elm$svg$Svg$Attributes$cy(cyString),
-					elm$svg$Svg$Attributes$r(
-					elm$core$String$fromFloat(lineHeight / 2)),
-					elm$svg$Svg$Attributes$fill(colorString)
-				]),
+			_Utils_ap(
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$cx(cxString),
+						elm$svg$Svg$Attributes$cy(cyString),
+						elm$svg$Svg$Attributes$r(
+						elm$core$String$fromFloat(lineHeight / 2))
+					]),
+				mdgriffith$elm_style_animation$Animation$render(animStyle)),
 			_List_Nil);
 	});
 var elm$svg$Svg$line = elm$svg$Svg$trustedNode('line');
@@ -9231,6 +9374,8 @@ var author$project$Main$staff = F3(
 			A3(author$project$Main$staffLines, staffWidth, lineHeight, margins),
 			A2(elm$core$List$range, 1, 5));
 	});
+var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
 var elm$svg$Svg$text_ = elm$svg$Svg$trustedNode('text');
 var elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
 var author$project$Main$trebleClef = F2(
@@ -9256,7 +9401,6 @@ var elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
 var author$project$Main$svgView = F4(
 	function (model, width, height, margins) {
 		var widthS = elm$core$String$fromFloat((width + margins.left) + margins.right);
-		var noteColorString = A2(author$project$Main$getIsCorrect, model.correctNote, model.currentNote) ? 'rgba(0,255,50,1)' : 'rgba(255,20,20,0.2)';
 		var lineHeight = height / 6;
 		var heightS = elm$core$String$fromFloat((height + margins.top) + margins.bottom);
 		var drawNoteFunc = A3(author$project$Main$drawNote, width, lineHeight, margins);
@@ -9268,7 +9412,7 @@ var author$project$Main$svgView = F4(
 				var n = _n0.a;
 				return _List_fromArray(
 					[
-						A2(drawNoteFunc, n, noteColorString)
+						A2(drawNoteFunc, n, model.currentNoteStyle)
 					]);
 			}
 		}();
@@ -9286,7 +9430,7 @@ var author$project$Main$svgView = F4(
 					A3(author$project$Main$staff, width, lineHeight, margins),
 					_List_fromArray(
 						[
-							A2(drawNoteFunc, model.correctNote, 'rgba(0,0,0,0.9)')
+							A2(drawNoteFunc, model.correctNote, model.correctNoteStyle)
 						])),
 				_Utils_ap(
 					currentNoteDrawing,
@@ -9315,6 +9459,23 @@ var elm$html$Html$Attributes$stringProperty = F2(
 			elm$json$Json$Encode$string(string));
 	});
 var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
+var elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			elm$virtual_dom$VirtualDom$on,
+			event,
+			elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		elm$html$Html$Events$on,
+		'click',
+		elm$json$Json$Decode$succeed(msg));
+};
 var author$project$Main$startScreenView = function (model) {
 	return A2(
 		elm$html$Html$div,
@@ -9348,6 +9509,7 @@ var author$project$Main$displayMIDIStatus = function (isConnected) {
 		}
 	}
 };
+var elm$html$Html$p = _VirtualDom_node('p');
 var author$project$Main$waitForMidiView = function (model) {
 	return A2(
 		elm$html$Html$div,
@@ -9373,7 +9535,6 @@ var author$project$Main$view = function (model) {
 		_List_Nil,
 		_List_fromArray(
 			[
-				author$project$Main$animationTestView(model),
 				function () {
 				var _n0 = model.isMIDIConnected;
 				if ((_n0.$ === 'Just') && _n0.a) {

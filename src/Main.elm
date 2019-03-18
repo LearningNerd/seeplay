@@ -13,7 +13,7 @@ import Task
 import Time
 import Json.Encode as E
 import Animation exposing (px)
-
+import Animation.Messenger
 
 port handleInitMIDI : (Bool -> msg) -> Sub msg
 port handleNotePressed : (Int -> msg) -> Sub msg
@@ -30,6 +30,14 @@ port fakeHandleInitMIDI : (Bool -> msg) -> Sub msg
 port fakeHandleNotePressed : (Int -> msg) -> Sub msg
 port fakeHandleNoteReleased : (Bool -> msg) -> Sub msg
 
+
+-- MOVE TO a Color.Palette module ????
+type alias Color =
+    { red : Int, blue : Int, green : Int, alpha : Float }
+rgba r g b a =
+    { red = r, blue = b, green = g, alpha = a }
+rgb r g b =
+    { red = r, blue = b, green = g, alpha = 1 }
 
 
 -- MODEL
@@ -63,7 +71,9 @@ type alias Model =
     , scoreList : List Score -- store a list of score records for each practice session ... goes into local storage
     , testCurrentTimestamp : Maybe Time.Posix
     , sessionId : Int
-    , style : Animation.State
+    , style : Animation.Messenger.State Msg
+    , currentNoteStyle : Animation.Messenger.State Msg
+    , correctNoteStyle : Animation.Messenger.State Msg
     }
 
 
@@ -83,6 +93,8 @@ initialModel =
     , testCurrentTimestamp = Nothing
     , sessionId = 0
     , style = Animation.style [ Animation.opacity 1.0 ]
+    , currentNoteStyle = initialCurrentNoteStyle
+    , correctNoteStyle = initialCorrectNoteStyle
     }
 
 -- Get session ID from JS flag (starts at 0, or incremented from localstorage)
@@ -95,6 +107,13 @@ init initialSessionId =
 
 -- SVG stuff
 
+-- initialCurrentNoteStyle : Animation.Messenger.State Msg
+initialCurrentNoteStyle =
+  Animation.style [ Animation.opacity 0.0, Animation.fill (rgb 255 20 20) ]
+
+-- initialCorrectNoteStyle : Animation.Messenger.State Msg
+initialCorrectNoteStyle =
+  Animation.style [ Animation.opacity 1.0, Animation.fill (rgb 0 0 0) ]
 
 type alias Margins =
     { top : Float, right : Float, bottom : Float, left : Float }
@@ -149,8 +168,8 @@ getNoteHeight midiCode =
     79 -> 1
     _ -> 12
 
-drawNote : Float -> Float -> Margins -> Note -> String -> Svg msg
-drawNote staffWidth lineHeight margins note colorString =
+drawNote : Float -> Float -> Margins -> Note -> (Animation.Messenger.State Msg) -> Svg msg
+drawNote staffWidth lineHeight margins note animStyle =
     let
         yPosFloat =
             toFloat (getNoteHeight note.midi)
@@ -162,11 +181,11 @@ drawNote staffWidth lineHeight margins note colorString =
             String.fromFloat (margins.top + (yPosFloat * lineHeight / 2))
     in
     circle
-        [ S.cx cxString
+      ( [ S.cx cxString
         , S.cy cyString
         , S.r (String.fromFloat (lineHeight / 2))
-        , S.fill colorString
-        ]
+        ] ++ (Animation.render animStyle)
+      )
         []
 
 
@@ -192,14 +211,9 @@ svgView model width height margins =
             String.fromFloat (height + margins.top + margins.bottom)
         
         drawNoteFunc = drawNote width lineHeight margins
-        noteColorString = if (getIsCorrect model.correctNote model.currentNote)
-                       then "rgba(0,255,50,1)"
-                       else "rgba(255,20,20,0.2)"
-
         currentNoteDrawing = case model.currentNote of
                                  Nothing -> []
-                                 Just n -> [ drawNoteFunc n noteColorString ]
-
+                                 Just n -> [ drawNoteFunc n model.currentNoteStyle ]
     in
     svg
         [ S.width widthS
@@ -207,7 +221,7 @@ svgView model width height margins =
         , S.viewBox ("0 0 " ++ widthS ++ " " ++ heightS)
         , S.class "center"
         ]
-        ((staff width lineHeight margins ++ [drawNoteFunc model.correctNote "rgba(0,0,0,0.9)"])
+        ((staff width lineHeight margins ++ [drawNoteFunc model.correctNote model.correctNoteStyle])
             ++ currentNoteDrawing ++ [ trebleClef 50 237 ]
         )
 
@@ -263,14 +277,14 @@ testMessagesView model =
 view : Model -> Html Msg
 view model =
     div []
-        [ animationTestView model
-        , (
+        [ -- if model.hasTestThingy then animationTestView model else HTML.text ""
+        -- , (
           case model.isMIDIConnected of
             Just True ->
               if model.isPlaying then gameView model else startScreenView model
             _ ->
               waitForMidiView model
-          )
+          -- )
         ]
 
 animationTestView model =
@@ -297,17 +311,50 @@ update msg model =
 
         -- don't draw notes when they're not being held down
         NoteReleased _ ->
-          ( { model | currentNote = Nothing }, Cmd.none )
+          ( { model | -- currentNote = Nothing
+           currentNoteStyle = Animation.interrupt [ 
+                                                    Animation.wait (Time.millisToPosix 50)
+                                                   , Animation.to [ Animation.opacity 0.0 ]
+                                                   , Animation.Messenger.send (CurrentNoteFadeAnimCompleted)
+                                                   ]
+                                                   model.currentNoteStyle
+{--                  , correctNoteStyle =
+                    Animation.interrupt
+                        [ Animation.to [ Animation.fill (rgb 0 255 0)]
+                        ]
+                        model.currentNoteStyle
+   --}     
+              }
+              , Cmd.none
+            )
+        
+        CurrentNoteFadeAnimCompleted -> ( { model | currentNote = Nothing }, Cmd.none )
 
         NotePressed noteCode ->
             let
                 newCurrentNote = createNote noteCode
                 isCorrect = getIsCorrect model.correctNote (Just newCurrentNote)
-                nextCommand = if isCorrect
-                                 then
-                                    Task.perform RestartTimer Time.now
-                                 else 
-                                    Cmd.none
+                newCorrectNoteStyle = if isCorrect
+                    then
+                                 Animation.interrupt [ Animation.to [ Animation.fill (rgb 0 255 0) ]
+                                 , Animation.wait (Time.millisToPosix 60)
+                                 , Animation.to [ Animation.opacity 0.0 ]
+                                    -- , Animation.fill (rgb 0 0 0)
+                                    -- this doesn't work because the Anim can only send a Cmd msg, NOT execute a task
+                                    -- , Animation.Messenger.send (Task.perform RestartTimer Time.now)
+                                 , Animation.Messenger.send (CorrectNoteFadeAnimCompleted) -- <<< so this is the workaround!
+                                 ] model.correctNoteStyle
+                    else 
+                                -- model.correctNoteStyle
+                                initialCorrectNoteStyle
+                newCurrentNoteStyle = if isCorrect
+                    then
+                        initialCurrentNoteStyle
+                    else
+                        Animation.interrupt [ Animation.set [Animation.opacity 0.0 ]
+                                            , Animation.to [ Animation.opacity 0.4 ]
+                                            ]
+                                            model.currentNoteStyle
             in
             ( { model
                 | currentNote =
@@ -316,9 +363,17 @@ update msg model =
                     if isCorrect then model.score + 1 else model.score
                 , incorrectTries =
                     if isCorrect then model.incorrectTries else model.incorrectTries + 1
+                , correctNoteStyle = newCorrectNoteStyle
+                , currentNoteStyle = newCurrentNoteStyle
               }
-            , nextCommand
+            -- , nextCommand
+            , Cmd.none
             )
+        
+        CorrectNoteFadeAnimCompleted ->
+          ( { model | correctNoteStyle = Animation.style [ Animation.opacity 0.0, Animation.fill (rgb 0 0 0) ] }
+          , Task.perform RestartTimer Time.now
+          )
 
         StartGame ->
             ( { model | isPlaying = True }
@@ -327,7 +382,9 @@ update msg model =
 
         -- called when page loads to initialize correctNote, and again on each correct note played!
         UpdateCorrectNote midiCode ->
-            ( { model | correctNote = createNote midiCode }
+            ( { model | correctNote = createNote midiCode
+              , correctNoteStyle = Animation.interrupt [ Animation.to [ Animation.opacity 1.0] ] model.correctNoteStyle
+              }
             , Cmd.none
             )
         
@@ -364,6 +421,9 @@ update msg model =
         FadeInFadeOut -> updateFadeInFadeOut model
         Animate animMsg-> updateAnimate animMsg model
 
+        -- .... gotta refactor this lolz! need to map over every thingy that needs animating
+        AnimateCurrentNote animMsg -> updateAnimateCurrentNote animMsg model
+        AnimateCorrectNote animMsg -> updateAnimateCorrectNote animMsg model
 
 -- ANIMATION EXPERIMENT via:
 -- https://github.com/mdgriffith/elm-style-animation/blob/master/examples/SimpleFadeIn.elm
@@ -375,9 +435,7 @@ updateFadeInFadeOut model =
                         [ Animation.to
                             [ Animation.opacity 0
                             ]
-                        , Animation.to
-                            [ Animation.opacity 1
-                            ]
+                        , Animation.wait (Time.millisToPosix 2000)
                         ]
                         model.style
               }
@@ -385,11 +443,37 @@ updateFadeInFadeOut model =
             )
 
 updateAnimate animMsg model =
+        let
+            (newStyle, cmd) =
+              Animation.Messenger.update animMsg model.style
+        in
             ( { model
-                | style = Animation.update animMsg model.style
+                | style = newStyle
               }
-            , Cmd.none
+            , cmd -- send any messages triggered by animations
             )
+updateAnimateCurrentNote animMsg model =
+        let
+            (newStyle, cmd) =
+              Animation.Messenger.update animMsg model.currentNoteStyle
+        in
+            ( { model
+                | currentNoteStyle = newStyle
+              }
+            , cmd -- send any messages triggered by animations
+            )
+updateAnimateCorrectNote animMsg model =
+        let
+            (newStyle, cmd) =
+              Animation.Messenger.update animMsg model.correctNoteStyle
+        in
+            ( { model
+                | correctNoteStyle = newStyle
+              }
+            , cmd -- send any messages triggered by animations
+            )
+
+
 
 
 -- Edge case: starting the timer when game begins shouldn't update answerSpeed
@@ -421,7 +505,10 @@ type Msg
     | TestTick Time.Posix
     | FadeInFadeOut
     | Animate Animation.Msg
-
+    | AnimateCorrectNote Animation.Msg
+    | AnimateCurrentNote Animation.Msg
+    | CorrectNoteFadeAnimCompleted
+    | CurrentNoteFadeAnimCompleted
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -437,6 +524,8 @@ subscriptions model =
         , fakeHandleNotePressed NotePressed
         , fakeHandleNoteReleased NoteReleased
         , Animation.subscription Animate [ model.style ]
+        , Animation.subscription AnimateCorrectNote [ model.correctNoteStyle ]
+        , Animation.subscription AnimateCurrentNote [ model.currentNoteStyle ]
         ]
 
 
