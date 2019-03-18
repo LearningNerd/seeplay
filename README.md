@@ -4,6 +4,8 @@
 
 Built with [Elm](https://elm-lang.org) and the web MIDI API. This project is a work in progress, because I'm using this to [learn Elm](https://elm-lang.org)!
 
+***Important note:** The Web MIDI API pretty much only works in Google Chrome and Opera for now. (See [CanIUse.com/#feat=midi](https://caniuse.com/#feat=midi) for details on cross-browser support.)*
+
 
 ## Development setup
 
@@ -19,7 +21,7 @@ Built with [Elm](https://elm-lang.org) and the web MIDI API. This project is a w
 
   1. Compile the Elm code with `elm make src/Main.elm --output=elm.js`
 
-  1. Run tests with the `elm-test`
+  1. Run tests with `elm-test`
 
-  1. Open the `index.html` file to run the app locally
+  1. Open the `index.html` file in your web browser to run the app locally
 
