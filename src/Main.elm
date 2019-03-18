@@ -2,18 +2,14 @@ port module Main exposing (..)
 
 import Array exposing (..)
 import Browser
-import Html as HTML exposing (..)
-import Html.Attributes as A exposing (..)
-import Html.Events exposing (..)
 import Random
-import Svg exposing (..)
-import Svg.Attributes as S exposing (..)
 import Tuple exposing (..)
 import Task
 import Time
 import Json.Encode as E
 import Animation
 import Animation.Messenger
+import Html exposing (..)
 
 import Model exposing (Model, Score, initialModel)
 import Color
@@ -21,6 +17,10 @@ import Animations
 import Msg exposing (..)
 import Note exposing (Note)
 import UpdateAnimations
+
+import View.MidiStatus
+import View.StartScreen
+import View.Game
 
 port handleInitMIDI : (Bool -> msg) -> Sub msg
 port handleNotePressed : (Int -> msg) -> Sub msg
@@ -36,116 +36,6 @@ port fakeHandleNotePressed : (Int -> msg) -> Sub msg
 port fakeHandleNoteReleased : (Bool -> msg) -> Sub msg
 
 
--- SVG stuff
-type alias Margins =
-    { top : Float, right : Float, bottom : Float, left : Float }
-
-
-trebleClef x y =
-    let
-        xS =
-            String.fromFloat x
-
-        yS =
-            String.fromFloat y
-    in
-    text_ [ S.x xS, S.y yS, S.class "treble" ] [ HTML.text "𝄞" ]
-
-
-staffLines : Float -> Float -> Margins -> Int -> Svg msg
-staffLines staffWidth lineHeight margins yPos =
-    let
-        lineYString =
-            String.fromFloat (margins.top + (toFloat yPos * lineHeight))
-    in
-    line
-        [ S.x1 (String.fromFloat margins.left)
-        , S.y1 lineYString
-        , S.x2 (String.fromFloat (margins.left + staffWidth))
-        , S.y2 lineYString
-        , S.stroke "black"
-        ]
-        []
-
-
-staff : Float -> Float -> Margins -> List (Svg msg)
-staff staffWidth lineHeight margins =
-    List.map (staffLines staffWidth lineHeight margins) (List.range 1 5)
-
-
-
-getNoteHeight midiCode = 
-  case midiCode of
-    60 -> 12
-    62 -> 11
-    64 -> 10
-    65 -> 9
-    67 -> 8
-    69 -> 7
-    71 -> 6
-    72 -> 5
-    74 -> 4
-    76 -> 3
-    77 -> 2
-    79 -> 1
-    _ -> 12
-
-drawNote : Float -> Float -> Margins -> Note -> (Animation.Messenger.State Msg) -> Svg msg
-drawNote staffWidth lineHeight margins note animStyle =
-    let
-        yPosFloat =
-            toFloat (getNoteHeight note.midi)
-    
-        cxString =
-            String.fromFloat (staffWidth/2)
-
-        cyString =
-            String.fromFloat (margins.top + (yPosFloat * lineHeight / 2))
-    in
-    circle
-      ( [ S.cx cxString
-        , S.cy cyString
-        , S.r (String.fromFloat (lineHeight / 2))
-        ] ++ (Animation.render animStyle)
-      )
-        []
-
-
-
-{--
-allNotes : Float -> Float -> Margins -> List (Svg msg)
-allNotes staffWidth lineHeight margins =
-    List.map (drawNote staffWidth lineHeight margins) (List.range 60 60)
---}
--- (List.map toFloat (List.range 1 12))
-
-
-svgView : Model -> Float -> Float -> Margins -> Svg Msg
-svgView model width height margins =
-    let
-        lineHeight =
-            height / 6
-
-        widthS =
-            String.fromFloat (width + margins.left + margins.right)
-
-        heightS =
-            String.fromFloat (height + margins.top + margins.bottom)
-        
-        drawNoteFunc = drawNote width lineHeight margins
-        currentNoteDrawing = case model.currentNote of
-                                 Nothing -> []
-                                 Just n -> [ drawNoteFunc n model.currentNoteStyle ]
-    in
-    svg
-        [ S.width widthS
-        , S.height heightS
-        , S.viewBox ("0 0 " ++ widthS ++ " " ++ heightS)
-        , S.class "center"
-        ]
-        ((staff width lineHeight margins ++ [drawNoteFunc model.correctNote model.correctNoteStyle])
-            ++ currentNoteDrawing ++ [ trebleClef 50 237 ]
-        )
 
 
 -- TIME HELPER...
@@ -160,52 +50,29 @@ getMillis timestamp =
         Just t -> Time.posixToMillis t
 
 
--- UI PIECES
-
-waitForMidiView : Model -> Html Msg
-waitForMidiView model = 
-    div [A.class "connectMidi"] [
-          p [] [ HTML.text (displayMIDIStatus model.isMIDIConnected) ]       
-        ]
-
-startScreenView : Model -> Html Msg
-startScreenView model =
-    div [A.class "startScreen"] [
-          button [ A.class "startButton", onClick StartGame] [ HTML.text "Start playing!" ]
-        ]
-
-gameView : Model -> Html Msg
-gameView model =
-    svgView model 500 200 { top = 50, left = 50, bottom = 50, right = 50 }
-
-
-testMessagesView : Model -> Html Msg
-testMessagesView model = 
-  let
-    answerSpeedS = String.fromInt model.answerSpeed
-  in
-    div [] [ p [] [ HTML.text ("Note: " ++ displayNote model.currentNote) ]
-        , p [] [ HTML.text ("CORRECT NOTE: " ++ displayNote (Just model.correctNote)) ]
-        , p [] [ HTML.text (".....score ....: " ++ String.fromInt model.score) ]
-        , p [] [ HTML.text ("START TIMESTAMP:  " ++ displayTimestamp model.startTimestamp) ]
-        , p [] [ HTML.text ("ANSWER SPEED (ms):  " ++ answerSpeedS) ]
-        , p [] [ HTML.text ("MS SINCE LAST ANSWER: " ++ String.fromInt ( (getMillis model.testCurrentTimestamp) - (getMillis model.startTimestamp))) ]
-        , p [] [ HTML.text ("MISSES:  " ++ String.fromInt model.incorrectTries) ]
-        , p [] [ HTML.text ("SESSION ID:  " ++ String.fromInt model.sessionId) ]
-        ]
 
 -- VIEW
+
 
 view : Model -> Html Msg
 view model =
     div []
         [ case model.isMIDIConnected of
+            -- If Nothing or False (waiting to init or no MIDI available), then show the MidiStatus screen (waiting for input)
+            Nothing ->
+              View.MidiStatus.view model
+
+            Just False ->
+              View.MidiStatus.view model
+
             Just True ->
-              if model.isPlaying then gameView model else startScreenView model
+              if model.isPlaying
+                 then View.Game.view model
+                 else View.StartScreen.view model
             
-            _ ->
-              waitForMidiView model
         ]
+
+
 
 -- UPDATE
 
@@ -348,6 +215,7 @@ convertScoreToJSON session =
   , ("incorrectTries", E.int session.incorrectTries)
   ]
 
+
 -- SUBSCRIPTIONS
 
 subscriptions : Model -> Sub Msg
@@ -387,33 +255,6 @@ init initialSessionId =
     , Random.generate UpdateCorrectNote Note.getRandomMidi -- generate first note to guess on app load!
   )
 
-
-displayMIDIStatus : Maybe Bool -> String
-displayMIDIStatus isConnected =
-    case isConnected of
-        Nothing ->
-            "Connect a MIDI instrument to play!"
-
-        Just True ->
-            "Your MIDI device is connected, yay! See the note below? Play it on your instrument!"
-
-        Just False ->
-            "Hmm, looks like your MIDI device got disconnected. Try reconnecting it, or if that doesn't work, try refreshing this page or turning your MIDI device off and on again."
-
-displayNote : Maybe Note -> String
-displayNote note =
-    case note of
-        Nothing ->
-            "nothing here"
-
-        Just x ->
-            "Name: "
-                ++ first x.noteName
-                ++ (second x.noteName |> String.fromInt)
-                ++ ", MIDI: "
-                ++ String.fromInt x.midi
-                ++ ", Frequency: "
-                ++ String.fromFloat x.frequency
 
 
 updateScore : Int -> Note -> Note -> ( Int, Bool )

@@ -8696,7 +8696,62 @@ var author$project$Main$update = F2(
 				return A2(author$project$UpdateAnimations$update, animMsg, model);
 		}
 	});
-var author$project$Main$getNoteHeight = function (midiCode) {
+var elm$core$String$fromFloat = _String_fromNumber;
+var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var elm$svg$Svg$line = elm$svg$Svg$trustedNode('line');
+var elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
+var elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
+var elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
+var elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
+var elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
+var author$project$View$Game$staffLines = F4(
+	function (staffWidth, lineHeight, margins, yPos) {
+		var lineYString = elm$core$String$fromFloat(margins.top + (yPos * lineHeight));
+		return A2(
+			elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					elm$svg$Svg$Attributes$x1(
+					elm$core$String$fromFloat(margins.left)),
+					elm$svg$Svg$Attributes$y1(lineYString),
+					elm$svg$Svg$Attributes$x2(
+					elm$core$String$fromFloat(margins.left + staffWidth)),
+					elm$svg$Svg$Attributes$y2(lineYString),
+					elm$svg$Svg$Attributes$stroke('black')
+				]),
+			_List_Nil);
+	});
+var author$project$View$Game$staff = F3(
+	function (staffWidth, lineHeight, margins) {
+		return A2(
+			elm$core$List$map,
+			A3(author$project$View$Game$staffLines, staffWidth, lineHeight, margins),
+			A2(elm$core$List$range, 1, 5));
+	});
+var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
+var elm$svg$Svg$text_ = elm$svg$Svg$trustedNode('text');
+var elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
+var elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
+var elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
+var author$project$View$Game$trebleClef = F2(
+	function (x, y) {
+		var yS = elm$core$String$fromFloat(y);
+		var xS = elm$core$String$fromFloat(x);
+		return A2(
+			elm$svg$Svg$text_,
+			_List_fromArray(
+				[
+					elm$svg$Svg$Attributes$x(xS),
+					elm$svg$Svg$Attributes$y(yS),
+					elm$svg$Svg$Attributes$class('treble')
+				]),
+			_List_fromArray(
+				[
+					elm$html$Html$text('𝄞')
+				]));
+	});
+var author$project$View$Note$getNoteHeight = function (midiCode) {
 	switch (midiCode) {
 		case 60:
 			return 12;
@@ -8726,8 +8781,6 @@ var author$project$Main$getNoteHeight = function (midiCode) {
 			return 12;
 	}
 };
-var elm$core$String$fromFloat = _String_fromNumber;
-var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
 var elm$svg$Svg$circle = elm$svg$Svg$trustedNode('circle');
 var elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
 var elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
@@ -8808,8 +8861,6 @@ var elm$svg$Svg$Attributes$points = _VirtualDom_attribute('points');
 var elm$svg$Svg$Attributes$rx = _VirtualDom_attribute('rx');
 var elm$svg$Svg$Attributes$ry = _VirtualDom_attribute('ry');
 var elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
-var elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
-var elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
 var elm$core$Basics$cos = _Basics_cos;
 var elm$core$Basics$degrees = function (angleInDegrees) {
 	return (angleInDegrees * elm$core$Basics$pi) / 180;
@@ -9282,9 +9333,9 @@ var mdgriffith$elm_style_animation$Animation$Render$render = function (animation
 	return _Utils_ap(styleAttr, otherAttrs);
 };
 var mdgriffith$elm_style_animation$Animation$render = mdgriffith$elm_style_animation$Animation$Render$render;
-var author$project$Main$drawNote = F5(
+var author$project$View$Note$drawNote = F5(
 	function (staffWidth, lineHeight, margins, note, animStyle) {
-		var yPosFloat = author$project$Main$getNoteHeight(note.midi);
+		var yPosFloat = author$project$View$Note$getNoteHeight(note.midi);
 		var cyString = elm$core$String$fromFloat(margins.top + ((yPosFloat * lineHeight) / 2));
 		var cxString = elm$core$String$fromFloat(staffWidth / 2);
 		return A2(
@@ -9300,66 +9351,15 @@ var author$project$Main$drawNote = F5(
 				mdgriffith$elm_style_animation$Animation$render(animStyle)),
 			_List_Nil);
 	});
-var elm$svg$Svg$line = elm$svg$Svg$trustedNode('line');
-var elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
-var elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
-var elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
-var elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
-var elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
-var author$project$Main$staffLines = F4(
-	function (staffWidth, lineHeight, margins, yPos) {
-		var lineYString = elm$core$String$fromFloat(margins.top + (yPos * lineHeight));
-		return A2(
-			elm$svg$Svg$line,
-			_List_fromArray(
-				[
-					elm$svg$Svg$Attributes$x1(
-					elm$core$String$fromFloat(margins.left)),
-					elm$svg$Svg$Attributes$y1(lineYString),
-					elm$svg$Svg$Attributes$x2(
-					elm$core$String$fromFloat(margins.left + staffWidth)),
-					elm$svg$Svg$Attributes$y2(lineYString),
-					elm$svg$Svg$Attributes$stroke('black')
-				]),
-			_List_Nil);
-	});
-var author$project$Main$staff = F3(
-	function (staffWidth, lineHeight, margins) {
-		return A2(
-			elm$core$List$map,
-			A3(author$project$Main$staffLines, staffWidth, lineHeight, margins),
-			A2(elm$core$List$range, 1, 5));
-	});
-var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
-var elm$svg$Svg$text_ = elm$svg$Svg$trustedNode('text');
-var elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
-var author$project$Main$trebleClef = F2(
-	function (x, y) {
-		var yS = elm$core$String$fromFloat(y);
-		var xS = elm$core$String$fromFloat(x);
-		return A2(
-			elm$svg$Svg$text_,
-			_List_fromArray(
-				[
-					elm$svg$Svg$Attributes$x(xS),
-					elm$svg$Svg$Attributes$y(yS),
-					elm$svg$Svg$Attributes$class('treble')
-				]),
-			_List_fromArray(
-				[
-					elm$html$Html$text('𝄞')
-				]));
-	});
 var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
 var elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
 var elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
-var author$project$Main$svgView = F4(
+var author$project$View$Game$svgView = F4(
 	function (model, width, height, margins) {
 		var widthS = elm$core$String$fromFloat((width + margins.left) + margins.right);
 		var lineHeight = height / 6;
 		var heightS = elm$core$String$fromFloat((height + margins.top) + margins.bottom);
-		var drawNoteFunc = A3(author$project$Main$drawNote, width, lineHeight, margins);
+		var drawNoteFunc = A3(author$project$View$Note$drawNote, width, lineHeight, margins);
 		var currentNoteDrawing = function () {
 			var _n0 = model.currentNote;
 			if (_n0.$ === 'Nothing') {
@@ -9383,7 +9383,7 @@ var author$project$Main$svgView = F4(
 				]),
 			_Utils_ap(
 				_Utils_ap(
-					A3(author$project$Main$staff, width, lineHeight, margins),
+					A3(author$project$View$Game$staff, width, lineHeight, margins),
 					_List_fromArray(
 						[
 							A2(drawNoteFunc, model.correctNote, model.correctNoteStyle)
@@ -9392,20 +9392,30 @@ var author$project$Main$svgView = F4(
 					currentNoteDrawing,
 					_List_fromArray(
 						[
-							A2(author$project$Main$trebleClef, 50, 237)
+							A2(author$project$View$Game$trebleClef, 50, 237)
 						]))));
 	});
-var author$project$Main$gameView = function (model) {
+var author$project$View$Game$view = function (model) {
 	return A4(
-		author$project$Main$svgView,
+		author$project$View$Game$svgView,
 		model,
 		500,
 		200,
 		{bottom: 50, left: 50, right: 50, top: 50});
 };
-var author$project$Msg$StartGame = {$: 'StartGame'};
-var elm$html$Html$button = _VirtualDom_node('button');
+var author$project$View$MidiStatus$midiStatusString = function (isConnected) {
+	if (isConnected.$ === 'Nothing') {
+		return 'Connect a MIDI instrument to play!';
+	} else {
+		if (isConnected.a) {
+			return 'Your MIDI device is connected, yay! See the note below? Play it on your instrument!';
+		} else {
+			return 'Hmm, looks like your MIDI device got disconnected. Try reconnecting it, or if that doesn\'t work, try refreshing this page or turning your MIDI device off and on again.';
+		}
+	}
+};
 var elm$html$Html$div = _VirtualDom_node('div');
+var elm$html$Html$p = _VirtualDom_node('p');
 var elm$json$Json$Encode$string = _Json_wrap;
 var elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
@@ -9415,6 +9425,27 @@ var elm$html$Html$Attributes$stringProperty = F2(
 			elm$json$Json$Encode$string(string));
 	});
 var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
+var author$project$View$MidiStatus$view = function (model) {
+	return A2(
+		elm$html$Html$div,
+		_List_fromArray(
+			[
+				elm$html$Html$Attributes$class('connectMidi')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						elm$html$Html$text(
+						author$project$View$MidiStatus$midiStatusString(model.isMIDIConnected))
+					]))
+			]));
+};
+var author$project$Msg$StartGame = {$: 'StartGame'};
+var elm$html$Html$button = _VirtualDom_node('button');
 var elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -9432,7 +9463,7 @@ var elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		elm$json$Json$Decode$succeed(msg));
 };
-var author$project$Main$startScreenView = function (model) {
+var author$project$View$StartScreen$view = function (model) {
 	return A2(
 		elm$html$Html$div,
 		_List_fromArray(
@@ -9454,37 +9485,6 @@ var author$project$Main$startScreenView = function (model) {
 					]))
 			]));
 };
-var author$project$Main$displayMIDIStatus = function (isConnected) {
-	if (isConnected.$ === 'Nothing') {
-		return 'Connect a MIDI instrument to play!';
-	} else {
-		if (isConnected.a) {
-			return 'Your MIDI device is connected, yay! See the note below? Play it on your instrument!';
-		} else {
-			return 'Hmm, looks like your MIDI device got disconnected. Try reconnecting it, or if that doesn\'t work, try refreshing this page or turning your MIDI device off and on again.';
-		}
-	}
-};
-var elm$html$Html$p = _VirtualDom_node('p');
-var author$project$Main$waitForMidiView = function (model) {
-	return A2(
-		elm$html$Html$div,
-		_List_fromArray(
-			[
-				elm$html$Html$Attributes$class('connectMidi')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				elm$html$Html$p,
-				_List_Nil,
-				_List_fromArray(
-					[
-						elm$html$Html$text(
-						author$project$Main$displayMIDIStatus(model.isMIDIConnected))
-					]))
-			]));
-};
 var author$project$Main$view = function (model) {
 	return A2(
 		elm$html$Html$div,
@@ -9493,10 +9493,14 @@ var author$project$Main$view = function (model) {
 			[
 				function () {
 				var _n0 = model.isMIDIConnected;
-				if ((_n0.$ === 'Just') && _n0.a) {
-					return model.isPlaying ? author$project$Main$gameView(model) : author$project$Main$startScreenView(model);
+				if (_n0.$ === 'Nothing') {
+					return author$project$View$MidiStatus$view(model);
 				} else {
-					return author$project$Main$waitForMidiView(model);
+					if (!_n0.a) {
+						return author$project$View$MidiStatus$view(model);
+					} else {
+						return model.isPlaying ? author$project$View$Game$view(model) : author$project$View$StartScreen$view(model);
+					}
 				}
 			}()
 			]));

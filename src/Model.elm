@@ -9,11 +9,6 @@ import Animations
 import Animation
 import Animation.Messenger
 
-type alias Score =
-  { correctNote : Note -- midi code of the Note (not the Note itself!)
-  , answerSpeed : Int
-  , incorrectTries : Int
-  }
 
 type alias Model =
     { isMIDIConnected : Maybe Bool
@@ -31,6 +26,16 @@ type alias Model =
     , currentNoteStyle : Animation.Messenger.State Msg
     , correctNoteStyle : Animation.Messenger.State Msg
     }
+
+type alias Score =
+  { correctNote : Note -- midi code of the Note (not the Note itself!)
+  , answerSpeed : Int
+  , incorrectTries : Int
+  }
+
+-- For views ... not sure where to put this =P
+type alias Margins =
+    { top : Float, right : Float, bottom : Float, left : Float }
 
 
 initialModel : Model
