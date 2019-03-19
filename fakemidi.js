@@ -7,9 +7,12 @@ let noteCode = 59;
 const testControls = document.createElement("section");
 testControls.className = "testControls";
 
+// const sectionTitle = document.createElement("h2");
+// sectionTitle.textContent = "Test without a MIDI instrument:"
+
 // Connect MIDI
 const connectButton = document.createElement("button");
-connectButton.textContent = "Connect fake MIDI";
+connectButton.textContent = "Click here to test the game without a MIDI instrument";
 connectButton.addEventListener("click", connectFakeMidi);
 
 // Generate buttons for the supported MIDI codes:
@@ -25,17 +28,23 @@ const noteButtons = noteMidi.map( midi => {
 });
 
 // Append to DOM
+// testControls.appendChild(sectionTitle);
 testControls.appendChild(connectButton);
-noteButtons.map( elem => { 
-  testControls.appendChild(elem);
-});
-document.body.prepend(testControls);
+document.body.append(testControls);
 // .....................................................................
 
 function connectFakeMidi () {
   if (!isMIDIConnected) {
     isMIDIConnected = true;
     console.log("Now connected to fake MIDI! Click again to play fake notes.");
+
+    // Remove "connect to fake midi" button
+    testControls.removeChild(connectButton);
+
+    // Display buttons to play notes
+    noteButtons.map( elem => { 
+      testControls.appendChild(elem);
+    });
 
     // Tell Elm that MIDI has been successfully set up! -- bool
     app.ports.fakeHandleInitMIDI.send(true); 

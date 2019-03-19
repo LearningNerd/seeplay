@@ -1,7 +1,7 @@
 body {
-  width: 80%;
-  margin: 2em auto;
-  padding: 0.5em;
+  margin: 0;
+  padding: 0;
+  font: 14px "Helvetica", Arial, sans-serif;
 }
 
 button {
@@ -14,6 +14,40 @@ button {
     box-shadow: 1px 1px 5px rgba(0,0,0,0.2);
 }
 
+.container {
+  max-width: 45em;
+  margin: 2em auto;
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+header {
+  background: #f4fbff;
+  border: 1px solid #d9edf4;
+  box-shadow: 1px 1px 5px rgba(0,0,0,0.2);
+}
+
+h1 {
+  margin-bottom: 0.5em;
+}
+
+
+.midiStatus {
+  margin-top: 2em;
+  text-align: center;
+  font-size: 2em;
+  line-height: 1.6;
+}
+
+.bigEmoji {
+  font-size: 4em;
+}
+
+.startScreen {
+  text-align: center;
+  margin-top: 4em;
+}
+
 .center {
   width: 100%;
   height: auto;
@@ -24,15 +58,26 @@ button {
 }
 
 .testControls {
-  background: #eee;
-  padding: 0.5em;
-  border: 1px solid #ddd;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #f4fbff;
+  border: 1px solid #d9edf4;
   box-shadow: 1px 1px 5px rgba(0,0,0,0.2);
+  padding: 2em 1em;
+  text-align: center;
+}
+
+.testControls h1 {
+  margin: 0.5em 0 0.5em;
+  font-size: 1.2em;
+  font-weight: normal;
 }
 
 .testControls button {
     text-align: center;
-    font-size: 1em;
+    font-size: 1.5em;
     padding: 0.2em 1em;
     margin: 0.1em;
     border-radius: 0.5em;
