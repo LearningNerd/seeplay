@@ -10,6 +10,7 @@ import Json.Encode as E
 import Animation
 import Animation.Messenger
 import Html exposing (..)
+import Html.Attributes as A exposing (..)
 
 import Model exposing (Model, Score, initialModel)
 import Color
@@ -18,6 +19,7 @@ import Msg exposing (..)
 import Note exposing (Note)
 import UpdateAnimations
 
+import View.Header
 import View.MidiStatus
 import View.StartScreen
 import View.Game
@@ -57,7 +59,8 @@ getMillis timestamp =
 view : Model -> Html Msg
 view model =
     div []
-        [ case model.isMIDIConnected of
+        [ View.Header.view model
+        , main_ [A.class "container"] [ case model.isMIDIConnected of
             -- If Nothing or False (waiting to init or no MIDI available), then show the MidiStatus screen (waiting for input)
             Nothing ->
               View.MidiStatus.view model
@@ -69,9 +72,8 @@ view model =
               if model.isPlaying
                  then View.Game.view model
                  else View.StartScreen.view model
-            
+           ] -- end main 
         ]
-
 
 
 -- UPDATE

@@ -9403,18 +9403,9 @@ var author$project$View$Game$view = function (model) {
 		200,
 		{bottom: 50, left: 50, right: 50, top: 50});
 };
-var author$project$View$MidiStatus$midiStatusString = function (isConnected) {
-	if (isConnected.$ === 'Nothing') {
-		return 'Connect a MIDI instrument to play!';
-	} else {
-		if (isConnected.a) {
-			return 'Your MIDI device is connected, yay! See the note below? Play it on your instrument!';
-		} else {
-			return 'Hmm, looks like your MIDI device got disconnected. Try reconnecting it, or if that doesn\'t work, try refreshing this page or turning your MIDI device off and on again.';
-		}
-	}
-};
 var elm$html$Html$div = _VirtualDom_node('div');
+var elm$html$Html$h1 = _VirtualDom_node('h1');
+var elm$html$Html$header = _VirtualDom_node('header');
 var elm$html$Html$p = _VirtualDom_node('p');
 var elm$json$Json$Encode$string = _Json_wrap;
 var elm$html$Html$Attributes$stringProperty = F2(
@@ -9425,23 +9416,83 @@ var elm$html$Html$Attributes$stringProperty = F2(
 			elm$json$Json$Encode$string(string));
 	});
 var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
+var author$project$View$Header$view = function (model) {
+	return A2(
+		elm$html$Html$header,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				elm$html$Html$div,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('container')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						elm$html$Html$h1,
+						_List_Nil,
+						_List_fromArray(
+							[
+								elm$html$Html$text('SeePlay')
+							])),
+						A2(
+						elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								elm$html$Html$text('Learn to sight-read sheet music! SeePlay teaches you to hear with your eyes and play from your heart. 👀🎹💖')
+							]))
+					]))
+			]));
+};
+var elm$html$Html$br = _VirtualDom_node('br');
+var elm$html$Html$span = _VirtualDom_node('span');
+var author$project$View$MidiStatus$midiStatusString = function (isConnected) {
+	if (isConnected.$ === 'Nothing') {
+		return _List_fromArray(
+			[
+				elm$html$Html$text('Connect a MIDI instrument to play!'),
+				A2(elm$html$Html$br, _List_Nil, _List_Nil),
+				A2(
+				elm$html$Html$span,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('bigEmoji')
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text('🎹')
+					]))
+			]);
+	} else {
+		if (isConnected.a) {
+			return _List_fromArray(
+				[
+					elm$html$Html$text('Your MIDI device is connected, yay! See the note below? Play it on your instrument!')
+				]);
+		} else {
+			return _List_fromArray(
+				[
+					elm$html$Html$text('Hmm, looks like your MIDI device got disconnected. Try reconnecting it, or if that doesn\'t work, try refreshing this page or turning your MIDI device off and on again.')
+				]);
+		}
+	}
+};
 var author$project$View$MidiStatus$view = function (model) {
 	return A2(
 		elm$html$Html$div,
 		_List_fromArray(
 			[
-				elm$html$Html$Attributes$class('connectMidi')
+				elm$html$Html$Attributes$class('midiStatus')
 			]),
 		_List_fromArray(
 			[
 				A2(
 				elm$html$Html$p,
 				_List_Nil,
-				_List_fromArray(
-					[
-						elm$html$Html$text(
-						author$project$View$MidiStatus$midiStatusString(model.isMIDIConnected))
-					]))
+				author$project$View$MidiStatus$midiStatusString(model.isMIDIConnected))
 			]));
 };
 var author$project$Msg$StartGame = {$: 'StartGame'};
@@ -9485,24 +9536,35 @@ var author$project$View$StartScreen$view = function (model) {
 					]))
 			]));
 };
+var elm$html$Html$main_ = _VirtualDom_node('main');
 var author$project$Main$view = function (model) {
 	return A2(
 		elm$html$Html$div,
 		_List_Nil,
 		_List_fromArray(
 			[
-				function () {
-				var _n0 = model.isMIDIConnected;
-				if (_n0.$ === 'Nothing') {
-					return author$project$View$MidiStatus$view(model);
-				} else {
-					if (!_n0.a) {
-						return author$project$View$MidiStatus$view(model);
-					} else {
-						return model.isPlaying ? author$project$View$Game$view(model) : author$project$View$StartScreen$view(model);
-					}
-				}
-			}()
+				author$project$View$Header$view(model),
+				A2(
+				elm$html$Html$main_,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('container')
+					]),
+				_List_fromArray(
+					[
+						function () {
+						var _n0 = model.isMIDIConnected;
+						if (_n0.$ === 'Nothing') {
+							return author$project$View$MidiStatus$view(model);
+						} else {
+							if (!_n0.a) {
+								return author$project$View$MidiStatus$view(model);
+							} else {
+								return model.isPlaying ? author$project$View$Game$view(model) : author$project$View$StartScreen$view(model);
+							}
+						}
+					}()
+					]))
 			]));
 };
 var elm$browser$Browser$element = _Browser_element;
