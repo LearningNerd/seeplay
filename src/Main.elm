@@ -11,6 +11,7 @@ import Animation
 import Animation.Messenger
 import Html exposing (..)
 import Html.Attributes as A exposing (..)
+import Html.Events exposing (..)
 
 import Model exposing (Model, Score, initialModel)
 import Color
@@ -23,6 +24,8 @@ import View.Header
 import View.MidiStatus
 import View.StartScreen
 import View.Game
+-- TEST:
+import View.Coin
 
 port handleInitMIDI : (Bool -> msg) -> Sub msg
 port handleNotePressed : (Int -> msg) -> Sub msg
@@ -58,12 +61,13 @@ getMillis timestamp =
 
 view : Model -> Html Msg
 view model =
-    div []
+    div [ ]
         [ View.Header.view model
-        , main_ [A.class "container"] [ case model.isMIDIConnected of
+        , main_ [A.class "container"] [ Html.p [onClick StartSpriteTestAnim ] [ Html.text "hey click me!"] , case model.isMIDIConnected of
             -- If Nothing or False (waiting to init or no MIDI available), then show the MidiStatus screen (waiting for input)
             Nothing ->
-              View.MidiStatus.view model
+              -- View.MidiStatus.view model
+              View.Coin.view model
 
             Just False ->
               View.MidiStatus.view model
@@ -200,6 +204,23 @@ update msg model =
         Animate animMsg ->
             UpdateAnimations.update animMsg model
 
+-- --------- -------- test ----------------- ------
+        StartSpriteTestAnim ->
+          let
+              test = Debug.log "called StartSpriteTestAnim section of update" model.coinStyle
+          in
+            ( { model | coinStyle = Animation.interrupt [Animations.coinLoop] model.coinStyle }
+            , Cmd.none
+            )
+
+        TestSpriteAnim animMsg ->
+          let
+              (newStyle, cmd) = Animation.Messenger.update animMsg model.coinStyle
+          in
+            ( { model | coinStyle = newStyle } , cmd )
+
+
+
 
 -- Edge case: starting the timer when game begins shouldn't update answerSpeed
 getNewAnswerSpeed startTime currentTime =
@@ -235,6 +256,8 @@ subscriptions model =
         , fakeHandleNoteReleased NoteReleased
         , Animation.subscription (Animate << CorrectNoteStyle) [ model.correctNoteStyle ]
         , Animation.subscription (Animate << CurrentNoteStyle) [ model.currentNoteStyle ]
+        -- TEST: 
+        , Animation.subscription TestSpriteAnim [ model.coinStyle ]
         ]
 
 

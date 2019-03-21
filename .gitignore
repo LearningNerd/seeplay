@@ -1,5 +1,10 @@
+# my test files
+sourcesprites/
+testimages/
+
 # elm-package generated files
 elm-stuff
+
 # elm-repl generated files
 repl-temp-*
 
@@ -8,4 +13,9 @@ repl-temp-*
 
 # MacOS stuff
 .DS_Store
+
+# Node stuff
+node_modules/
+.env
+.env.test
 

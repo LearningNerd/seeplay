@@ -5527,8 +5527,41 @@ var author$project$Note$createNote = function (midiCode) {
 		noteName: author$project$Note$midiToNoteName(midiCode)
 	};
 };
+var mdgriffith$elm_style_animation$Animation$length4 = F5(
+	function (name, _n0, _n1, _n2, _n3) {
+		var val = _n0.a;
+		var len = _n0.b;
+		var val2 = _n1.a;
+		var len2 = _n1.b;
+		var val3 = _n2.a;
+		var len3 = _n2.b;
+		var val4 = _n3.a;
+		var len4 = _n3.b;
+		return A5(
+			mdgriffith$elm_style_animation$Animation$Model$Property4,
+			name,
+			A2(mdgriffith$elm_style_animation$Animation$initMotion, val, len),
+			A2(mdgriffith$elm_style_animation$Animation$initMotion, val2, len2),
+			A2(mdgriffith$elm_style_animation$Animation$initMotion, val3, len3),
+			A2(mdgriffith$elm_style_animation$Animation$initMotion, val4, len4));
+	});
+var mdgriffith$elm_style_animation$Animation$viewBox = F4(
+	function (w_, x_, y_, z_) {
+		return A5(
+			mdgriffith$elm_style_animation$Animation$length4,
+			'viewBox',
+			_Utils_Tuple2(w_, ''),
+			_Utils_Tuple2(x_, ''),
+			_Utils_Tuple2(y_, ''),
+			_Utils_Tuple2(z_, ''));
+	});
 var author$project$Model$initialModel = {
 	answerSpeed: 0,
+	coinStyle: mdgriffith$elm_style_animation$Animation$style(
+		_List_fromArray(
+			[
+				A4(mdgriffith$elm_style_animation$Animation$viewBox, 0, 0, 16, 16)
+			])),
 	correctNote: author$project$Note$createNote(60),
 	correctNoteStyle: author$project$Animations$initialCorrectNoteStyle,
 	currentNote: elm$core$Maybe$Nothing,
@@ -6020,6 +6053,9 @@ var author$project$Msg$NotePressed = function (a) {
 };
 var author$project$Msg$NoteReleased = function (a) {
 	return {$: 'NoteReleased', a: a};
+};
+var author$project$Msg$TestSpriteAnim = function (a) {
+	return {$: 'TestSpriteAnim', a: a};
 };
 var author$project$Msg$TestTick = function (a) {
 	return {$: 'TestTick', a: a};
@@ -6820,9 +6856,93 @@ var author$project$Main$subscriptions = function (model) {
 				mdgriffith$elm_style_animation$Animation$subscription,
 				A2(elm$core$Basics$composeL, author$project$Msg$Animate, author$project$Msg$CurrentNoteStyle),
 				_List_fromArray(
-					[model.currentNoteStyle]))
+					[model.currentNoteStyle])),
+				A2(
+				mdgriffith$elm_style_animation$Animation$subscription,
+				author$project$Msg$TestSpriteAnim,
+				_List_fromArray(
+					[model.coinStyle]))
 			]));
 };
+var elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3(elm$core$List$foldr, elm$core$List$cons, ys, xs);
+		}
+	});
+var elm$core$List$concat = function (lists) {
+	return A3(elm$core$List$foldr, elm$core$List$append, _List_Nil, lists);
+};
+var elm$core$List$concatMap = F2(
+	function (f, list) {
+		return elm$core$List$concat(
+			A2(elm$core$List$map, f, list));
+	});
+var elm$core$List$drop = F2(
+	function (n, list) {
+		drop:
+		while (true) {
+			if (n <= 0) {
+				return list;
+			} else {
+				if (!list.b) {
+					return list;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs;
+					n = $temp$n;
+					list = $temp$list;
+					continue drop;
+				}
+			}
+		}
+	});
+var mdgriffith$elm_style_animation$Animation$Model$Loop = function (a) {
+	return {$: 'Loop', a: a};
+};
+var mdgriffith$elm_style_animation$Animation$loop = function (steps) {
+	return mdgriffith$elm_style_animation$Animation$Model$Loop(steps);
+};
+var mdgriffith$elm_style_animation$Animation$Model$Set = function (a) {
+	return {$: 'Set', a: a};
+};
+var mdgriffith$elm_style_animation$Animation$set = function (props) {
+	return mdgriffith$elm_style_animation$Animation$Model$Set(props);
+};
+var mdgriffith$elm_style_animation$Animation$Model$Wait = function (a) {
+	return {$: 'Wait', a: a};
+};
+var mdgriffith$elm_style_animation$Animation$wait = function (till) {
+	return mdgriffith$elm_style_animation$Animation$Model$Wait(till);
+};
+var author$project$Animations$spriteLoop = F4(
+	function (delayMillis, spriteWidth, spriteHeight, numSprites) {
+		var loopForwardHalf = A2(
+			elm$core$List$concatMap,
+			function (i) {
+				return _List_fromArray(
+					[
+						mdgriffith$elm_style_animation$Animation$set(
+						_List_fromArray(
+							[
+								A4(mdgriffith$elm_style_animation$Animation$viewBox, spriteWidth * i, 0.0, spriteWidth, spriteHeight)
+							])),
+						mdgriffith$elm_style_animation$Animation$wait(
+						elm$time$Time$millisToPosix(delayMillis))
+					]);
+			},
+			A2(elm$core$List$range, 0, numSprites - 1));
+		var loopBackwardHalf = A2(
+			elm$core$List$drop,
+			2,
+			elm$core$List$reverse(loopForwardHalf));
+		return mdgriffith$elm_style_animation$Animation$loop(loopForwardHalf);
+	});
+var author$project$Animations$coinLoop = A4(author$project$Animations$spriteLoop, 100, 16, 16, 4);
 var author$project$Color$green = A3(author$project$Color$rgb, 0, 255, 0);
 var author$project$Main$cache = _Platform_outgoingPort('cache', elm$core$Basics$identity);
 var elm$json$Json$Encode$int = _Json_wrap;
@@ -6918,38 +7038,11 @@ var elm$core$List$all = F2(
 			A2(elm$core$Basics$composeL, elm$core$Basics$not, isOkay),
 			list);
 	});
-var elm$core$List$drop = F2(
-	function (n, list) {
-		drop:
-		while (true) {
-			if (n <= 0) {
-				return list;
-			} else {
-				if (!list.b) {
-					return list;
-				} else {
-					var x = list.a;
-					var xs = list.b;
-					var $temp$n = n - 1,
-						$temp$list = xs;
-					n = $temp$n;
-					list = $temp$list;
-					continue drop;
-				}
-			}
-		}
-	});
-var mdgriffith$elm_style_animation$Animation$Model$Loop = function (a) {
-	return {$: 'Loop', a: a};
-};
 var mdgriffith$elm_style_animation$Animation$Model$Repeat = F2(
 	function (a, b) {
 		return {$: 'Repeat', a: a, b: b};
 	});
 var mdgriffith$elm_style_animation$Animation$Model$Step = {$: 'Step'};
-var mdgriffith$elm_style_animation$Animation$Model$Wait = function (a) {
-	return {$: 'Wait', a: a};
-};
 var elm$core$Maybe$withDefault = F2(
 	function (_default, maybe) {
 		if (maybe.$ === 'Just') {
@@ -8452,6 +8545,7 @@ var author$project$UpdateAnimations$update = F2(
 				cmd);
 		}
 	});
+var elm$core$Debug$log = _Debug_log;
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var elm$json$Json$Encode$list = F2(
 	function (func, entries) {
@@ -8501,20 +8595,11 @@ var mdgriffith$elm_style_animation$Animation$interrupt = F2(
 					running: true
 				}));
 	});
-var mdgriffith$elm_style_animation$Animation$Model$Set = function (a) {
-	return {$: 'Set', a: a};
-};
-var mdgriffith$elm_style_animation$Animation$set = function (props) {
-	return mdgriffith$elm_style_animation$Animation$Model$Set(props);
-};
 var mdgriffith$elm_style_animation$Animation$Model$To = function (a) {
 	return {$: 'To', a: a};
 };
 var mdgriffith$elm_style_animation$Animation$to = function (props) {
 	return mdgriffith$elm_style_animation$Animation$Model$To(props);
-};
-var mdgriffith$elm_style_animation$Animation$wait = function (till) {
-	return mdgriffith$elm_style_animation$Animation$Model$Wait(till);
 };
 var mdgriffith$elm_style_animation$Animation$Model$Send = function (a) {
 	return {$: 'Send', a: a};
@@ -8691,116 +8776,43 @@ var author$project$Main$update = F2(
 							testCurrentTimestamp: elm$core$Maybe$Just(currentTimestamp)
 						}),
 					elm$core$Platform$Cmd$none);
-			default:
+			case 'Animate':
 				var animMsg = msg.a;
 				return A2(author$project$UpdateAnimations$update, animMsg, model);
+			case 'StartSpriteTestAnim':
+				var test = A2(elm$core$Debug$log, 'called StartSpriteTestAnim section of update', model.coinStyle);
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							coinStyle: A2(
+								mdgriffith$elm_style_animation$Animation$interrupt,
+								_List_fromArray(
+									[author$project$Animations$coinLoop]),
+								model.coinStyle)
+						}),
+					elm$core$Platform$Cmd$none);
+			default:
+				var animMsg = msg.a;
+				var _n1 = A2(mdgriffith$elm_style_animation$Animation$Messenger$update, animMsg, model.coinStyle);
+				var newStyle = _n1.a;
+				var cmd = _n1.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{coinStyle: newStyle}),
+					cmd);
 		}
 	});
-var elm$core$String$fromFloat = _String_fromNumber;
+var author$project$Msg$StartSpriteTestAnim = {$: 'StartSpriteTestAnim'};
 var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
-var elm$svg$Svg$line = elm$svg$Svg$trustedNode('line');
-var elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
-var elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
-var elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
-var elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
-var elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
-var author$project$View$Game$staffLines = F4(
-	function (staffWidth, lineHeight, margins, yPos) {
-		var lineYString = elm$core$String$fromFloat(margins.top + (yPos * lineHeight));
-		return A2(
-			elm$svg$Svg$line,
-			_List_fromArray(
-				[
-					elm$svg$Svg$Attributes$x1(
-					elm$core$String$fromFloat(margins.left)),
-					elm$svg$Svg$Attributes$y1(lineYString),
-					elm$svg$Svg$Attributes$x2(
-					elm$core$String$fromFloat(margins.left + staffWidth)),
-					elm$svg$Svg$Attributes$y2(lineYString),
-					elm$svg$Svg$Attributes$stroke('black')
-				]),
-			_List_Nil);
-	});
-var author$project$View$Game$staff = F3(
-	function (staffWidth, lineHeight, margins) {
-		return A2(
-			elm$core$List$map,
-			A3(author$project$View$Game$staffLines, staffWidth, lineHeight, margins),
-			A2(elm$core$List$range, 1, 5));
-	});
-var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
-var elm$svg$Svg$text_ = elm$svg$Svg$trustedNode('text');
-var elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
+var elm$svg$Svg$rect = elm$svg$Svg$trustedNode('rect');
+var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
+var elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
+var elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
+var elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
 var elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
 var elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
-var author$project$View$Game$trebleClef = F2(
-	function (x, y) {
-		var yS = elm$core$String$fromFloat(y);
-		var xS = elm$core$String$fromFloat(x);
-		return A2(
-			elm$svg$Svg$text_,
-			_List_fromArray(
-				[
-					elm$svg$Svg$Attributes$x(xS),
-					elm$svg$Svg$Attributes$y(yS),
-					elm$svg$Svg$Attributes$class('treble')
-				]),
-			_List_fromArray(
-				[
-					elm$html$Html$text('𝄞')
-				]));
-	});
-var author$project$View$Note$getNoteHeight = function (midiCode) {
-	switch (midiCode) {
-		case 60:
-			return 12;
-		case 62:
-			return 11;
-		case 64:
-			return 10;
-		case 65:
-			return 9;
-		case 67:
-			return 8;
-		case 69:
-			return 7;
-		case 71:
-			return 6;
-		case 72:
-			return 5;
-		case 74:
-			return 4;
-		case 76:
-			return 3;
-		case 77:
-			return 2;
-		case 79:
-			return 1;
-		default:
-			return 12;
-	}
-};
-var elm$svg$Svg$circle = elm$svg$Svg$trustedNode('circle');
-var elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
-var elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
-var elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
-var elm$core$List$append = F2(
-	function (xs, ys) {
-		if (!ys.b) {
-			return xs;
-		} else {
-			return A3(elm$core$List$foldr, elm$core$List$cons, ys, xs);
-		}
-	});
-var elm$core$List$concat = function (lists) {
-	return A3(elm$core$List$foldr, elm$core$List$append, _List_Nil, lists);
-};
-var elm$core$List$concatMap = F2(
-	function (f, list) {
-		return elm$core$List$concat(
-			A2(elm$core$List$map, f, list));
-	});
 var elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
 var mdgriffith$elm_style_animation$Animation$Render$iePrefix = '-ms-';
@@ -8855,12 +8867,16 @@ var elm$virtual_dom$VirtualDom$attribute = F2(
 			_VirtualDom_noJavaScriptOrHtmlUri(value));
 	});
 var elm$html$Html$Attributes$attribute = elm$virtual_dom$VirtualDom$attribute;
+var elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
+var elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
 var elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
 var elm$svg$Svg$Attributes$offset = _VirtualDom_attribute('offset');
 var elm$svg$Svg$Attributes$points = _VirtualDom_attribute('points');
+var elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
 var elm$svg$Svg$Attributes$rx = _VirtualDom_attribute('rx');
 var elm$svg$Svg$Attributes$ry = _VirtualDom_attribute('ry');
 var elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
+var elm$core$String$fromFloat = _String_fromNumber;
 var elm$core$Basics$cos = _Basics_cos;
 var elm$core$Basics$degrees = function (angleInDegrees) {
 	return (angleInDegrees * elm$core$Basics$pi) / 180;
@@ -9333,6 +9349,5774 @@ var mdgriffith$elm_style_animation$Animation$Render$render = function (animation
 	return _Utils_ap(styleAttr, otherAttrs);
 };
 var mdgriffith$elm_style_animation$Animation$render = mdgriffith$elm_style_animation$Animation$Render$render;
+var author$project$View$Coin$view = function (model) {
+	var spriteWidth = 16;
+	var spriteHeight = 16;
+	return A2(
+		elm$svg$Svg$svg,
+		_Utils_ap(
+			mdgriffith$elm_style_animation$Animation$render(model.coinStyle),
+			_List_fromArray(
+				[
+					elm$svg$Svg$Attributes$width(
+					elm$core$String$fromInt(16)),
+					elm$svg$Svg$Attributes$height(
+					elm$core$String$fromInt(16))
+				])),
+		_List_fromArray(
+			[
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(0)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(0)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(0)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(0)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(21)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(0)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(22)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(0)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(37)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(0)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(38)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(0)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(53)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(0)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(54)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(0)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(20)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(21)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(22)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(23)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(36)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(37)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(38)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(39)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(52)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(53)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(54)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(55)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(19)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(20)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(21)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(22)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(23)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(24)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(36)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(37)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(38)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(39)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(51)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(52)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(53)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(54)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(55)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(56)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(19)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(20)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(21)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(22)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(23)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(24)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(36)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(37)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(38)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(39)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(51)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(52)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(53)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(54)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(55)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(56)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(0)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(18)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(19)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(20)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(21)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(22)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(23)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(24)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(25)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(35)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(36)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(37)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(38)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(39)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(40)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(50)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(51)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(52)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(53)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(54)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(55)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(56)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(57)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(0)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(18)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(19)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(20)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(21)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(22)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(23)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(24)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(25)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(35)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(36)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(37)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(38)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(39)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(40)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(50)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(51)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(52)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(53)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(54)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(55)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(56)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(57)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(0)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(18)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(19)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(20)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(21)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(22)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(23)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(24)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(25)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(35)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(36)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(37)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(38)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(39)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(40)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(50)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(51)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(52)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(53)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(54)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(55)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(56)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(57)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(0)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(18)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(19)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(20)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(21)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(22)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(23)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(24)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(25)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(35)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(36)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(37)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(38)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(39)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(40)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(50)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(51)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(52)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(53)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(54)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(55)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(56)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(57)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(0)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(18)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(19)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(20)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(21)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(22)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(23)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(24)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(25)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(35)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(36)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(37)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(38)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(39)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(40)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(50)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(51)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(52)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(53)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(54)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(55)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(56)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(57)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(0)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(18)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(19)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(20)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(21)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(22)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(23)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(24)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(25)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(35)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(36)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(37)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(38)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(39)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(40)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(50)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(51)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(52)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(53)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(54)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(55)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(56)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(57)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(0)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(18)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(19)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(20)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(21)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(22)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(23)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(24)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(25)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(35)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(36)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(37)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(38)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(39)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(40)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(50)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(51)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(52)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(53)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(54)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(55)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(56)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(57)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(0)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(18)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(19)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(20)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(21)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(22)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(23)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(24)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(25)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(35)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(36)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(37)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(38)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(39)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(40)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(50)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(51)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(52)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(53)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(54)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(55)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(56)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(57)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(11)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(19)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(20)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(21)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(22)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(23)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(24)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(36)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(37)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(38)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(39)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(51)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(52)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(53)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(54)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(55)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(56)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(12)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(1)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(10)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(19)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(20)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(21)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(22)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(23)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(24)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(36)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(37)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(38)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(39)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(51)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(52)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(53)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(232, 240, 248, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(54)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 248, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(55)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(56)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(13)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(2)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(14)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(3)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(14)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(14)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(14)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(14)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(14)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(8)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(14)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(9)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(14)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(20)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(14)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(21)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(14)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(22)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(14)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(23)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(14)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(36)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(14)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(37)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(14)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(38)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(14)),
+						elm$svg$Svg$Attributes$fill('rgba(216, 160, 56, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(39)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(14)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(52)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(14)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(53)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(14)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(54)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(14)),
+						elm$svg$Svg$Attributes$fill('rgba(248, 216, 32, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(55)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(14)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(4)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(15)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(5)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(15)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(6)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(15)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(7)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(15)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(21)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(15)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(22)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(15)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(37)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(15)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(38)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(15)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(53)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(15)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil),
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('1'),
+						elm$svg$Svg$Attributes$height('1'),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt(54)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt(15)),
+						elm$svg$Svg$Attributes$fill('rgba(0, 0, 0, 1.00)')
+					]),
+				_List_Nil)
+			]));
+};
+var elm$svg$Svg$line = elm$svg$Svg$trustedNode('line');
+var elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
+var elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
+var elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
+var elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
+var elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
+var author$project$View$Game$staffLines = F4(
+	function (staffWidth, lineHeight, margins, yPos) {
+		var lineYString = elm$core$String$fromFloat(margins.top + (yPos * lineHeight));
+		return A2(
+			elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					elm$svg$Svg$Attributes$x1(
+					elm$core$String$fromFloat(margins.left)),
+					elm$svg$Svg$Attributes$y1(lineYString),
+					elm$svg$Svg$Attributes$x2(
+					elm$core$String$fromFloat(margins.left + staffWidth)),
+					elm$svg$Svg$Attributes$y2(lineYString),
+					elm$svg$Svg$Attributes$stroke('black')
+				]),
+			_List_Nil);
+	});
+var author$project$View$Game$staff = F3(
+	function (staffWidth, lineHeight, margins) {
+		return A2(
+			elm$core$List$map,
+			A3(author$project$View$Game$staffLines, staffWidth, lineHeight, margins),
+			A2(elm$core$List$range, 1, 5));
+	});
+var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
+var elm$svg$Svg$text_ = elm$svg$Svg$trustedNode('text');
+var elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
+var author$project$View$Game$trebleClef = F2(
+	function (x, y) {
+		var yS = elm$core$String$fromFloat(y);
+		var xS = elm$core$String$fromFloat(x);
+		return A2(
+			elm$svg$Svg$text_,
+			_List_fromArray(
+				[
+					elm$svg$Svg$Attributes$x(xS),
+					elm$svg$Svg$Attributes$y(yS),
+					elm$svg$Svg$Attributes$class('treble')
+				]),
+			_List_fromArray(
+				[
+					elm$html$Html$text('𝄞')
+				]));
+	});
+var author$project$View$Note$getNoteHeight = function (midiCode) {
+	switch (midiCode) {
+		case 60:
+			return 12;
+		case 62:
+			return 11;
+		case 64:
+			return 10;
+		case 65:
+			return 9;
+		case 67:
+			return 8;
+		case 69:
+			return 7;
+		case 71:
+			return 6;
+		case 72:
+			return 5;
+		case 74:
+			return 4;
+		case 76:
+			return 3;
+		case 77:
+			return 2;
+		case 79:
+			return 1;
+		default:
+			return 12;
+	}
+};
+var elm$svg$Svg$circle = elm$svg$Svg$trustedNode('circle');
 var author$project$View$Note$drawNote = F5(
 	function (staffWidth, lineHeight, margins, note, animStyle) {
 		var yPosFloat = author$project$View$Note$getNoteHeight(note.midi);
@@ -9351,9 +15135,6 @@ var author$project$View$Note$drawNote = F5(
 				mdgriffith$elm_style_animation$Animation$render(animStyle)),
 			_List_Nil);
 	});
-var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
-var elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
-var elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
 var author$project$View$Game$svgView = F4(
 	function (model, width, height, margins) {
 		var widthS = elm$core$String$fromFloat((width + margins.left) + margins.right);
@@ -9552,10 +15333,20 @@ var author$project$Main$view = function (model) {
 					]),
 				_List_fromArray(
 					[
+						A2(
+						elm$html$Html$p,
+						_List_fromArray(
+							[
+								elm$html$Html$Events$onClick(author$project$Msg$StartSpriteTestAnim)
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('hey click me!')
+							])),
 						function () {
 						var _n0 = model.isMIDIConnected;
 						if (_n0.$ === 'Nothing') {
-							return author$project$View$MidiStatus$view(model);
+							return author$project$View$Coin$view(model);
 						} else {
 							if (!_n0.a) {
 								return author$project$View$MidiStatus$view(model);
