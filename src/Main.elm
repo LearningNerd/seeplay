@@ -11,6 +11,7 @@ import Animation
 import Animation.Messenger
 import Html exposing (..)
 import Html.Attributes as A exposing (..)
+import Html.Events exposing (..)
 
 import Model exposing (Model, Score, initialModel)
 import Color
@@ -23,6 +24,8 @@ import View.Header
 import View.MidiStatus
 import View.StartScreen
 import View.Game
+-- TEST:
+import View.TestSprite
 
 port handleInitMIDI : (Bool -> msg) -> Sub msg
 port handleNotePressed : (Int -> msg) -> Sub msg
@@ -60,10 +63,15 @@ view : Model -> Html Msg
 view model =
     div []
         [ View.Header.view model
-        , main_ [A.class "container"] [ case model.isMIDIConnected of
+        , main_ [A.class "container"]
+          [ Html.p [onClick StartSpriteTestAnim ] [ Html.text "hey click me!"]
+          , Html.p [onClick StartTestSpriteBounce ] [ Html.text "  ...and then click me too!"]
+                 
+          , case model.isMIDIConnected of
             -- If Nothing or False (waiting to init or no MIDI available), then show the MidiStatus screen (waiting for input)
             Nothing ->
-              View.MidiStatus.view model
+              -- View.MidiStatus.view model
+              View.TestSprite.view model
 
             Just False ->
               View.MidiStatus.view model
@@ -200,6 +208,37 @@ update msg model =
         Animate animMsg ->
             UpdateAnimations.update animMsg model
 
+-- --------- -------- test ----------------- ------
+        StartSpriteTestAnim ->
+          let
+              test = Debug.log "called StartSpriteTestAnim section of update" model.spriteStyle
+          in
+            ( { model | spriteStyle = Animation.interrupt [Animations.circleLoop] model.spriteStyle }
+            , Cmd.none
+            )
+
+        StartTestSpriteBounce ->
+          let
+              test = Debug.log "called StartTestSpriteBounce section of update" model.circleBounceStyle
+          in
+            ( { model | circleBounceStyle = Animation.interrupt Animations.circleBounce model.circleBounceStyle }
+            , Cmd.none
+            )
+
+
+        TestSpriteAnim animMsg ->
+          let
+              (newStyle, cmd) = Animation.Messenger.update animMsg model.spriteStyle
+          in
+            ( { model | spriteStyle = newStyle } , cmd )
+
+        TestSpriteBounce animMsg ->
+          let
+              (newStyle, cmd) = Animation.Messenger.update animMsg model.circleBounceStyle
+          in
+            ( { model | circleBounceStyle = newStyle } , cmd )
+
+
 
 -- Edge case: starting the timer when game begins shouldn't update answerSpeed
 getNewAnswerSpeed startTime currentTime =
@@ -235,6 +274,9 @@ subscriptions model =
         , fakeHandleNoteReleased NoteReleased
         , Animation.subscription (Animate << CorrectNoteStyle) [ model.correctNoteStyle ]
         , Animation.subscription (Animate << CurrentNoteStyle) [ model.currentNoteStyle ]
+        -- TEST: 
+        , Animation.subscription TestSpriteAnim [ model.spriteStyle ]
+        , Animation.subscription TestSpriteBounce [ model.circleBounceStyle ]
         ]
 
 

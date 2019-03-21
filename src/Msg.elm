@@ -21,4 +21,7 @@ type Msg
    
     -- test: delete this!
     | TestTick Time.Posix
-
+    | StartSpriteTestAnim
+    | TestSpriteAnim Animation.Msg
+    | StartTestSpriteBounce
+    | TestSpriteBounce Animation.Msg

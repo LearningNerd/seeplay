@@ -5527,8 +5527,44 @@ var author$project$Note$createNote = function (midiCode) {
 		noteName: author$project$Note$midiToNoteName(midiCode)
 	};
 };
+var mdgriffith$elm_style_animation$Animation$length4 = F5(
+	function (name, _n0, _n1, _n2, _n3) {
+		var val = _n0.a;
+		var len = _n0.b;
+		var val2 = _n1.a;
+		var len2 = _n1.b;
+		var val3 = _n2.a;
+		var len3 = _n2.b;
+		var val4 = _n3.a;
+		var len4 = _n3.b;
+		return A5(
+			mdgriffith$elm_style_animation$Animation$Model$Property4,
+			name,
+			A2(mdgriffith$elm_style_animation$Animation$initMotion, val, len),
+			A2(mdgriffith$elm_style_animation$Animation$initMotion, val2, len2),
+			A2(mdgriffith$elm_style_animation$Animation$initMotion, val3, len3),
+			A2(mdgriffith$elm_style_animation$Animation$initMotion, val4, len4));
+	});
+var mdgriffith$elm_style_animation$Animation$viewBox = F4(
+	function (w_, x_, y_, z_) {
+		return A5(
+			mdgriffith$elm_style_animation$Animation$length4,
+			'viewBox',
+			_Utils_Tuple2(w_, ''),
+			_Utils_Tuple2(x_, ''),
+			_Utils_Tuple2(y_, ''),
+			_Utils_Tuple2(z_, ''));
+	});
+var mdgriffith$elm_style_animation$Animation$y = function (y_) {
+	return A3(mdgriffith$elm_style_animation$Animation$custom, 'y', y_, '');
+};
 var author$project$Model$initialModel = {
 	answerSpeed: 0,
+	circleBounceStyle: mdgriffith$elm_style_animation$Animation$style(
+		_List_fromArray(
+			[
+				mdgriffith$elm_style_animation$Animation$y(50)
+			])),
 	correctNote: author$project$Note$createNote(60),
 	correctNoteStyle: author$project$Animations$initialCorrectNoteStyle,
 	currentNote: elm$core$Maybe$Nothing,
@@ -5539,6 +5575,11 @@ var author$project$Model$initialModel = {
 	score: 0,
 	scoreList: _List_Nil,
 	sessionId: 0,
+	spriteStyle: mdgriffith$elm_style_animation$Animation$style(
+		_List_fromArray(
+			[
+				A4(mdgriffith$elm_style_animation$Animation$viewBox, 0, 0, 50, 50)
+			])),
 	startTimestamp: elm$core$Maybe$Nothing,
 	style: mdgriffith$elm_style_animation$Animation$style(
 		_List_fromArray(
@@ -6020,6 +6061,12 @@ var author$project$Msg$NotePressed = function (a) {
 };
 var author$project$Msg$NoteReleased = function (a) {
 	return {$: 'NoteReleased', a: a};
+};
+var author$project$Msg$TestSpriteAnim = function (a) {
+	return {$: 'TestSpriteAnim', a: a};
+};
+var author$project$Msg$TestSpriteBounce = function (a) {
+	return {$: 'TestSpriteBounce', a: a};
 };
 var author$project$Msg$TestTick = function (a) {
 	return {$: 'TestTick', a: a};
@@ -6820,9 +6867,94 @@ var author$project$Main$subscriptions = function (model) {
 				mdgriffith$elm_style_animation$Animation$subscription,
 				A2(elm$core$Basics$composeL, author$project$Msg$Animate, author$project$Msg$CurrentNoteStyle),
 				_List_fromArray(
-					[model.currentNoteStyle]))
+					[model.currentNoteStyle])),
+				A2(
+				mdgriffith$elm_style_animation$Animation$subscription,
+				author$project$Msg$TestSpriteAnim,
+				_List_fromArray(
+					[model.spriteStyle])),
+				A2(
+				mdgriffith$elm_style_animation$Animation$subscription,
+				author$project$Msg$TestSpriteBounce,
+				_List_fromArray(
+					[model.circleBounceStyle]))
 			]));
 };
+var mdgriffith$elm_style_animation$Animation$Model$To = function (a) {
+	return {$: 'To', a: a};
+};
+var mdgriffith$elm_style_animation$Animation$to = function (props) {
+	return mdgriffith$elm_style_animation$Animation$Model$To(props);
+};
+var mdgriffith$elm_style_animation$Animation$Model$Wait = function (a) {
+	return {$: 'Wait', a: a};
+};
+var mdgriffith$elm_style_animation$Animation$wait = function (till) {
+	return mdgriffith$elm_style_animation$Animation$Model$Wait(till);
+};
+var author$project$Animations$circleBounce = _List_fromArray(
+	[
+		mdgriffith$elm_style_animation$Animation$to(
+		_List_fromArray(
+			[
+				mdgriffith$elm_style_animation$Animation$y(150)
+			])),
+		mdgriffith$elm_style_animation$Animation$to(
+		_List_fromArray(
+			[
+				mdgriffith$elm_style_animation$Animation$y(50)
+			])),
+		mdgriffith$elm_style_animation$Animation$wait(
+		elm$time$Time$millisToPosix(50))
+	]);
+var elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3(elm$core$List$foldr, elm$core$List$cons, ys, xs);
+		}
+	});
+var elm$core$List$concat = function (lists) {
+	return A3(elm$core$List$foldr, elm$core$List$append, _List_Nil, lists);
+};
+var elm$core$List$concatMap = F2(
+	function (f, list) {
+		return elm$core$List$concat(
+			A2(elm$core$List$map, f, list));
+	});
+var mdgriffith$elm_style_animation$Animation$Model$Loop = function (a) {
+	return {$: 'Loop', a: a};
+};
+var mdgriffith$elm_style_animation$Animation$loop = function (steps) {
+	return mdgriffith$elm_style_animation$Animation$Model$Loop(steps);
+};
+var mdgriffith$elm_style_animation$Animation$Model$Set = function (a) {
+	return {$: 'Set', a: a};
+};
+var mdgriffith$elm_style_animation$Animation$set = function (props) {
+	return mdgriffith$elm_style_animation$Animation$Model$Set(props);
+};
+var author$project$Animations$spriteLoop = F4(
+	function (delayMillis, spriteWidth, spriteHeight, numSprites) {
+		var loopForwardHalf = A2(
+			elm$core$List$concatMap,
+			function (i) {
+				return _List_fromArray(
+					[
+						mdgriffith$elm_style_animation$Animation$set(
+						_List_fromArray(
+							[
+								A4(mdgriffith$elm_style_animation$Animation$viewBox, spriteWidth * i, 0.0, spriteWidth, spriteHeight)
+							])),
+						mdgriffith$elm_style_animation$Animation$wait(
+						elm$time$Time$millisToPosix(delayMillis))
+					]);
+			},
+			A2(elm$core$List$range, 0, numSprites - 1));
+		return mdgriffith$elm_style_animation$Animation$loop(loopForwardHalf);
+	});
+var author$project$Animations$circleLoop = A4(author$project$Animations$spriteLoop, 500, 50, 50, 3);
 var author$project$Color$green = A3(author$project$Color$rgb, 0, 255, 0);
 var author$project$Main$cache = _Platform_outgoingPort('cache', elm$core$Basics$identity);
 var elm$json$Json$Encode$int = _Json_wrap;
@@ -6939,17 +7071,11 @@ var elm$core$List$drop = F2(
 			}
 		}
 	});
-var mdgriffith$elm_style_animation$Animation$Model$Loop = function (a) {
-	return {$: 'Loop', a: a};
-};
 var mdgriffith$elm_style_animation$Animation$Model$Repeat = F2(
 	function (a, b) {
 		return {$: 'Repeat', a: a, b: b};
 	});
 var mdgriffith$elm_style_animation$Animation$Model$Step = {$: 'Step'};
-var mdgriffith$elm_style_animation$Animation$Model$Wait = function (a) {
-	return {$: 'Wait', a: a};
-};
 var elm$core$Maybe$withDefault = F2(
 	function (_default, maybe) {
 		if (maybe.$ === 'Just') {
@@ -8452,6 +8578,7 @@ var author$project$UpdateAnimations$update = F2(
 				cmd);
 		}
 	});
+var elm$core$Debug$log = _Debug_log;
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var elm$json$Json$Encode$list = F2(
 	function (func, entries) {
@@ -8501,21 +8628,6 @@ var mdgriffith$elm_style_animation$Animation$interrupt = F2(
 					running: true
 				}));
 	});
-var mdgriffith$elm_style_animation$Animation$Model$Set = function (a) {
-	return {$: 'Set', a: a};
-};
-var mdgriffith$elm_style_animation$Animation$set = function (props) {
-	return mdgriffith$elm_style_animation$Animation$Model$Set(props);
-};
-var mdgriffith$elm_style_animation$Animation$Model$To = function (a) {
-	return {$: 'To', a: a};
-};
-var mdgriffith$elm_style_animation$Animation$to = function (props) {
-	return mdgriffith$elm_style_animation$Animation$Model$To(props);
-};
-var mdgriffith$elm_style_animation$Animation$wait = function (till) {
-	return mdgriffith$elm_style_animation$Animation$Model$Wait(till);
-};
 var mdgriffith$elm_style_animation$Animation$Model$Send = function (a) {
 	return {$: 'Send', a: a};
 };
@@ -8691,11 +8803,55 @@ var author$project$Main$update = F2(
 							testCurrentTimestamp: elm$core$Maybe$Just(currentTimestamp)
 						}),
 					elm$core$Platform$Cmd$none);
-			default:
+			case 'Animate':
 				var animMsg = msg.a;
 				return A2(author$project$UpdateAnimations$update, animMsg, model);
+			case 'StartSpriteTestAnim':
+				var test = A2(elm$core$Debug$log, 'called StartSpriteTestAnim section of update', model.spriteStyle);
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							spriteStyle: A2(
+								mdgriffith$elm_style_animation$Animation$interrupt,
+								_List_fromArray(
+									[author$project$Animations$circleLoop]),
+								model.spriteStyle)
+						}),
+					elm$core$Platform$Cmd$none);
+			case 'StartTestSpriteBounce':
+				var test = A2(elm$core$Debug$log, 'called StartTestSpriteBounce section of update', model.circleBounceStyle);
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							circleBounceStyle: A2(mdgriffith$elm_style_animation$Animation$interrupt, author$project$Animations$circleBounce, model.circleBounceStyle)
+						}),
+					elm$core$Platform$Cmd$none);
+			case 'TestSpriteAnim':
+				var animMsg = msg.a;
+				var _n1 = A2(mdgriffith$elm_style_animation$Animation$Messenger$update, animMsg, model.spriteStyle);
+				var newStyle = _n1.a;
+				var cmd = _n1.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{spriteStyle: newStyle}),
+					cmd);
+			default:
+				var animMsg = msg.a;
+				var _n2 = A2(mdgriffith$elm_style_animation$Animation$Messenger$update, animMsg, model.circleBounceStyle);
+				var newStyle = _n2.a;
+				var cmd = _n2.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{circleBounceStyle: newStyle}),
+					cmd);
 		}
 	});
+var author$project$Msg$StartSpriteTestAnim = {$: 'StartSpriteTestAnim'};
+var author$project$Msg$StartTestSpriteBounce = {$: 'StartTestSpriteBounce'};
 var elm$core$String$fromFloat = _String_fromNumber;
 var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
 var elm$svg$Svg$line = elm$svg$Svg$trustedNode('line');
@@ -8785,22 +8941,6 @@ var elm$svg$Svg$circle = elm$svg$Svg$trustedNode('circle');
 var elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
 var elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
 var elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
-var elm$core$List$append = F2(
-	function (xs, ys) {
-		if (!ys.b) {
-			return xs;
-		} else {
-			return A3(elm$core$List$foldr, elm$core$List$cons, ys, xs);
-		}
-	});
-var elm$core$List$concat = function (lists) {
-	return A3(elm$core$List$foldr, elm$core$List$append, _List_Nil, lists);
-};
-var elm$core$List$concatMap = F2(
-	function (f, list) {
-		return elm$core$List$concat(
-			A2(elm$core$List$map, f, list));
-	});
 var elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
 var mdgriffith$elm_style_animation$Animation$Render$iePrefix = '-ms-';
@@ -9536,6 +9676,72 @@ var author$project$View$StartScreen$view = function (model) {
 					]))
 			]));
 };
+var elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
+var author$project$View$TestSprite$drawCircle = function (_n0) {
+	var color = _n0.a;
+	var pos = _n0.b;
+	return A2(
+		elm$svg$Svg$circle,
+		_List_fromArray(
+			[
+				elm$svg$Svg$Attributes$cx(
+				elm$core$String$fromInt((pos * 50) + 25)),
+				elm$svg$Svg$Attributes$cy('25'),
+				elm$svg$Svg$Attributes$r('25'),
+				elm$svg$Svg$Attributes$fill(color)
+			]),
+		_List_Nil);
+};
+var author$project$View$TestSprite$circleSpriteSvg = F3(
+	function (xPos, yPos, model) {
+		var spriteWidth = 50;
+		var spriteHeight = 50;
+		return A2(
+			elm$svg$Svg$svg,
+			_Utils_ap(
+				mdgriffith$elm_style_animation$Animation$render(model.spriteStyle),
+				_Utils_ap(
+					mdgriffith$elm_style_animation$Animation$render(model.circleBounceStyle),
+					_List_fromArray(
+						[
+							elm$svg$Svg$Attributes$x(
+							elm$core$String$fromInt(xPos)),
+							elm$svg$Svg$Attributes$width(
+							elm$core$String$fromInt(spriteWidth)),
+							elm$svg$Svg$Attributes$height(
+							elm$core$String$fromInt(spriteHeight))
+						]))),
+			A2(
+				elm$core$List$map,
+				author$project$View$TestSprite$drawCircle,
+				_List_fromArray(
+					[
+						_Utils_Tuple2('red', 0),
+						_Utils_Tuple2('blue', 1),
+						_Utils_Tuple2('green', 2)
+					])));
+	});
+var author$project$View$TestSprite$view = function (model) {
+	return A2(
+		elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				elm$svg$Svg$svg,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$width('500'),
+						elm$svg$Svg$Attributes$height('500'),
+						elm$svg$Svg$Attributes$viewBox('0 0 500 500'),
+						elm$svg$Svg$Attributes$class('center')
+					]),
+				_List_fromArray(
+					[
+						A3(author$project$View$TestSprite$circleSpriteSvg, 200, 100, model)
+					]))
+			]));
+};
 var elm$html$Html$main_ = _VirtualDom_node('main');
 var author$project$Main$view = function (model) {
 	return A2(
@@ -9552,10 +9758,30 @@ var author$project$Main$view = function (model) {
 					]),
 				_List_fromArray(
 					[
+						A2(
+						elm$html$Html$p,
+						_List_fromArray(
+							[
+								elm$html$Html$Events$onClick(author$project$Msg$StartSpriteTestAnim)
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('hey click me!')
+							])),
+						A2(
+						elm$html$Html$p,
+						_List_fromArray(
+							[
+								elm$html$Html$Events$onClick(author$project$Msg$StartTestSpriteBounce)
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('  ...and then click me too!')
+							])),
 						function () {
 						var _n0 = model.isMIDIConnected;
 						if (_n0.$ === 'Nothing') {
-							return author$project$View$MidiStatus$view(model);
+							return author$project$View$TestSprite$view(model);
 						} else {
 							if (!_n0.a) {
 								return author$project$View$MidiStatus$view(model);

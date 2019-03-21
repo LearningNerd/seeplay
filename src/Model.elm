@@ -25,6 +25,10 @@ type alias Model =
     , style : Animation.Messenger.State Msg
     , currentNoteStyle : Animation.Messenger.State Msg
     , correctNoteStyle : Animation.Messenger.State Msg
+
+    -- TEST:
+    , spriteStyle : Animation.Messenger.State Msg
+    , circleBounceStyle : Animation.Messenger.State Msg
     }
 
 type alias Score =
@@ -54,5 +58,9 @@ initialModel =
     , style = Animation.style [ Animation.opacity 1.0 ]
     , currentNoteStyle = Animations.initialCurrentNoteStyle
     , correctNoteStyle = Animations.initialCorrectNoteStyle
+
+    -- TEST:
+    , spriteStyle = Animation.style [ Animation.viewBox 0 0 50 50 ]
+    , circleBounceStyle = Animation.style [Animation.y 50 ]
     }
 
