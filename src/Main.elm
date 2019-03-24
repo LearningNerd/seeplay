@@ -131,7 +131,7 @@ update msg model =
         -- called when page loads to initialize correctNote, and again on each correct note played!
         GenerateTargetNotes midiCodeList ->
           let
-            targetNotes = List.map Note.createNote midiCodeList
+            targetNotes = Array.fromList (List.map Note.createNote midiCodeList)
             test = Debug.log "targetnotes: " targetNotes
           in
             ( { model | targetNotes = targetNotes -- List.map Note.createNote midiCodeList
@@ -218,11 +218,8 @@ update msg model =
 updateNotePressed noteCode model =
   let
     newCurrentNote = Note.createNote noteCode
-    (nextTargetNote, remainingTargetNotes) = getListParts model.targetNotes
-    
+    nextTargetNote = getNextTargetNote model.nextTargetNoteIndex model.targetNotes
     isCorrect = getIsCorrect nextTargetNote (Just newCurrentNote)
-
-    newTargetNotes = if isCorrect then (remainingTargetNotes) else model.targetNotes
     
     newNextTargetNoteIndex = if isCorrect then (model.nextTargetNoteIndex + 1) else model.nextTargetNoteIndex
 
@@ -240,18 +237,15 @@ updateNotePressed noteCode model =
     ( { model
         | currentNote =
             Just newCurrentNote
-        , targetNotes = newTargetNotes
         , nextTargetNoteIndex = newNextTargetNoteIndex
         , score =
             if isCorrect then model.score + 1 else model.score
         , incorrectTries =
             if isCorrect then model.incorrectTries else model.incorrectTries + 1
         , currentNoteStyle = newCurrentNoteStyle
-{-- test with no scrolling
-      , gameLevelScrollState = Animation.interrupt [
+        , gameLevelScrollState = Animation.interrupt [
           Animations.scrollGameLevel newNextTargetNoteIndex
           ] model.gameLevelScrollState
---}
       }
 
     -- , nextCommand
@@ -277,13 +271,14 @@ convertScoreToJSON session =
   , ("incorrectTries", E.int session.incorrectTries)
   ]
 
--- TODO: need to add logic to END THE GAME when on the last note or something like that
-getListParts list =
-  case list of
-    (h :: t) -> (h, t)
-    [] -> (Note.createNote 60, []) -- for now... default to C4, lol!
 
-
+getNextTargetNote index targetNotesArray = 
+  let 
+      next = Array.get index targetNotesArray
+  in
+    case next of
+      Nothing -> Note.createNote 60 -- temporary fix =P last note is always C4 ?
+      Just n -> n
 
 -- SUBSCRIPTIONS
 

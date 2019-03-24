@@ -1,6 +1,6 @@
 module Config exposing (..)
 
-noteXInterval = 100
+noteXInterval = 200
 
 svgViewWidth = 500
 svgViewHeight = 200

@@ -1,6 +1,7 @@
 module Model exposing (..)
 
 
+import Array exposing (..)
 import Time
 import Msg exposing (..)
 import Config
@@ -15,7 +16,7 @@ type alias Model =
     { isMIDIConnected : Maybe Bool
     , isPlaying : Bool
     , correctNote : Note
-    , targetNotes : List Note
+    , targetNotes : Array Note
     , nextTargetNoteIndex : Int
     , currentNote : Maybe Note
     , score : Int
@@ -50,7 +51,7 @@ initialModel =
     { isMIDIConnected = Nothing
     , isPlaying = False
     , correctNote = Note.createNote 60
-    , targetNotes = []
+    , targetNotes = Array.empty
     , nextTargetNoteIndex = 0
     , currentNote = Nothing
     , score = 0

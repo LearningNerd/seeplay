@@ -5592,7 +5592,7 @@ var author$project$Model$initialModel = {
 			[
 				mdgriffith$elm_style_animation$Animation$opacity(1.0)
 			])),
-	targetNotes: _List_Nil,
+	targetNotes: elm$core$Array$empty,
 	testCurrentTimestamp: elm$core$Maybe$Nothing
 };
 var author$project$Msg$GenerateTargetNotes = function (a) {
@@ -6979,7 +6979,7 @@ var author$project$Animations$spriteLoop = F4(
 		return mdgriffith$elm_style_animation$Animation$loop(loopForwardHalf);
 	});
 var author$project$Animations$coinLoop = A4(author$project$Animations$spriteLoop, 100, 16, 16, 4);
-var author$project$Config$noteXInterval = 100;
+var author$project$Config$noteXInterval = 200;
 var elm$core$Debug$log = _Debug_log;
 var mdgriffith$elm_style_animation$Animation$Model$To = function (a) {
 	return {$: 'To', a: a};
@@ -7044,17 +7044,16 @@ var author$project$Main$getIsCorrect = F2(
 			return _Utils_eq(n.midi, correctNote.midi) ? true : false;
 		}
 	});
-var author$project$Main$getListParts = function (list) {
-	if (list.b) {
-		var h = list.a;
-		var t = list.b;
-		return _Utils_Tuple2(h, t);
-	} else {
-		return _Utils_Tuple2(
-			author$project$Note$createNote(60),
-			_List_Nil);
-	}
-};
+var author$project$Main$getNextTargetNote = F2(
+	function (index, targetNotesArray) {
+		var next = A2(elm$core$Array$get, index, targetNotesArray);
+		if (next.$ === 'Nothing') {
+			return author$project$Note$createNote(60);
+		} else {
+			var n = next.a;
+			return n;
+		}
+	});
 var elm$core$Platform$Cmd$batch = _Platform_batch;
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var elm$core$List$drop = F2(
@@ -7119,10 +7118,8 @@ var mdgriffith$elm_style_animation$Animation$interrupt = F2(
 	});
 var author$project$Main$updateNotePressed = F2(
 	function (noteCode, model) {
+		var nextTargetNote = A2(author$project$Main$getNextTargetNote, model.nextTargetNoteIndex, model.targetNotes);
 		var newCurrentNote = author$project$Note$createNote(noteCode);
-		var _n0 = author$project$Main$getListParts(model.targetNotes);
-		var nextTargetNote = _n0.a;
-		var remainingTargetNotes = _n0.b;
 		var isCorrect = A2(
 			author$project$Main$getIsCorrect,
 			nextTargetNote,
@@ -7145,17 +7142,22 @@ var author$project$Main$updateNotePressed = F2(
 			model.currentNoteStyle);
 		var newNextTargetNoteIndex = isCorrect ? (model.nextTargetNoteIndex + 1) : model.nextTargetNoteIndex;
 		var test = A2(elm$core$Debug$log, 'new next target note index: ', newNextTargetNoteIndex);
-		var newTargetNotes = isCorrect ? remainingTargetNotes : model.targetNotes;
 		return _Utils_Tuple2(
 			_Utils_update(
 				model,
 				{
 					currentNote: elm$core$Maybe$Just(newCurrentNote),
 					currentNoteStyle: newCurrentNoteStyle,
+					gameLevelScrollState: A2(
+						mdgriffith$elm_style_animation$Animation$interrupt,
+						_List_fromArray(
+							[
+								author$project$Animations$scrollGameLevel(newNextTargetNoteIndex)
+							]),
+						model.gameLevelScrollState),
 					incorrectTries: isCorrect ? model.incorrectTries : (model.incorrectTries + 1),
 					nextTargetNoteIndex: newNextTargetNoteIndex,
-					score: isCorrect ? (model.score + 1) : model.score,
-					targetNotes: newTargetNotes
+					score: isCorrect ? (model.score + 1) : model.score
 				}),
 			elm$core$Platform$Cmd$none);
 	});
@@ -8789,7 +8791,8 @@ var author$project$Main$update = F2(
 					A2(elm$core$Task$perform, author$project$Msg$RestartTimer, elm$time$Time$now));
 			case 'GenerateTargetNotes':
 				var midiCodeList = msg.a;
-				var targetNotes = A2(elm$core$List$map, author$project$Note$createNote, midiCodeList);
+				var targetNotes = elm$core$Array$fromList(
+					A2(elm$core$List$map, author$project$Note$createNote, midiCodeList));
 				var test = A2(elm$core$Debug$log, 'targetnotes: ', targetNotes);
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -9558,7 +9561,7 @@ var author$project$View$Note$drawAllNotes = F5(
 		return A2(
 			elm$core$List$indexedMap,
 			A3(author$project$View$Note$drawNote, lineHeight, margins, animStyle),
-			noteList);
+			elm$core$Array$toList(noteList));
 	});
 var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
 var elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');

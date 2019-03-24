@@ -10,6 +10,7 @@ import Svg exposing (..)
 import Svg.Attributes as S exposing (..)
 import Animation
 import Animation.Messenger
+import Array exposing (Array)
 
 import Note exposing (Note)
 
@@ -53,8 +54,8 @@ getNoteHeight midiCode =
     _ -> 12
 
 
-drawAllNotes : Float -> Float -> Margins -> (Animation.Messenger.State Msg) -> List Note -> List (Svg msg)
+drawAllNotes : Float -> Float -> Margins -> (Animation.Messenger.State Msg) -> Array Note -> List (Svg msg)
 drawAllNotes staffWidth lineHeight margins animStyle noteList =
-    List.indexedMap (drawNote lineHeight margins animStyle) noteList
+    List.indexedMap (drawNote lineHeight margins animStyle) (Array.toList noteList)
 -- (List.map toFloat (List.range 1 12))
 
