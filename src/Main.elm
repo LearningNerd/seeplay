@@ -247,10 +247,13 @@ updateNotePressed noteCode model =
         , incorrectTries =
             if isCorrect then model.incorrectTries else model.incorrectTries + 1
         , currentNoteStyle = newCurrentNoteStyle
-        , gameLevelScrollState = Animation.interrupt [
+{-- test with no scrolling
+      , gameLevelScrollState = Animation.interrupt [
           Animations.scrollGameLevel newNextTargetNoteIndex
           ] model.gameLevelScrollState
+--}
       }
+
     -- , nextCommand
     , Cmd.none
     )

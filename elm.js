@@ -7152,13 +7152,6 @@ var author$project$Main$updateNotePressed = F2(
 				{
 					currentNote: elm$core$Maybe$Just(newCurrentNote),
 					currentNoteStyle: newCurrentNoteStyle,
-					gameLevelScrollState: A2(
-						mdgriffith$elm_style_animation$Animation$interrupt,
-						_List_fromArray(
-							[
-								author$project$Animations$scrollGameLevel(newNextTargetNoteIndex)
-							]),
-						model.gameLevelScrollState),
 					incorrectTries: isCorrect ? model.incorrectTries : (model.incorrectTries + 1),
 					nextTargetNoteIndex: newNextTargetNoteIndex,
 					score: isCorrect ? (model.score + 1) : model.score,
