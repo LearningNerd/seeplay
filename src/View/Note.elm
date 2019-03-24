@@ -1,5 +1,6 @@
-module View.Note exposing (drawNote)
+module View.Note exposing (drawNote, drawAllNotes)
 
+import Config
 import Model exposing (Model, Margins)
 import Msg exposing (..)
 import Html as HTML exposing (..)
@@ -13,14 +14,15 @@ import Animation.Messenger
 import Note exposing (Note)
 
 
-drawNote : Float -> Float -> Margins -> Note -> (Animation.Messenger.State Msg) -> Svg msg
-drawNote staffWidth lineHeight margins note animStyle =
+
+drawNote : Float -> Margins -> (Animation.Messenger.State Msg) -> Int -> Note -> Svg msg
+drawNote lineHeight margins animStyle xPosIndex note =
     let
         yPosFloat =
             toFloat (getNoteHeight note.midi)
     
         cxString =
-            String.fromFloat (staffWidth/2)
+            String.fromFloat (margins.left + ((toFloat xPosIndex) * (toFloat Config.noteXInterval) ) )
 
         cyString =
             String.fromFloat (margins.top + (yPosFloat * lineHeight / 2))
@@ -51,11 +53,8 @@ getNoteHeight midiCode =
     _ -> 12
 
 
-{--
-
-allNotes : Float -> Float -> Margins -> List (Svg msg)
-allNotes staffWidth lineHeight margins =
-    List.map (drawNote staffWidth lineHeight margins) (List.range 60 60)
---}
+drawAllNotes : Float -> Float -> Margins -> (Animation.Messenger.State Msg) -> List Note -> List (Svg msg)
+drawAllNotes staffWidth lineHeight margins animStyle noteList =
+    List.indexedMap (drawNote lineHeight margins animStyle) noteList
 -- (List.map toFloat (List.range 1 12))
 

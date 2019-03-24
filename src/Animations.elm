@@ -1,5 +1,6 @@
 module Animations exposing (..)
 
+import Config
 import Animation
 import Color
 import Time
@@ -28,4 +29,12 @@ spriteLoop delayMillis spriteWidth spriteHeight numSprites =
 
 coinLoop = spriteLoop 100 16 16 4
 -- **** store the above, and starting locations of each sprite also???
+
+-- scrollGameLevel : Int -> Animation.Step
+scrollGameLevel nextNoteIndex =
+  let
+      nextViewBoxStartPos = ((toFloat nextNoteIndex) * Config.noteXInterval)
+      test = Debug.log "next xPos: " nextViewBoxStartPos
+  in
+    Animation.to [ Animation.viewBox nextViewBoxStartPos 0 Config.svgViewTotalWidth Config.svgViewTotalHeight ]
 

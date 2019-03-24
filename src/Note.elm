@@ -20,6 +20,23 @@ createNote midiCode =
     , frequency = midiToFrequency midiCode
     }
 
+-- Generate list of [num] random midi codes
+getRandomMidiList : Int -> Random.Generator (List Int)
+getRandomMidiList num =
+  Random.list num <| Random.uniform 60 [ 62
+   , 64
+   , 65
+   , 67
+   , 69
+   , 71
+   , 72
+   , 74
+   , 76
+   , 77
+   , 79
+   ]
+
+
 getRandomMidi : Random.Generator Int
 getRandomMidi =
   Random.uniform 60 [

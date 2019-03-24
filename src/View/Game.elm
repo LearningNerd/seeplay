@@ -1,5 +1,6 @@
 module View.Game exposing (view)
 
+import Config
 import Model exposing (Model, Margins)
 import Msg exposing (..)
 import Html as HTML exposing (..)
@@ -7,12 +8,14 @@ import Html.Attributes as A exposing (..)
 import Html.Events exposing (..)
 import Svg exposing (..)
 import Svg.Attributes as S exposing (..)
+import Animation
+import Animation.Messenger
 
 import View.Note
 
 view : Model -> Html Msg
 view model =
-    svgView model 500 200 { top = 50, left = 50, bottom = 50, right = 50 }
+    svgView model Config.svgViewWidth Config.svgViewHeight { top = Config.topMargin, left = Config.leftMargin, bottom = Config.bottomMargin, right = Config.rightMargin }
 
 
 svgView : Model -> Float -> Float -> Margins -> Svg Msg
@@ -21,16 +24,24 @@ svgView model width height margins =
         lineHeight =
             height / 6
 
-        widthS =
-            String.fromFloat (width + margins.left + margins.right)
+        svgWidth =
+            Config.svgViewTotalWidth
+
+        widthS = String.fromFloat svgWidth
 
         heightS =
-            String.fromFloat (height + margins.top + margins.bottom)
+            String.fromFloat Config.svgViewTotalHeight
         
-        drawNoteFunc = View.Note.drawNote width lineHeight margins
+        drawNoteFunc = View.Note.drawNote lineHeight margins
+
+        svgListAllNotes = View.Note.drawAllNotes width lineHeight margins model.correctNoteStyle model.targetNotes
+
+        -- animate viewBox to scroll game level with all notes drawn inside
+        gameLevelSvg = svg ( [S.width widthS, S.height heightS, S.x "150", S.y "0"] ++ Animation.render model.gameLevelScrollState) svgListAllNotes
+
         currentNoteDrawing = case model.currentNote of
                                  Nothing -> []
-                                 Just n -> [ drawNoteFunc n model.currentNoteStyle ]
+                                 Just n -> [ drawNoteFunc model.currentNoteStyle 100 n ]
     in
     svg
         [ S.width widthS
@@ -38,9 +49,17 @@ svgView model width height margins =
         , S.viewBox ("0 0 " ++ widthS ++ " " ++ heightS)
         , S.class "center"
         ]
-        ((staff width lineHeight margins ++ [drawNoteFunc model.correctNote model.correctNoteStyle])
-            ++ currentNoteDrawing ++ [ trebleClef 50 237 ]
-        )
+        (
+          (backgroundStatic width lineHeight margins)
+           ++ [gameLevelSvg]
+           ++ currentNoteDrawing
+        ) 
+
+
+-- Treble clef and staff are static, other stuff scrolls on top
+backgroundStatic width lineHeight margins = 
+    (drawStaff width lineHeight margins)
+    ++ [ trebleClef 50 237 ]
 
 
 trebleClef x y =
@@ -70,7 +89,7 @@ staffLines staffWidth lineHeight margins yPos =
         []
 
 
-staff : Float -> Float -> Margins -> List (Svg msg)
-staff staffWidth lineHeight margins =
+drawStaff : Float -> Float -> Margins -> List (Svg msg)
+drawStaff staffWidth lineHeight margins =
     List.map (staffLines staffWidth lineHeight margins) (List.range 1 5)
 

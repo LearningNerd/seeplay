@@ -3,6 +3,7 @@ module Model exposing (..)
 
 import Time
 import Msg exposing (..)
+import Config
 import Note exposing (Note)
 import Color
 import Animations
@@ -14,6 +15,8 @@ type alias Model =
     { isMIDIConnected : Maybe Bool
     , isPlaying : Bool
     , correctNote : Note
+    , targetNotes : List Note
+    , nextTargetNoteIndex : Int
     , currentNote : Maybe Note
     , score : Int
     , startTimestamp : Maybe Time.Posix
@@ -25,6 +28,7 @@ type alias Model =
     , style : Animation.Messenger.State Msg
     , currentNoteStyle : Animation.Messenger.State Msg
     , correctNoteStyle : Animation.Messenger.State Msg
+    , gameLevelScrollState : Animation.Messenger.State Msg
 
     -- TEST:
     , coinStyle : Animation.Messenger.State Msg
@@ -46,6 +50,8 @@ initialModel =
     { isMIDIConnected = Nothing
     , isPlaying = False
     , correctNote = Note.createNote 60
+    , targetNotes = []
+    , nextTargetNoteIndex = 0
     , currentNote = Nothing
     , score = 0
     , startTimestamp = Nothing
@@ -57,6 +63,8 @@ initialModel =
     , style = Animation.style [ Animation.opacity 1.0 ]
     , currentNoteStyle = Animations.initialCurrentNoteStyle
     , correctNoteStyle = Animations.initialCorrectNoteStyle
+    -- NOTE: currently hard-coded here and in src/View/Game.elm
+    , gameLevelScrollState = Animation.style [ Animation.viewBox 0 0 Config.svgViewTotalWidth Config.svgViewTotalHeight ]
 
     -- TEST:
     , coinStyle = Animation.style [ Animation.viewBox 0 0 16 16 ]

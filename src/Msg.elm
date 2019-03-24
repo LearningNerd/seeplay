@@ -12,6 +12,7 @@ type Msg
     | NotePressed Int
     | NoteReleased Bool
     | UpdateCorrectNote Int
+    | GenerateTargetNotes (List Int)
     | StartGame
     | RestartTimer Time.Posix
    
@@ -19,6 +20,9 @@ type Msg
     | CorrectNoteFadeAnimCompleted
     | CurrentNoteFadeAnimCompleted
    
+    | StartScrollGameLevel
+    | ScrollGameLevel Animation.Msg
+
     -- test: delete this!
     | TestTick Time.Posix
     | StartSpriteTestAnim

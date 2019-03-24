@@ -63,11 +63,13 @@ view : Model -> Html Msg
 view model =
     div [ ]
         [ View.Header.view model
-        , main_ [A.class "container"] [ Html.p [onClick StartSpriteTestAnim ] [ Html.text "hey click me!"] , case model.isMIDIConnected of
+        , main_ [A.class "container"] [ Html.p [onClick StartScrollGameLevel ] [ Html.text " click me to scroll the game level!"] , case model.isMIDIConnected of
             -- If Nothing or False (waiting to init or no MIDI available), then show the MidiStatus screen (waiting for input)
             Nothing ->
-              -- View.MidiStatus.view model
-              View.Coin.view model
+              View.MidiStatus.view model
+              -- View.Coin.view model
+              -- View.Game.view model
+
 
             Just False ->
               View.MidiStatus.view model
@@ -113,46 +115,9 @@ update msg model =
         
         CurrentNoteFadeAnimCompleted -> ( { model | currentNote = Nothing }, Cmd.none )
 
-        NotePressed noteCode ->
-            let
-                newCurrentNote = Note.createNote noteCode
-                isCorrect = getIsCorrect model.correctNote (Just newCurrentNote)
-                newCorrectNoteStyle = if isCorrect
-                    then
-                                 Animation.interrupt [ Animation.to [ Animation.fill Color.green]
-                                 , Animation.wait (Time.millisToPosix 60)
-                                 , Animation.to [ Animation.opacity 0.0 ]
-                                    -- , Animation.fill (rgb 0 0 0)
-                                    -- this doesn't work because the Anim can only send a Cmd msg, NOT execute a task
-                                    -- , Animation.Messenger.send (Task.perform RestartTimer Time.now)
-                                 , Animation.Messenger.send (CorrectNoteFadeAnimCompleted) -- <<< so this is the workaround!
-                                 ] model.correctNoteStyle
-                    else 
-                                -- model.correctNoteStyle
-                                Animations.initialCorrectNoteStyle
-                newCurrentNoteStyle = if isCorrect
-                    then
-                        Animations.initialCurrentNoteStyle
-                    else
-                        Animation.interrupt [ Animation.set [Animation.opacity 0.0 ]
-                                            , Animation.to [ Animation.opacity 0.4 ]
-                                            ]
-                                            model.currentNoteStyle
-            in
-            ( { model
-                | currentNote =
-                    Just newCurrentNote
-                , score =
-                    if isCorrect then model.score + 1 else model.score
-                , incorrectTries =
-                    if isCorrect then model.incorrectTries else model.incorrectTries + 1
-                , correctNoteStyle = newCorrectNoteStyle
-                , currentNoteStyle = newCurrentNoteStyle
-              }
-            -- , nextCommand
-            , Cmd.none
-            )
-        
+        NotePressed noteCode -> updateNotePressed noteCode model
+
+
         CorrectNoteFadeAnimCompleted ->
           ( { model | correctNoteStyle = Animation.style [ Animation.opacity 0.0, Animation.fill Color.black ] }
           , Task.perform RestartTimer Time.now
@@ -164,6 +129,18 @@ update msg model =
             )
 
         -- called when page loads to initialize correctNote, and again on each correct note played!
+        GenerateTargetNotes midiCodeList ->
+          let
+            targetNotes = List.map Note.createNote midiCodeList
+            test = Debug.log "targetnotes: " targetNotes
+          in
+            ( { model | targetNotes = targetNotes -- List.map Note.createNote midiCodeList
+              -- update model to track animation state for each generated note!!
+              }
+            , Cmd.none
+            )
+ 
+
         UpdateCorrectNote midiCode ->
             ( { model | correctNote = Note.createNote midiCode
               , correctNoteStyle = Animation.interrupt [ Animation.to [ Animation.opacity 1.0] ] model.correctNoteStyle
@@ -182,7 +159,7 @@ update msg model =
             nextCommand = if model.startTimestamp /= Nothing
                               then 
                                 Cmd.batch [ cache (E.list convertScoreToJSON (model.scoreList ++ newScoreObjectList) )
-                                , Random.generate UpdateCorrectNote Note.getRandomMidi
+                                -- , Random.generate UpdateCorrectNote Note.getRandomMidi
                                 ]
                               else Cmd.none
           in
@@ -221,6 +198,65 @@ update msg model =
 
 
 
+        StartScrollGameLevel ->
+            ( { model | gameLevelScrollState = Animation.interrupt [Animations.scrollGameLevel model.nextTargetNoteIndex] model.gameLevelScrollState }
+            , Cmd.none
+            )
+
+
+
+
+
+        ScrollGameLevel animMsg ->
+          let
+              (newStyle, cmd) = Animation.Messenger.update animMsg model.gameLevelScrollState
+          in
+            ( { model | gameLevelScrollState = newStyle } , cmd )
+
+
+
+updateNotePressed noteCode model =
+  let
+    newCurrentNote = Note.createNote noteCode
+    (nextTargetNote, remainingTargetNotes) = getListParts model.targetNotes
+    
+    isCorrect = getIsCorrect nextTargetNote (Just newCurrentNote)
+
+    newTargetNotes = if isCorrect then (remainingTargetNotes) else model.targetNotes
+    
+    newNextTargetNoteIndex = if isCorrect then (model.nextTargetNoteIndex + 1) else model.nextTargetNoteIndex
+
+    test = Debug.log "new next target note index: " newNextTargetNoteIndex
+    
+    newCurrentNoteStyle = if isCorrect
+        then
+            Animations.initialCurrentNoteStyle
+        else
+            Animation.interrupt [ Animation.set [Animation.opacity 0.0 ]
+                                , Animation.to [ Animation.opacity 0.4 ]
+                                ]
+                                model.currentNoteStyle
+  in
+    ( { model
+        | currentNote =
+            Just newCurrentNote
+        , targetNotes = newTargetNotes
+        , nextTargetNoteIndex = newNextTargetNoteIndex
+        , score =
+            if isCorrect then model.score + 1 else model.score
+        , incorrectTries =
+            if isCorrect then model.incorrectTries else model.incorrectTries + 1
+        , currentNoteStyle = newCurrentNoteStyle
+        , gameLevelScrollState = Animation.interrupt [
+          Animations.scrollGameLevel newNextTargetNoteIndex
+          ] model.gameLevelScrollState
+      }
+    -- , nextCommand
+    , Cmd.none
+    )
+
+
+
 
 -- Edge case: starting the timer when game begins shouldn't update answerSpeed
 getNewAnswerSpeed startTime currentTime =
@@ -237,6 +273,13 @@ convertScoreToJSON session =
   , ("answerSpeed", E.int session.answerSpeed)
   , ("incorrectTries", E.int session.incorrectTries)
   ]
+
+-- TODO: need to add logic to END THE GAME when on the last note or something like that
+getListParts list =
+  case list of
+    (h :: t) -> (h, t)
+    [] -> (Note.createNote 60, []) -- for now... default to C4, lol!
+
 
 
 -- SUBSCRIPTIONS
@@ -258,6 +301,8 @@ subscriptions model =
         , Animation.subscription (Animate << CurrentNoteStyle) [ model.currentNoteStyle ]
         -- TEST: 
         , Animation.subscription TestSpriteAnim [ model.coinStyle ]
+        
+        , Animation.subscription ScrollGameLevel [ model.gameLevelScrollState ]
         ]
 
 
@@ -276,8 +321,9 @@ main =
 init : Int -> ( Model, Cmd Msg )
 init initialSessionId =
     -- Get session ID from JS flag (starts at 0, or incremented from localstorage)
+    -- Generate list of random numbers
   ( { initialModel | sessionId = initialSessionId }
-    , Random.generate UpdateCorrectNote Note.getRandomMidi -- generate first note to guess on app load!
+    , Random.generate GenerateTargetNotes (Note.getRandomMidiList 10)
   )
 
 
