@@ -36,5 +36,18 @@ scrollGameLevel nextNoteIndex =
       nextViewBoxStartPos = ((toFloat nextNoteIndex) * Config.noteXInterval)
       test = Debug.log "next xPos: " nextViewBoxStartPos
   in
-    Animation.to [ Animation.viewBox nextViewBoxStartPos 0 Config.svgViewTotalWidth Config.svgViewTotalHeight ]
+    Animation.toWith
+{--
+        (Animation.easing
+            { duration = 2000
+            , ease = (\x -> x^2)
+            }
+        ) 
+--}
+        (Animation.spring
+            { stiffness = 100
+            , damping = 50
+            }
+        ) 
+        [ Animation.viewBox nextViewBoxStartPos 0 Config.svgViewTotalWidth Config.svgViewTotalHeight ]
 

@@ -4393,6 +4393,7 @@ function _Browser_load(url)
 		}
 	}));
 }
+var author$project$Config$notesPerLevel = 10;
 var author$project$Color$rgb = F3(
 	function (r, g, b) {
 		return {alpha: 1, blue: b, green: g, red: r};
@@ -5327,7 +5328,7 @@ var author$project$Config$topMargin = 50;
 var author$project$Config$svgViewTotalHeight = (author$project$Config$svgViewHeight + author$project$Config$topMargin) + author$project$Config$bottomMargin;
 var author$project$Config$leftMargin = 50;
 var author$project$Config$rightMargin = 0;
-var author$project$Config$svgViewWidth = 500;
+var author$project$Config$svgViewWidth = 700;
 var author$project$Config$svgViewTotalWidth = (author$project$Config$svgViewWidth + author$project$Config$leftMargin) + author$project$Config$rightMargin;
 var elm$core$Basics$mul = _Basics_mul;
 var elm$core$Basics$pow = _Basics_pow;
@@ -5744,7 +5745,7 @@ var author$project$Note$getRandomMidiList = function (num) {
 			elm$random$Random$uniform,
 			60,
 			_List_fromArray(
-				[62, 64, 65, 67, 69, 71, 72, 74, 76, 77, 79])));
+				[60])));
 };
 var elm$random$Random$Generate = function (a) {
 	return {$: 'Generate', a: a};
@@ -6079,7 +6080,7 @@ var author$project$Main$init = function (initialSessionId) {
 		A2(
 			elm$random$Random$generate,
 			author$project$Msg$GenerateTargetNotes,
-			author$project$Note$getRandomMidiList(10)));
+			author$project$Note$getRandomMidiList(author$project$Config$notesPerLevel)));
 };
 var elm$json$Json$Decode$bool = _Json_decodeBool;
 var author$project$Main$fakeHandleInitMIDI = _Platform_incomingPort('fakeHandleInitMIDI', elm$json$Json$Decode$bool);
@@ -6981,16 +6982,32 @@ var author$project$Animations$spriteLoop = F4(
 var author$project$Animations$coinLoop = A4(author$project$Animations$spriteLoop, 100, 16, 16, 4);
 var author$project$Config$noteXInterval = 200;
 var elm$core$Debug$log = _Debug_log;
-var mdgriffith$elm_style_animation$Animation$Model$To = function (a) {
-	return {$: 'To', a: a};
+var mdgriffith$elm_style_animation$Animation$spring = function (settings) {
+	return mdgriffith$elm_style_animation$Animation$Model$Spring(settings);
 };
-var mdgriffith$elm_style_animation$Animation$to = function (props) {
-	return mdgriffith$elm_style_animation$Animation$Model$To(props);
+var mdgriffith$elm_style_animation$Animation$Model$ToWith = function (a) {
+	return {$: 'ToWith', a: a};
 };
+var mdgriffith$elm_style_animation$Animation$toWith = F2(
+	function (interp, props) {
+		return mdgriffith$elm_style_animation$Animation$Model$ToWith(
+			A2(
+				elm$core$List$map,
+				mdgriffith$elm_style_animation$Animation$Model$mapToMotion(
+					function (m) {
+						return _Utils_update(
+							m,
+							{interpolation: interp});
+					}),
+				props));
+	});
 var author$project$Animations$scrollGameLevel = function (nextNoteIndex) {
 	var nextViewBoxStartPos = nextNoteIndex * author$project$Config$noteXInterval;
 	var test = A2(elm$core$Debug$log, 'next xPos: ', nextViewBoxStartPos);
-	return mdgriffith$elm_style_animation$Animation$to(
+	return A2(
+		mdgriffith$elm_style_animation$Animation$toWith,
+		mdgriffith$elm_style_animation$Animation$spring(
+			{damping: 50, stiffness: 100}),
 		_List_fromArray(
 			[
 				A4(mdgriffith$elm_style_animation$Animation$viewBox, nextViewBoxStartPos, 0, author$project$Config$svgViewTotalWidth, author$project$Config$svgViewTotalHeight)
@@ -7116,6 +7133,12 @@ var mdgriffith$elm_style_animation$Animation$interrupt = F2(
 					running: true
 				}));
 	});
+var mdgriffith$elm_style_animation$Animation$Model$To = function (a) {
+	return {$: 'To', a: a};
+};
+var mdgriffith$elm_style_animation$Animation$to = function (props) {
+	return mdgriffith$elm_style_animation$Animation$Model$To(props);
+};
 var author$project$Main$updateNotePressed = F2(
 	function (noteCode, model) {
 		var nextTargetNote = A2(author$project$Main$getNextTargetNote, model.nextTargetNoteIndex, model.targetNotes);

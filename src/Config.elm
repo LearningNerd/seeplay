@@ -1,8 +1,10 @@
 module Config exposing (..)
 
+notesPerLevel = 10
+
 noteXInterval = 200
 
-svgViewWidth = 500
+svgViewWidth = 700
 svgViewHeight = 200
 
 topMargin = 50
