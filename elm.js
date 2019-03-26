@@ -5322,6 +5322,9 @@ var author$project$Animations$initialCurrentNoteStyle = mdgriffith$elm_style_ani
 			mdgriffith$elm_style_animation$Animation$opacity(0.0),
 			mdgriffith$elm_style_animation$Animation$fill(author$project$Color$red)
 		]));
+var author$project$Model$coinStyle = 'coinStyle';
+var author$project$Model$correctNoteStyle = 'correctNoteStyle';
+var author$project$Model$currentNoteStyle = 'currentNoteStyle';
 var author$project$Config$bottomMargin = 50;
 var author$project$Config$svgViewHeight = 200;
 var author$project$Config$topMargin = 50;
@@ -5330,6 +5333,177 @@ var author$project$Config$leftMargin = 50;
 var author$project$Config$rightMargin = 0;
 var author$project$Config$svgViewWidth = 700;
 var author$project$Config$svgViewTotalWidth = (author$project$Config$svgViewWidth + author$project$Config$leftMargin) + author$project$Config$rightMargin;
+var mdgriffith$elm_style_animation$Animation$length4 = F5(
+	function (name, _n0, _n1, _n2, _n3) {
+		var val = _n0.a;
+		var len = _n0.b;
+		var val2 = _n1.a;
+		var len2 = _n1.b;
+		var val3 = _n2.a;
+		var len3 = _n2.b;
+		var val4 = _n3.a;
+		var len4 = _n3.b;
+		return A5(
+			mdgriffith$elm_style_animation$Animation$Model$Property4,
+			name,
+			A2(mdgriffith$elm_style_animation$Animation$initMotion, val, len),
+			A2(mdgriffith$elm_style_animation$Animation$initMotion, val2, len2),
+			A2(mdgriffith$elm_style_animation$Animation$initMotion, val3, len3),
+			A2(mdgriffith$elm_style_animation$Animation$initMotion, val4, len4));
+	});
+var mdgriffith$elm_style_animation$Animation$viewBox = F4(
+	function (w_, x_, y_, z_) {
+		return A5(
+			mdgriffith$elm_style_animation$Animation$length4,
+			'viewBox',
+			_Utils_Tuple2(w_, ''),
+			_Utils_Tuple2(x_, ''),
+			_Utils_Tuple2(y_, ''),
+			_Utils_Tuple2(z_, ''));
+	});
+var author$project$Model$initialScrollAnimState = mdgriffith$elm_style_animation$Animation$style(
+	_List_fromArray(
+		[
+			A4(mdgriffith$elm_style_animation$Animation$viewBox, 0, 0, author$project$Config$svgViewTotalWidth, author$project$Config$svgViewTotalHeight)
+		]));
+var author$project$Model$scrollState = 'gameLevelScrollState';
+var elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
+var elm$core$Dict$empty = elm$core$Dict$RBEmpty_elm_builtin;
+var elm$core$Dict$Black = {$: 'Black'};
+var elm$core$Dict$RBNode_elm_builtin = F5(
+	function (a, b, c, d, e) {
+		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
+	});
+var elm$core$Basics$compare = _Utils_compare;
+var elm$core$Dict$Red = {$: 'Red'};
+var elm$core$Dict$balance = F5(
+	function (color, key, value, left, right) {
+		if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Red')) {
+			var _n1 = right.a;
+			var rK = right.b;
+			var rV = right.c;
+			var rLeft = right.d;
+			var rRight = right.e;
+			if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
+				var _n3 = left.a;
+				var lK = left.b;
+				var lV = left.c;
+				var lLeft = left.d;
+				var lRight = left.e;
+				return A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					elm$core$Dict$Red,
+					key,
+					value,
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, lK, lV, lLeft, lRight),
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, rK, rV, rLeft, rRight));
+			} else {
+				return A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					color,
+					rK,
+					rV,
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, key, value, left, rLeft),
+					rRight);
+			}
+		} else {
+			if ((((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) && (left.d.$ === 'RBNode_elm_builtin')) && (left.d.a.$ === 'Red')) {
+				var _n5 = left.a;
+				var lK = left.b;
+				var lV = left.c;
+				var _n6 = left.d;
+				var _n7 = _n6.a;
+				var llK = _n6.b;
+				var llV = _n6.c;
+				var llLeft = _n6.d;
+				var llRight = _n6.e;
+				var lRight = left.e;
+				return A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					elm$core$Dict$Red,
+					lK,
+					lV,
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, llK, llV, llLeft, llRight),
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, key, value, lRight, right));
+			} else {
+				return A5(elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
+			}
+		}
+	});
+var elm$core$Dict$insertHelp = F3(
+	function (key, value, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, key, value, elm$core$Dict$RBEmpty_elm_builtin, elm$core$Dict$RBEmpty_elm_builtin);
+		} else {
+			var nColor = dict.a;
+			var nKey = dict.b;
+			var nValue = dict.c;
+			var nLeft = dict.d;
+			var nRight = dict.e;
+			var _n1 = A2(elm$core$Basics$compare, key, nKey);
+			switch (_n1.$) {
+				case 'LT':
+					return A5(
+						elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						A3(elm$core$Dict$insertHelp, key, value, nLeft),
+						nRight);
+				case 'EQ':
+					return A5(elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
+				default:
+					return A5(
+						elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						nLeft,
+						A3(elm$core$Dict$insertHelp, key, value, nRight));
+			}
+		}
+	});
+var elm$core$Dict$insert = F3(
+	function (key, value, dict) {
+		var _n0 = A3(elm$core$Dict$insertHelp, key, value, dict);
+		if ((_n0.$ === 'RBNode_elm_builtin') && (_n0.a.$ === 'Red')) {
+			var _n1 = _n0.a;
+			var k = _n0.b;
+			var v = _n0.c;
+			var l = _n0.d;
+			var r = _n0.e;
+			return A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, k, v, l, r);
+		} else {
+			var x = _n0;
+			return x;
+		}
+	});
+var elm$core$Dict$fromList = function (assocs) {
+	return A3(
+		elm$core$List$foldl,
+		F2(
+			function (_n0, dict) {
+				var key = _n0.a;
+				var value = _n0.b;
+				return A3(elm$core$Dict$insert, key, value, dict);
+			}),
+		elm$core$Dict$empty,
+		assocs);
+};
+var author$project$Model$initUniqueAnimStates = elm$core$Dict$fromList(
+	_List_fromArray(
+		[
+			_Utils_Tuple2(
+			author$project$Model$coinStyle,
+			mdgriffith$elm_style_animation$Animation$style(
+				_List_fromArray(
+					[
+						A4(mdgriffith$elm_style_animation$Animation$viewBox, 0, 0, 16, 16)
+					]))),
+			_Utils_Tuple2(author$project$Model$scrollState, author$project$Model$initialScrollAnimState),
+			_Utils_Tuple2(author$project$Model$currentNoteStyle, author$project$Animations$initialCurrentNoteStyle),
+			_Utils_Tuple2(author$project$Model$correctNoteStyle, author$project$Animations$initialCorrectNoteStyle)
+		]));
 var elm$core$Basics$mul = _Basics_mul;
 var elm$core$Basics$pow = _Basics_pow;
 var author$project$Note$midiToFrequency = function (midiCode) {
@@ -5536,50 +5710,10 @@ var author$project$Note$createNote = function (midiCode) {
 		noteName: author$project$Note$midiToNoteName(midiCode)
 	};
 };
-var mdgriffith$elm_style_animation$Animation$length4 = F5(
-	function (name, _n0, _n1, _n2, _n3) {
-		var val = _n0.a;
-		var len = _n0.b;
-		var val2 = _n1.a;
-		var len2 = _n1.b;
-		var val3 = _n2.a;
-		var len3 = _n2.b;
-		var val4 = _n3.a;
-		var len4 = _n3.b;
-		return A5(
-			mdgriffith$elm_style_animation$Animation$Model$Property4,
-			name,
-			A2(mdgriffith$elm_style_animation$Animation$initMotion, val, len),
-			A2(mdgriffith$elm_style_animation$Animation$initMotion, val2, len2),
-			A2(mdgriffith$elm_style_animation$Animation$initMotion, val3, len3),
-			A2(mdgriffith$elm_style_animation$Animation$initMotion, val4, len4));
-	});
-var mdgriffith$elm_style_animation$Animation$viewBox = F4(
-	function (w_, x_, y_, z_) {
-		return A5(
-			mdgriffith$elm_style_animation$Animation$length4,
-			'viewBox',
-			_Utils_Tuple2(w_, ''),
-			_Utils_Tuple2(x_, ''),
-			_Utils_Tuple2(y_, ''),
-			_Utils_Tuple2(z_, ''));
-	});
 var author$project$Model$initialModel = {
 	answerSpeed: 0,
-	coinStyle: mdgriffith$elm_style_animation$Animation$style(
-		_List_fromArray(
-			[
-				A4(mdgriffith$elm_style_animation$Animation$viewBox, 0, 0, 16, 16)
-			])),
 	correctNote: author$project$Note$createNote(60),
-	correctNoteStyle: author$project$Animations$initialCorrectNoteStyle,
 	currentNote: elm$core$Maybe$Nothing,
-	currentNoteStyle: author$project$Animations$initialCurrentNoteStyle,
-	gameLevelScrollState: mdgriffith$elm_style_animation$Animation$style(
-		_List_fromArray(
-			[
-				A4(mdgriffith$elm_style_animation$Animation$viewBox, 0, 0, author$project$Config$svgViewTotalWidth, author$project$Config$svgViewTotalHeight)
-			])),
 	incorrectTries: 0,
 	isMIDIConnected: elm$core$Maybe$Nothing,
 	isPlaying: false,
@@ -5588,13 +5722,9 @@ var author$project$Model$initialModel = {
 	scoreList: _List_Nil,
 	sessionId: 0,
 	startTimestamp: elm$core$Maybe$Nothing,
-	style: mdgriffith$elm_style_animation$Animation$style(
-		_List_fromArray(
-			[
-				mdgriffith$elm_style_animation$Animation$opacity(1.0)
-			])),
 	targetNotes: elm$core$Array$empty,
-	testCurrentTimestamp: elm$core$Maybe$Nothing
+	testCurrentTimestamp: elm$core$Maybe$Nothing,
+	uniqueAnimStates: author$project$Model$initUniqueAnimStates
 };
 var author$project$Msg$GenerateTargetNotes = function (a) {
 	return {$: 'GenerateTargetNotes', a: a};
@@ -6093,12 +6223,6 @@ var author$project$Main$handleNoteReleased = _Platform_incomingPort('handleNoteR
 var author$project$Msg$Animate = function (a) {
 	return {$: 'Animate', a: a};
 };
-var author$project$Msg$CorrectNoteStyle = function (a) {
-	return {$: 'CorrectNoteStyle', a: a};
-};
-var author$project$Msg$CurrentNoteStyle = function (a) {
-	return {$: 'CurrentNoteStyle', a: a};
-};
 var author$project$Msg$InitMIDI = function (a) {
 	return {$: 'InitMIDI', a: a};
 };
@@ -6108,142 +6232,30 @@ var author$project$Msg$NotePressed = function (a) {
 var author$project$Msg$NoteReleased = function (a) {
 	return {$: 'NoteReleased', a: a};
 };
-var author$project$Msg$ScrollGameLevel = function (a) {
-	return {$: 'ScrollGameLevel', a: a};
-};
-var author$project$Msg$TestSpriteAnim = function (a) {
-	return {$: 'TestSpriteAnim', a: a};
-};
 var author$project$Msg$TestTick = function (a) {
 	return {$: 'TestTick', a: a};
 };
-var elm$core$Basics$composeL = F3(
-	function (g, f, x) {
-		return g(
-			f(x));
-	});
+var elm$core$Dict$values = function (dict) {
+	return A3(
+		elm$core$Dict$foldr,
+		F3(
+			function (key, value, valueList) {
+				return A2(elm$core$List$cons, value, valueList);
+			}),
+		_List_Nil,
+		dict);
+};
 var elm$core$Platform$Sub$batch = _Platform_batch;
 var elm$time$Time$Every = F2(
 	function (a, b) {
 		return {$: 'Every', a: a, b: b};
 	});
-var elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
-var elm$core$Dict$empty = elm$core$Dict$RBEmpty_elm_builtin;
 var elm$time$Time$State = F2(
 	function (taggers, processes) {
 		return {processes: processes, taggers: taggers};
 	});
 var elm$time$Time$init = elm$core$Task$succeed(
 	A2(elm$time$Time$State, elm$core$Dict$empty, elm$core$Dict$empty));
-var elm$core$Dict$Black = {$: 'Black'};
-var elm$core$Dict$RBNode_elm_builtin = F5(
-	function (a, b, c, d, e) {
-		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
-	});
-var elm$core$Basics$compare = _Utils_compare;
-var elm$core$Dict$Red = {$: 'Red'};
-var elm$core$Dict$balance = F5(
-	function (color, key, value, left, right) {
-		if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Red')) {
-			var _n1 = right.a;
-			var rK = right.b;
-			var rV = right.c;
-			var rLeft = right.d;
-			var rRight = right.e;
-			if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
-				var _n3 = left.a;
-				var lK = left.b;
-				var lV = left.c;
-				var lLeft = left.d;
-				var lRight = left.e;
-				return A5(
-					elm$core$Dict$RBNode_elm_builtin,
-					elm$core$Dict$Red,
-					key,
-					value,
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, lK, lV, lLeft, lRight),
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, rK, rV, rLeft, rRight));
-			} else {
-				return A5(
-					elm$core$Dict$RBNode_elm_builtin,
-					color,
-					rK,
-					rV,
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, key, value, left, rLeft),
-					rRight);
-			}
-		} else {
-			if ((((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) && (left.d.$ === 'RBNode_elm_builtin')) && (left.d.a.$ === 'Red')) {
-				var _n5 = left.a;
-				var lK = left.b;
-				var lV = left.c;
-				var _n6 = left.d;
-				var _n7 = _n6.a;
-				var llK = _n6.b;
-				var llV = _n6.c;
-				var llLeft = _n6.d;
-				var llRight = _n6.e;
-				var lRight = left.e;
-				return A5(
-					elm$core$Dict$RBNode_elm_builtin,
-					elm$core$Dict$Red,
-					lK,
-					lV,
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, llK, llV, llLeft, llRight),
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, key, value, lRight, right));
-			} else {
-				return A5(elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
-			}
-		}
-	});
-var elm$core$Dict$insertHelp = F3(
-	function (key, value, dict) {
-		if (dict.$ === 'RBEmpty_elm_builtin') {
-			return A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, key, value, elm$core$Dict$RBEmpty_elm_builtin, elm$core$Dict$RBEmpty_elm_builtin);
-		} else {
-			var nColor = dict.a;
-			var nKey = dict.b;
-			var nValue = dict.c;
-			var nLeft = dict.d;
-			var nRight = dict.e;
-			var _n1 = A2(elm$core$Basics$compare, key, nKey);
-			switch (_n1.$) {
-				case 'LT':
-					return A5(
-						elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						A3(elm$core$Dict$insertHelp, key, value, nLeft),
-						nRight);
-				case 'EQ':
-					return A5(elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
-				default:
-					return A5(
-						elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						nLeft,
-						A3(elm$core$Dict$insertHelp, key, value, nRight));
-			}
-		}
-	});
-var elm$core$Dict$insert = F3(
-	function (key, value, dict) {
-		var _n0 = A3(elm$core$Dict$insertHelp, key, value, dict);
-		if ((_n0.$ === 'RBNode_elm_builtin') && (_n0.a.$ === 'Red')) {
-			var _n1 = _n0.a;
-			var k = _n0.b;
-			var v = _n0.c;
-			var l = _n0.d;
-			var r = _n0.e;
-			return A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, k, v, l, r);
-		} else {
-			var x = _n0;
-			return x;
-		}
-	});
 var elm$core$Dict$foldl = F3(
 	function (func, acc, dict) {
 		foldl:
@@ -6522,6 +6534,11 @@ var elm$time$Time$onSelfMsg = F3(
 				},
 				A2(elm$core$Task$andThen, tellTaggers, elm$time$Time$now));
 		}
+	});
+var elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
 	});
 var elm$time$Time$subMap = F2(
 	function (f, _n0) {
@@ -6906,80 +6923,10 @@ var author$project$Main$subscriptions = function (model) {
 				author$project$Main$fakeHandleNoteReleased(author$project$Msg$NoteReleased),
 				A2(
 				mdgriffith$elm_style_animation$Animation$subscription,
-				A2(elm$core$Basics$composeL, author$project$Msg$Animate, author$project$Msg$CorrectNoteStyle),
-				_List_fromArray(
-					[model.correctNoteStyle])),
-				A2(
-				mdgriffith$elm_style_animation$Animation$subscription,
-				A2(elm$core$Basics$composeL, author$project$Msg$Animate, author$project$Msg$CurrentNoteStyle),
-				_List_fromArray(
-					[model.currentNoteStyle])),
-				A2(
-				mdgriffith$elm_style_animation$Animation$subscription,
-				author$project$Msg$TestSpriteAnim,
-				_List_fromArray(
-					[model.coinStyle])),
-				A2(
-				mdgriffith$elm_style_animation$Animation$subscription,
-				author$project$Msg$ScrollGameLevel,
-				_List_fromArray(
-					[model.gameLevelScrollState]))
+				author$project$Msg$Animate,
+				elm$core$Dict$values(model.uniqueAnimStates))
 			]));
 };
-var elm$core$List$append = F2(
-	function (xs, ys) {
-		if (!ys.b) {
-			return xs;
-		} else {
-			return A3(elm$core$List$foldr, elm$core$List$cons, ys, xs);
-		}
-	});
-var elm$core$List$concat = function (lists) {
-	return A3(elm$core$List$foldr, elm$core$List$append, _List_Nil, lists);
-};
-var elm$core$List$concatMap = F2(
-	function (f, list) {
-		return elm$core$List$concat(
-			A2(elm$core$List$map, f, list));
-	});
-var mdgriffith$elm_style_animation$Animation$Model$Loop = function (a) {
-	return {$: 'Loop', a: a};
-};
-var mdgriffith$elm_style_animation$Animation$loop = function (steps) {
-	return mdgriffith$elm_style_animation$Animation$Model$Loop(steps);
-};
-var mdgriffith$elm_style_animation$Animation$Model$Set = function (a) {
-	return {$: 'Set', a: a};
-};
-var mdgriffith$elm_style_animation$Animation$set = function (props) {
-	return mdgriffith$elm_style_animation$Animation$Model$Set(props);
-};
-var mdgriffith$elm_style_animation$Animation$Model$Wait = function (a) {
-	return {$: 'Wait', a: a};
-};
-var mdgriffith$elm_style_animation$Animation$wait = function (till) {
-	return mdgriffith$elm_style_animation$Animation$Model$Wait(till);
-};
-var author$project$Animations$spriteLoop = F4(
-	function (delayMillis, spriteWidth, spriteHeight, numSprites) {
-		var loopForwardHalf = A2(
-			elm$core$List$concatMap,
-			function (i) {
-				return _List_fromArray(
-					[
-						mdgriffith$elm_style_animation$Animation$set(
-						_List_fromArray(
-							[
-								A4(mdgriffith$elm_style_animation$Animation$viewBox, spriteWidth * i, 0.0, spriteWidth, spriteHeight)
-							])),
-						mdgriffith$elm_style_animation$Animation$wait(
-						elm$time$Time$millisToPosix(delayMillis))
-					]);
-			},
-			A2(elm$core$List$range, 0, numSprites - 1));
-		return mdgriffith$elm_style_animation$Animation$loop(loopForwardHalf);
-	});
-var author$project$Animations$coinLoop = A4(author$project$Animations$spriteLoop, 100, 16, 16, 4);
 var author$project$Config$noteXInterval = 200;
 var elm$core$Debug$log = _Debug_log;
 var mdgriffith$elm_style_animation$Animation$spring = function (settings) {
@@ -7013,66 +6960,78 @@ var author$project$Animations$scrollGameLevel = function (nextNoteIndex) {
 				A4(mdgriffith$elm_style_animation$Animation$viewBox, nextViewBoxStartPos, 0, author$project$Config$svgViewTotalWidth, author$project$Config$svgViewTotalHeight)
 			]));
 };
-var author$project$Main$cache = _Platform_outgoingPort('cache', elm$core$Basics$identity);
-var elm$json$Json$Encode$int = _Json_wrap;
-var elm$json$Json$Encode$object = function (pairs) {
-	return _Json_wrap(
-		A3(
-			elm$core$List$foldl,
-			F2(
-				function (_n0, obj) {
-					var k = _n0.a;
-					var v = _n0.b;
-					return A3(_Json_addField, k, v, obj);
-				}),
-			_Json_emptyObject(_Utils_Tuple0),
-			pairs));
-};
-var author$project$Main$convertScoreToJSON = function (session) {
-	return elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'correctNoteMidi',
-				elm$json$Json$Encode$int(session.correctNote.midi)),
-				_Utils_Tuple2(
-				'answerSpeed',
-				elm$json$Json$Encode$int(session.answerSpeed)),
-				_Utils_Tuple2(
-				'incorrectTries',
-				elm$json$Json$Encode$int(session.incorrectTries))
-			]));
-};
-var author$project$Main$getNewAnswerSpeed = F2(
-	function (startTime, currentTime) {
-		if (startTime.$ === 'Nothing') {
-			return 0;
+var elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
 		} else {
-			var t = startTime.a;
-			return elm$time$Time$posixToMillis(currentTime) - elm$time$Time$posixToMillis(t);
+			return _default;
 		}
 	});
-var author$project$Main$getIsCorrect = F2(
-	function (correctNote, currentNote) {
-		if (currentNote.$ === 'Nothing') {
-			return false;
+var author$project$Helpers$getUniqueAnimState = F2(
+	function (dict, key) {
+		return A2(
+			elm$core$Maybe$withDefault,
+			mdgriffith$elm_style_animation$Animation$style(_List_Nil),
+			A2(elm$core$Dict$get, key, dict));
+	});
+var elm$core$Dict$map = F2(
+	function (func, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return elm$core$Dict$RBEmpty_elm_builtin;
 		} else {
-			var n = currentNote.a;
-			return _Utils_eq(n.midi, correctNote.midi) ? true : false;
+			var color = dict.a;
+			var key = dict.b;
+			var value = dict.c;
+			var left = dict.d;
+			var right = dict.e;
+			return A5(
+				elm$core$Dict$RBNode_elm_builtin,
+				color,
+				key,
+				A2(func, key, value),
+				A2(elm$core$Dict$map, func, left),
+				A2(elm$core$Dict$map, func, right));
 		}
 	});
-var author$project$Main$getNextTargetNote = F2(
-	function (index, targetNotesArray) {
-		var next = A2(elm$core$Array$get, index, targetNotesArray);
-		if (next.$ === 'Nothing') {
-			return author$project$Note$createNote(60);
-		} else {
-			var n = next.a;
-			return n;
-		}
+var elm$core$Basics$neq = _Utils_notEqual;
+var elm$core$List$partition = F2(
+	function (pred, list) {
+		var step = F2(
+			function (x, _n0) {
+				var trues = _n0.a;
+				var falses = _n0.b;
+				return pred(x) ? _Utils_Tuple2(
+					A2(elm$core$List$cons, x, trues),
+					falses) : _Utils_Tuple2(
+					trues,
+					A2(elm$core$List$cons, x, falses));
+			});
+		return A3(
+			elm$core$List$foldr,
+			step,
+			_Utils_Tuple2(_List_Nil, _List_Nil),
+			list);
 	});
 var elm$core$Platform$Cmd$batch = _Platform_batch;
-var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
+var elm$core$Basics$round = _Basics_round;
+var mdgriffith$elm_style_animation$Animation$Model$refreshTiming = F2(
+	function (now, timing) {
+		var dt = elm$time$Time$posixToMillis(now) - elm$time$Time$posixToMillis(timing.current);
+		return {
+			current: now,
+			dt: ((dt > 34) || (!elm$time$Time$posixToMillis(timing.current))) ? elm$time$Time$millisToPosix(
+				elm$core$Basics$round(16.666)) : elm$time$Time$millisToPosix(dt)
+		};
+	});
+var elm$core$List$all = F2(
+	function (isOkay, list) {
+		return !A2(
+			elm$core$List$any,
+			A2(elm$core$Basics$composeL, elm$core$Basics$not, isOkay),
+			list);
+	});
 var elm$core$List$drop = F2(
 	function (n, list) {
 		drop:
@@ -7094,154 +7053,17 @@ var elm$core$List$drop = F2(
 			}
 		}
 	});
-var mdgriffith$elm_style_animation$Animation$extractInitialWait = function (steps) {
-	var _n0 = elm$core$List$head(steps);
-	if (_n0.$ === 'Nothing') {
-		return _Utils_Tuple2(
-			elm$time$Time$millisToPosix(0),
-			_List_Nil);
-	} else {
-		var step = _n0.a;
-		if (step.$ === 'Wait') {
-			var till = step.a;
-			var _n2 = mdgriffith$elm_style_animation$Animation$extractInitialWait(
-				A2(elm$core$List$drop, 1, steps));
-			var additionalTime = _n2.a;
-			var remainingSteps = _n2.b;
-			return _Utils_Tuple2(
-				elm$time$Time$millisToPosix(
-					elm$time$Time$posixToMillis(till) + elm$time$Time$posixToMillis(additionalTime)),
-				remainingSteps);
-		} else {
-			return _Utils_Tuple2(
-				elm$time$Time$millisToPosix(0),
-				steps);
-		}
-	}
+var mdgriffith$elm_style_animation$Animation$Model$Loop = function (a) {
+	return {$: 'Loop', a: a};
 };
-var mdgriffith$elm_style_animation$Animation$interrupt = F2(
-	function (steps, _n0) {
-		var model = _n0.a;
-		return mdgriffith$elm_style_animation$Animation$Model$Animation(
-			_Utils_update(
-				model,
-				{
-					interruption: A2(
-						elm$core$List$cons,
-						mdgriffith$elm_style_animation$Animation$extractInitialWait(steps),
-						model.interruption),
-					running: true
-				}));
-	});
-var mdgriffith$elm_style_animation$Animation$Model$To = function (a) {
-	return {$: 'To', a: a};
-};
-var mdgriffith$elm_style_animation$Animation$to = function (props) {
-	return mdgriffith$elm_style_animation$Animation$Model$To(props);
-};
-var author$project$Main$updateNotePressed = F2(
-	function (noteCode, model) {
-		var nextTargetNote = A2(author$project$Main$getNextTargetNote, model.nextTargetNoteIndex, model.targetNotes);
-		var newCurrentNote = author$project$Note$createNote(noteCode);
-		var isCorrect = A2(
-			author$project$Main$getIsCorrect,
-			nextTargetNote,
-			elm$core$Maybe$Just(newCurrentNote));
-		var newCurrentNoteStyle = isCorrect ? author$project$Animations$initialCurrentNoteStyle : A2(
-			mdgriffith$elm_style_animation$Animation$interrupt,
-			_List_fromArray(
-				[
-					mdgriffith$elm_style_animation$Animation$set(
-					_List_fromArray(
-						[
-							mdgriffith$elm_style_animation$Animation$opacity(0.0)
-						])),
-					mdgriffith$elm_style_animation$Animation$to(
-					_List_fromArray(
-						[
-							mdgriffith$elm_style_animation$Animation$opacity(0.4)
-						]))
-				]),
-			model.currentNoteStyle);
-		var newNextTargetNoteIndex = isCorrect ? (model.nextTargetNoteIndex + 1) : model.nextTargetNoteIndex;
-		var test = A2(elm$core$Debug$log, 'new next target note index: ', newNextTargetNoteIndex);
-		return _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{
-					currentNote: elm$core$Maybe$Just(newCurrentNote),
-					currentNoteStyle: newCurrentNoteStyle,
-					gameLevelScrollState: A2(
-						mdgriffith$elm_style_animation$Animation$interrupt,
-						_List_fromArray(
-							[
-								author$project$Animations$scrollGameLevel(newNextTargetNoteIndex)
-							]),
-						model.gameLevelScrollState),
-					incorrectTries: isCorrect ? model.incorrectTries : (model.incorrectTries + 1),
-					nextTargetNoteIndex: newNextTargetNoteIndex,
-					score: isCorrect ? (model.score + 1) : model.score
-				}),
-			elm$core$Platform$Cmd$none);
-	});
-var author$project$Model$Score = F3(
-	function (correctNote, answerSpeed, incorrectTries) {
-		return {answerSpeed: answerSpeed, correctNote: correctNote, incorrectTries: incorrectTries};
-	});
-var author$project$Msg$CurrentNoteFadeAnimCompleted = {$: 'CurrentNoteFadeAnimCompleted'};
-var author$project$Msg$RestartTimer = function (a) {
-	return {$: 'RestartTimer', a: a};
-};
-var elm$core$Basics$neq = _Utils_notEqual;
-var elm$core$List$partition = F2(
-	function (pred, list) {
-		var step = F2(
-			function (x, _n0) {
-				var trues = _n0.a;
-				var falses = _n0.b;
-				return pred(x) ? _Utils_Tuple2(
-					A2(elm$core$List$cons, x, trues),
-					falses) : _Utils_Tuple2(
-					trues,
-					A2(elm$core$List$cons, x, falses));
-			});
-		return A3(
-			elm$core$List$foldr,
-			step,
-			_Utils_Tuple2(_List_Nil, _List_Nil),
-			list);
-	});
-var elm$core$Basics$round = _Basics_round;
-var mdgriffith$elm_style_animation$Animation$Model$refreshTiming = F2(
-	function (now, timing) {
-		var dt = elm$time$Time$posixToMillis(now) - elm$time$Time$posixToMillis(timing.current);
-		return {
-			current: now,
-			dt: ((dt > 34) || (!elm$time$Time$posixToMillis(timing.current))) ? elm$time$Time$millisToPosix(
-				elm$core$Basics$round(16.666)) : elm$time$Time$millisToPosix(dt)
-		};
-	});
-var elm$core$List$all = F2(
-	function (isOkay, list) {
-		return !A2(
-			elm$core$List$any,
-			A2(elm$core$Basics$composeL, elm$core$Basics$not, isOkay),
-			list);
-	});
 var mdgriffith$elm_style_animation$Animation$Model$Repeat = F2(
 	function (a, b) {
 		return {$: 'Repeat', a: a, b: b};
 	});
 var mdgriffith$elm_style_animation$Animation$Model$Step = {$: 'Step'};
-var elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
-		}
-	});
+var mdgriffith$elm_style_animation$Animation$Model$Wait = function (a) {
+	return {$: 'Wait', a: a};
+};
 var mdgriffith$elm_style_animation$Animation$Model$isCmdDone = function (cmd) {
 	var motionDone = function (motion) {
 		return (!motion.velocity) && _Utils_eq(motion.position, motion.target);
@@ -8711,30 +8533,596 @@ var mdgriffith$elm_style_animation$Animation$Messenger$update = F2(
 	function (tick, animation) {
 		return A2(mdgriffith$elm_style_animation$Animation$Model$updateAnimation, tick, animation);
 	});
-var author$project$UpdateAnimations$update = F2(
-	function (msg, model) {
-		if (msg.$ === 'CorrectNoteStyle') {
-			var animMsg = msg.a;
-			var _n1 = A2(mdgriffith$elm_style_animation$Animation$Messenger$update, animMsg, model.correctNoteStyle);
-			var newStyle = _n1.a;
-			var cmd = _n1.b;
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{correctNoteStyle: newStyle}),
-				cmd);
+var author$project$Helpers$updateEveryAnimState = F2(
+	function (dict, timestamp) {
+		var animEach = F2(
+			function (key, val) {
+				return A2(mdgriffith$elm_style_animation$Animation$Messenger$update, timestamp, val);
+			});
+		return A2(elm$core$Dict$map, animEach, dict);
+	});
+var elm$core$Dict$getMin = function (dict) {
+	getMin:
+	while (true) {
+		if ((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) {
+			var left = dict.d;
+			var $temp$dict = left;
+			dict = $temp$dict;
+			continue getMin;
 		} else {
-			var animMsg = msg.a;
-			var _n2 = A2(mdgriffith$elm_style_animation$Animation$Messenger$update, animMsg, model.currentNoteStyle);
-			var newStyle = _n2.a;
-			var cmd = _n2.b;
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{currentNoteStyle: newStyle}),
-				cmd);
+			return dict;
+		}
+	}
+};
+var elm$core$Dict$moveRedLeft = function (dict) {
+	if (((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) && (dict.e.$ === 'RBNode_elm_builtin')) {
+		if ((dict.e.d.$ === 'RBNode_elm_builtin') && (dict.e.d.a.$ === 'Red')) {
+			var clr = dict.a;
+			var k = dict.b;
+			var v = dict.c;
+			var _n1 = dict.d;
+			var lClr = _n1.a;
+			var lK = _n1.b;
+			var lV = _n1.c;
+			var lLeft = _n1.d;
+			var lRight = _n1.e;
+			var _n2 = dict.e;
+			var rClr = _n2.a;
+			var rK = _n2.b;
+			var rV = _n2.c;
+			var rLeft = _n2.d;
+			var _n3 = rLeft.a;
+			var rlK = rLeft.b;
+			var rlV = rLeft.c;
+			var rlL = rLeft.d;
+			var rlR = rLeft.e;
+			var rRight = _n2.e;
+			return A5(
+				elm$core$Dict$RBNode_elm_builtin,
+				elm$core$Dict$Red,
+				rlK,
+				rlV,
+				A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					elm$core$Dict$Black,
+					k,
+					v,
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					rlL),
+				A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, rK, rV, rlR, rRight));
+		} else {
+			var clr = dict.a;
+			var k = dict.b;
+			var v = dict.c;
+			var _n4 = dict.d;
+			var lClr = _n4.a;
+			var lK = _n4.b;
+			var lV = _n4.c;
+			var lLeft = _n4.d;
+			var lRight = _n4.e;
+			var _n5 = dict.e;
+			var rClr = _n5.a;
+			var rK = _n5.b;
+			var rV = _n5.c;
+			var rLeft = _n5.d;
+			var rRight = _n5.e;
+			if (clr.$ === 'Black') {
+				return A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					elm$core$Dict$Black,
+					k,
+					v,
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, rK, rV, rLeft, rRight));
+			} else {
+				return A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					elm$core$Dict$Black,
+					k,
+					v,
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, rK, rV, rLeft, rRight));
+			}
+		}
+	} else {
+		return dict;
+	}
+};
+var elm$core$Dict$moveRedRight = function (dict) {
+	if (((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) && (dict.e.$ === 'RBNode_elm_builtin')) {
+		if ((dict.d.d.$ === 'RBNode_elm_builtin') && (dict.d.d.a.$ === 'Red')) {
+			var clr = dict.a;
+			var k = dict.b;
+			var v = dict.c;
+			var _n1 = dict.d;
+			var lClr = _n1.a;
+			var lK = _n1.b;
+			var lV = _n1.c;
+			var _n2 = _n1.d;
+			var _n3 = _n2.a;
+			var llK = _n2.b;
+			var llV = _n2.c;
+			var llLeft = _n2.d;
+			var llRight = _n2.e;
+			var lRight = _n1.e;
+			var _n4 = dict.e;
+			var rClr = _n4.a;
+			var rK = _n4.b;
+			var rV = _n4.c;
+			var rLeft = _n4.d;
+			var rRight = _n4.e;
+			return A5(
+				elm$core$Dict$RBNode_elm_builtin,
+				elm$core$Dict$Red,
+				lK,
+				lV,
+				A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, llK, llV, llLeft, llRight),
+				A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					elm$core$Dict$Black,
+					k,
+					v,
+					lRight,
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, rK, rV, rLeft, rRight)));
+		} else {
+			var clr = dict.a;
+			var k = dict.b;
+			var v = dict.c;
+			var _n5 = dict.d;
+			var lClr = _n5.a;
+			var lK = _n5.b;
+			var lV = _n5.c;
+			var lLeft = _n5.d;
+			var lRight = _n5.e;
+			var _n6 = dict.e;
+			var rClr = _n6.a;
+			var rK = _n6.b;
+			var rV = _n6.c;
+			var rLeft = _n6.d;
+			var rRight = _n6.e;
+			if (clr.$ === 'Black') {
+				return A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					elm$core$Dict$Black,
+					k,
+					v,
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, rK, rV, rLeft, rRight));
+			} else {
+				return A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					elm$core$Dict$Black,
+					k,
+					v,
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, rK, rV, rLeft, rRight));
+			}
+		}
+	} else {
+		return dict;
+	}
+};
+var elm$core$Dict$removeHelpPrepEQGT = F7(
+	function (targetKey, dict, color, key, value, left, right) {
+		if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
+			var _n1 = left.a;
+			var lK = left.b;
+			var lV = left.c;
+			var lLeft = left.d;
+			var lRight = left.e;
+			return A5(
+				elm$core$Dict$RBNode_elm_builtin,
+				color,
+				lK,
+				lV,
+				lLeft,
+				A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, key, value, lRight, right));
+		} else {
+			_n2$2:
+			while (true) {
+				if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Black')) {
+					if (right.d.$ === 'RBNode_elm_builtin') {
+						if (right.d.a.$ === 'Black') {
+							var _n3 = right.a;
+							var _n4 = right.d;
+							var _n5 = _n4.a;
+							return elm$core$Dict$moveRedRight(dict);
+						} else {
+							break _n2$2;
+						}
+					} else {
+						var _n6 = right.a;
+						var _n7 = right.d;
+						return elm$core$Dict$moveRedRight(dict);
+					}
+				} else {
+					break _n2$2;
+				}
+			}
+			return dict;
 		}
 	});
+var elm$core$Dict$removeMin = function (dict) {
+	if ((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) {
+		var color = dict.a;
+		var key = dict.b;
+		var value = dict.c;
+		var left = dict.d;
+		var lColor = left.a;
+		var lLeft = left.d;
+		var right = dict.e;
+		if (lColor.$ === 'Black') {
+			if ((lLeft.$ === 'RBNode_elm_builtin') && (lLeft.a.$ === 'Red')) {
+				var _n3 = lLeft.a;
+				return A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					color,
+					key,
+					value,
+					elm$core$Dict$removeMin(left),
+					right);
+			} else {
+				var _n4 = elm$core$Dict$moveRedLeft(dict);
+				if (_n4.$ === 'RBNode_elm_builtin') {
+					var nColor = _n4.a;
+					var nKey = _n4.b;
+					var nValue = _n4.c;
+					var nLeft = _n4.d;
+					var nRight = _n4.e;
+					return A5(
+						elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						elm$core$Dict$removeMin(nLeft),
+						nRight);
+				} else {
+					return elm$core$Dict$RBEmpty_elm_builtin;
+				}
+			}
+		} else {
+			return A5(
+				elm$core$Dict$RBNode_elm_builtin,
+				color,
+				key,
+				value,
+				elm$core$Dict$removeMin(left),
+				right);
+		}
+	} else {
+		return elm$core$Dict$RBEmpty_elm_builtin;
+	}
+};
+var elm$core$Dict$removeHelp = F2(
+	function (targetKey, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return elm$core$Dict$RBEmpty_elm_builtin;
+		} else {
+			var color = dict.a;
+			var key = dict.b;
+			var value = dict.c;
+			var left = dict.d;
+			var right = dict.e;
+			if (_Utils_cmp(targetKey, key) < 0) {
+				if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Black')) {
+					var _n4 = left.a;
+					var lLeft = left.d;
+					if ((lLeft.$ === 'RBNode_elm_builtin') && (lLeft.a.$ === 'Red')) {
+						var _n6 = lLeft.a;
+						return A5(
+							elm$core$Dict$RBNode_elm_builtin,
+							color,
+							key,
+							value,
+							A2(elm$core$Dict$removeHelp, targetKey, left),
+							right);
+					} else {
+						var _n7 = elm$core$Dict$moveRedLeft(dict);
+						if (_n7.$ === 'RBNode_elm_builtin') {
+							var nColor = _n7.a;
+							var nKey = _n7.b;
+							var nValue = _n7.c;
+							var nLeft = _n7.d;
+							var nRight = _n7.e;
+							return A5(
+								elm$core$Dict$balance,
+								nColor,
+								nKey,
+								nValue,
+								A2(elm$core$Dict$removeHelp, targetKey, nLeft),
+								nRight);
+						} else {
+							return elm$core$Dict$RBEmpty_elm_builtin;
+						}
+					}
+				} else {
+					return A5(
+						elm$core$Dict$RBNode_elm_builtin,
+						color,
+						key,
+						value,
+						A2(elm$core$Dict$removeHelp, targetKey, left),
+						right);
+				}
+			} else {
+				return A2(
+					elm$core$Dict$removeHelpEQGT,
+					targetKey,
+					A7(elm$core$Dict$removeHelpPrepEQGT, targetKey, dict, color, key, value, left, right));
+			}
+		}
+	});
+var elm$core$Dict$removeHelpEQGT = F2(
+	function (targetKey, dict) {
+		if (dict.$ === 'RBNode_elm_builtin') {
+			var color = dict.a;
+			var key = dict.b;
+			var value = dict.c;
+			var left = dict.d;
+			var right = dict.e;
+			if (_Utils_eq(targetKey, key)) {
+				var _n1 = elm$core$Dict$getMin(right);
+				if (_n1.$ === 'RBNode_elm_builtin') {
+					var minKey = _n1.b;
+					var minValue = _n1.c;
+					return A5(
+						elm$core$Dict$balance,
+						color,
+						minKey,
+						minValue,
+						left,
+						elm$core$Dict$removeMin(right));
+				} else {
+					return elm$core$Dict$RBEmpty_elm_builtin;
+				}
+			} else {
+				return A5(
+					elm$core$Dict$balance,
+					color,
+					key,
+					value,
+					left,
+					A2(elm$core$Dict$removeHelp, targetKey, right));
+			}
+		} else {
+			return elm$core$Dict$RBEmpty_elm_builtin;
+		}
+	});
+var elm$core$Dict$remove = F2(
+	function (key, dict) {
+		var _n0 = A2(elm$core$Dict$removeHelp, key, dict);
+		if ((_n0.$ === 'RBNode_elm_builtin') && (_n0.a.$ === 'Red')) {
+			var _n1 = _n0.a;
+			var k = _n0.b;
+			var v = _n0.c;
+			var l = _n0.d;
+			var r = _n0.e;
+			return A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, k, v, l, r);
+		} else {
+			var x = _n0;
+			return x;
+		}
+	});
+var elm$core$Dict$update = F3(
+	function (targetKey, alter, dictionary) {
+		var _n0 = alter(
+			A2(elm$core$Dict$get, targetKey, dictionary));
+		if (_n0.$ === 'Just') {
+			var value = _n0.a;
+			return A3(elm$core$Dict$insert, targetKey, value, dictionary);
+		} else {
+			return A2(elm$core$Dict$remove, targetKey, dictionary);
+		}
+	});
+var elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return elm$core$Maybe$Nothing;
+		}
+	});
+var author$project$Helpers$updateUniqueAnimState = F2(
+	function (dict, _n0) {
+		var key = _n0.a;
+		var newValue = _n0.b;
+		return A3(
+			elm$core$Dict$update,
+			key,
+			elm$core$Maybe$map(
+				function (a) {
+					return newValue;
+				}),
+			dict);
+	});
+var mdgriffith$elm_style_animation$Animation$extractInitialWait = function (steps) {
+	var _n0 = elm$core$List$head(steps);
+	if (_n0.$ === 'Nothing') {
+		return _Utils_Tuple2(
+			elm$time$Time$millisToPosix(0),
+			_List_Nil);
+	} else {
+		var step = _n0.a;
+		if (step.$ === 'Wait') {
+			var till = step.a;
+			var _n2 = mdgriffith$elm_style_animation$Animation$extractInitialWait(
+				A2(elm$core$List$drop, 1, steps));
+			var additionalTime = _n2.a;
+			var remainingSteps = _n2.b;
+			return _Utils_Tuple2(
+				elm$time$Time$millisToPosix(
+					elm$time$Time$posixToMillis(till) + elm$time$Time$posixToMillis(additionalTime)),
+				remainingSteps);
+		} else {
+			return _Utils_Tuple2(
+				elm$time$Time$millisToPosix(0),
+				steps);
+		}
+	}
+};
+var mdgriffith$elm_style_animation$Animation$interrupt = F2(
+	function (steps, _n0) {
+		var model = _n0.a;
+		return mdgriffith$elm_style_animation$Animation$Model$Animation(
+			_Utils_update(
+				model,
+				{
+					interruption: A2(
+						elm$core$List$cons,
+						mdgriffith$elm_style_animation$Animation$extractInitialWait(steps),
+						model.interruption),
+					running: true
+				}));
+	});
+var author$project$Helpers$updateModelForUniqueAnim = F3(
+	function (model, animKey, newAnimSteps) {
+		var currentStyle = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, animKey);
+		var newStyle = A2(mdgriffith$elm_style_animation$Animation$interrupt, newAnimSteps, currentStyle);
+		return _Utils_update(
+			model,
+			{
+				uniqueAnimStates: A2(
+					author$project$Helpers$updateUniqueAnimState,
+					model.uniqueAnimStates,
+					_Utils_Tuple2(animKey, newStyle))
+			});
+	});
+var author$project$Main$cache = _Platform_outgoingPort('cache', elm$core$Basics$identity);
+var elm$json$Json$Encode$int = _Json_wrap;
+var elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			elm$core$List$foldl,
+			F2(
+				function (_n0, obj) {
+					var k = _n0.a;
+					var v = _n0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
+var author$project$Main$convertScoreToJSON = function (session) {
+	return elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'correctNoteMidi',
+				elm$json$Json$Encode$int(session.correctNote.midi)),
+				_Utils_Tuple2(
+				'answerSpeed',
+				elm$json$Json$Encode$int(session.answerSpeed)),
+				_Utils_Tuple2(
+				'incorrectTries',
+				elm$json$Json$Encode$int(session.incorrectTries))
+			]));
+};
+var author$project$Main$getNewAnswerSpeed = F2(
+	function (startTime, currentTime) {
+		if (startTime.$ === 'Nothing') {
+			return 0;
+		} else {
+			var t = startTime.a;
+			return elm$time$Time$posixToMillis(currentTime) - elm$time$Time$posixToMillis(t);
+		}
+	});
+var author$project$Main$getIsCorrect = F2(
+	function (correctNote, currentNote) {
+		if (currentNote.$ === 'Nothing') {
+			return false;
+		} else {
+			var n = currentNote.a;
+			return _Utils_eq(n.midi, correctNote.midi) ? true : false;
+		}
+	});
+var author$project$Main$getNextTargetNote = F2(
+	function (index, targetNotesArray) {
+		var next = A2(elm$core$Array$get, index, targetNotesArray);
+		if (next.$ === 'Nothing') {
+			return author$project$Note$createNote(60);
+		} else {
+			var n = next.a;
+			return n;
+		}
+	});
+var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
+var mdgriffith$elm_style_animation$Animation$Model$Set = function (a) {
+	return {$: 'Set', a: a};
+};
+var mdgriffith$elm_style_animation$Animation$set = function (props) {
+	return mdgriffith$elm_style_animation$Animation$Model$Set(props);
+};
+var mdgriffith$elm_style_animation$Animation$Model$To = function (a) {
+	return {$: 'To', a: a};
+};
+var mdgriffith$elm_style_animation$Animation$to = function (props) {
+	return mdgriffith$elm_style_animation$Animation$Model$To(props);
+};
+var author$project$Main$updateNotePressed = F2(
+	function (noteCode, model) {
+		var nextTargetNote = A2(author$project$Main$getNextTargetNote, model.nextTargetNoteIndex, model.targetNotes);
+		var newCurrentNote = author$project$Note$createNote(noteCode);
+		var isCorrect = A2(
+			author$project$Main$getIsCorrect,
+			nextTargetNote,
+			elm$core$Maybe$Just(newCurrentNote));
+		var newNextTargetNoteIndex = isCorrect ? (model.nextTargetNoteIndex + 1) : model.nextTargetNoteIndex;
+		var test = A2(elm$core$Debug$log, 'new next target note index: ', newNextTargetNoteIndex);
+		var currentScrollState = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, author$project$Model$scrollState);
+		var newScrollState = A2(
+			mdgriffith$elm_style_animation$Animation$interrupt,
+			_List_fromArray(
+				[
+					author$project$Animations$scrollGameLevel(newNextTargetNoteIndex)
+				]),
+			currentScrollState);
+		var currentNoteStyle = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, author$project$Model$currentNoteStyle);
+		var newCurrentNoteStyle = isCorrect ? author$project$Animations$initialCurrentNoteStyle : A2(
+			mdgriffith$elm_style_animation$Animation$interrupt,
+			_List_fromArray(
+				[
+					mdgriffith$elm_style_animation$Animation$set(
+					_List_fromArray(
+						[
+							mdgriffith$elm_style_animation$Animation$opacity(0.0)
+						])),
+					mdgriffith$elm_style_animation$Animation$to(
+					_List_fromArray(
+						[
+							mdgriffith$elm_style_animation$Animation$opacity(0.4)
+						]))
+				]),
+			currentNoteStyle);
+		var newUniqueAnimStates = A2(
+			author$project$Helpers$updateUniqueAnimState,
+			model.uniqueAnimStates,
+			_Utils_Tuple2(author$project$Model$currentNoteStyle, newCurrentNoteStyle));
+		var newUniqueAnimStates2 = A2(
+			author$project$Helpers$updateUniqueAnimState,
+			newUniqueAnimStates,
+			_Utils_Tuple2(author$project$Model$scrollState, newScrollState));
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{
+					currentNote: elm$core$Maybe$Just(newCurrentNote),
+					incorrectTries: isCorrect ? model.incorrectTries : (model.incorrectTries + 1),
+					nextTargetNoteIndex: newNextTargetNoteIndex,
+					score: isCorrect ? (model.score + 1) : model.score,
+					uniqueAnimStates: newUniqueAnimStates2
+				}),
+			elm$core$Platform$Cmd$none);
+	});
+var author$project$Model$Score = F3(
+	function (correctNote, answerSpeed, incorrectTries) {
+		return {answerSpeed: answerSpeed, correctNote: correctNote, incorrectTries: incorrectTries};
+	});
+var author$project$Msg$CurrentNoteFadeAnimCompleted = {$: 'CurrentNoteFadeAnimCompleted'};
+var author$project$Msg$RestartTimer = function (a) {
+	return {$: 'RestartTimer', a: a};
+};
 var elm$json$Json$Encode$list = F2(
 	function (func, entries) {
 		return _Json_wrap(
@@ -8744,6 +9132,9 @@ var elm$json$Json$Encode$list = F2(
 				_Json_emptyArray(_Utils_Tuple0),
 				entries));
 	});
+var mdgriffith$elm_style_animation$Animation$wait = function (till) {
+	return mdgriffith$elm_style_animation$Animation$Model$Wait(till);
+};
 var mdgriffith$elm_style_animation$Animation$Model$Send = function (a) {
 	return {$: 'Send', a: a};
 };
@@ -8764,27 +9155,22 @@ var author$project$Main$update = F2(
 						}),
 					elm$core$Platform$Cmd$none);
 			case 'NoteReleased':
+				var newAnimSteps = _List_fromArray(
+					[
+						mdgriffith$elm_style_animation$Animation$wait(
+						elm$time$Time$millisToPosix(50)),
+						mdgriffith$elm_style_animation$Animation$to(
+						_List_fromArray(
+							[
+								mdgriffith$elm_style_animation$Animation$opacity(0.0)
+							])),
+						mdgriffith$elm_style_animation$Animation$Messenger$send(author$project$Msg$CurrentNoteFadeAnimCompleted)
+					]);
 				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							currentNoteStyle: A2(
-								mdgriffith$elm_style_animation$Animation$interrupt,
-								_List_fromArray(
-									[
-										mdgriffith$elm_style_animation$Animation$wait(
-										elm$time$Time$millisToPosix(50)),
-										mdgriffith$elm_style_animation$Animation$to(
-										_List_fromArray(
-											[
-												mdgriffith$elm_style_animation$Animation$opacity(0.0)
-											])),
-										mdgriffith$elm_style_animation$Animation$Messenger$send(author$project$Msg$CurrentNoteFadeAnimCompleted)
-									]),
-								model.currentNoteStyle)
-						}),
+					A3(author$project$Helpers$updateModelForUniqueAnim, model, author$project$Model$currentNoteStyle, newAnimSteps),
 					elm$core$Platform$Cmd$none);
 			case 'CurrentNoteFadeAnimCompleted':
+				var test = A2(elm$core$Debug$log, 'hiiii', 'CurrentNoteFadeAnimCompleted');
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -8794,17 +9180,17 @@ var author$project$Main$update = F2(
 				var noteCode = msg.a;
 				return A2(author$project$Main$updateNotePressed, noteCode, model);
 			case 'CorrectNoteFadeAnimCompleted':
+				var newAnimSteps = _List_fromArray(
+					[
+						mdgriffith$elm_style_animation$Animation$to(
+						_List_fromArray(
+							[
+								mdgriffith$elm_style_animation$Animation$opacity(0.0),
+								mdgriffith$elm_style_animation$Animation$fill(author$project$Color$black)
+							]))
+					]);
 				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							correctNoteStyle: mdgriffith$elm_style_animation$Animation$style(
-								_List_fromArray(
-									[
-										mdgriffith$elm_style_animation$Animation$opacity(0.0),
-										mdgriffith$elm_style_animation$Animation$fill(author$project$Color$black)
-									]))
-						}),
+					A3(author$project$Helpers$updateModelForUniqueAnim, model, author$project$Model$correctNoteStyle, newAnimSteps),
 					A2(elm$core$Task$perform, author$project$Msg$RestartTimer, elm$time$Time$now));
 			case 'StartGame':
 				return _Utils_Tuple2(
@@ -8824,23 +9210,16 @@ var author$project$Main$update = F2(
 					elm$core$Platform$Cmd$none);
 			case 'UpdateCorrectNote':
 				var midiCode = msg.a;
+				var newAnimSteps = _List_fromArray(
+					[
+						mdgriffith$elm_style_animation$Animation$to(
+						_List_fromArray(
+							[
+								mdgriffith$elm_style_animation$Animation$opacity(1.0)
+							]))
+					]);
 				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							correctNote: author$project$Note$createNote(midiCode),
-							correctNoteStyle: A2(
-								mdgriffith$elm_style_animation$Animation$interrupt,
-								_List_fromArray(
-									[
-										mdgriffith$elm_style_animation$Animation$to(
-										_List_fromArray(
-											[
-												mdgriffith$elm_style_animation$Animation$opacity(1.0)
-											]))
-									]),
-								model.correctNoteStyle)
-						}),
+					A3(author$project$Helpers$updateModelForUniqueAnim, model, author$project$Model$correctNoteStyle, newAnimSteps),
 					elm$core$Platform$Cmd$none);
 			case 'RestartTimer':
 				var currentTimestamp = msg.a;
@@ -8869,6 +9248,26 @@ var author$project$Main$update = F2(
 							testCurrentTimestamp: elm$core$Maybe$Just(currentTimestamp)
 						}),
 					nextCommand);
+			case 'Animate':
+				var timestamp = msg.a;
+				var updatedDict = A2(author$project$Helpers$updateEveryAnimState, model.uniqueAnimStates, timestamp);
+				var dictStylesOnly = A2(
+					elm$core$Dict$map,
+					F2(
+						function (key, val) {
+							return val.a;
+						}),
+					updatedDict);
+				var allCmds = A2(
+					elm$core$List$map,
+					elm$core$Tuple$second,
+					elm$core$Dict$values(updatedDict));
+				var test = A2(elm$core$Debug$log, 'allCmds ', allCmds);
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{uniqueAnimStates: dictStylesOnly}),
+					elm$core$Platform$Cmd$batch(allCmds));
 			case 'TestTick':
 				var currentTimestamp = msg.a;
 				return _Utils_Tuple2(
@@ -8878,56 +9277,25 @@ var author$project$Main$update = F2(
 							testCurrentTimestamp: elm$core$Maybe$Just(currentTimestamp)
 						}),
 					elm$core$Platform$Cmd$none);
-			case 'Animate':
-				var animMsg = msg.a;
-				return A2(author$project$UpdateAnimations$update, animMsg, model);
-			case 'StartSpriteTestAnim':
-				var test = A2(elm$core$Debug$log, 'called StartSpriteTestAnim section of update', model.coinStyle);
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							coinStyle: A2(
-								mdgriffith$elm_style_animation$Animation$interrupt,
-								_List_fromArray(
-									[author$project$Animations$coinLoop]),
-								model.coinStyle)
-						}),
-					elm$core$Platform$Cmd$none);
-			case 'TestSpriteAnim':
-				var animMsg = msg.a;
-				var _n1 = A2(mdgriffith$elm_style_animation$Animation$Messenger$update, animMsg, model.coinStyle);
-				var newStyle = _n1.a;
-				var cmd = _n1.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{coinStyle: newStyle}),
-					cmd);
-			case 'StartScrollGameLevel':
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							gameLevelScrollState: A2(
-								mdgriffith$elm_style_animation$Animation$interrupt,
-								_List_fromArray(
-									[
-										author$project$Animations$scrollGameLevel(model.nextTargetNoteIndex)
-									]),
-								model.gameLevelScrollState)
-						}),
-					elm$core$Platform$Cmd$none);
 			default:
-				var animMsg = msg.a;
-				var _n2 = A2(mdgriffith$elm_style_animation$Animation$Messenger$update, animMsg, model.gameLevelScrollState);
-				var newStyle = _n2.a;
-				var cmd = _n2.b;
+				var currentScrollState = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, author$project$Model$scrollState);
+				var newScrollState = A2(
+					mdgriffith$elm_style_animation$Animation$interrupt,
+					_List_fromArray(
+						[
+							author$project$Animations$scrollGameLevel(model.nextTargetNoteIndex)
+						]),
+					currentScrollState);
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{gameLevelScrollState: newStyle}),
-					cmd);
+						{
+							uniqueAnimStates: A2(
+								author$project$Helpers$updateUniqueAnimState,
+								model.uniqueAnimStates,
+								_Utils_Tuple2(author$project$Model$scrollState, newScrollState))
+						}),
+					elm$core$Platform$Cmd$none);
 		}
 	});
 var author$project$Msg$StartScrollGameLevel = {$: 'StartScrollGameLevel'};
@@ -9029,6 +9397,22 @@ var elm$svg$Svg$circle = elm$svg$Svg$trustedNode('circle');
 var elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
 var elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
 var elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
+var elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3(elm$core$List$foldr, elm$core$List$cons, ys, xs);
+		}
+	});
+var elm$core$List$concat = function (lists) {
+	return A3(elm$core$List$foldr, elm$core$List$append, _List_Nil, lists);
+};
+var elm$core$List$concatMap = F2(
+	function (f, list) {
+		return elm$core$List$concat(
+			A2(elm$core$List$map, f, list));
+	});
 var elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
 var mdgriffith$elm_style_animation$Animation$Render$iePrefix = '-ms-';
@@ -9594,8 +9978,24 @@ var author$project$View$Game$svgView = F4(
 		var svgWidth = author$project$Config$svgViewTotalWidth;
 		var widthS = elm$core$String$fromFloat(svgWidth);
 		var lineHeight = height / 6;
-		var svgListAllNotes = A5(author$project$View$Note$drawAllNotes, width, lineHeight, margins, model.correctNoteStyle, model.targetNotes);
 		var heightS = elm$core$String$fromFloat(author$project$Config$svgViewTotalHeight);
+		var gameLevelScrollState = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, 'gameLevelScrollState');
+		var drawNoteFunc = A2(author$project$View$Note$drawNote, lineHeight, margins);
+		var currentNoteStyle = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, 'currentNoteStyle');
+		var currentNoteDrawing = function () {
+			var _n0 = model.currentNote;
+			if (_n0.$ === 'Nothing') {
+				return _List_Nil;
+			} else {
+				var n = _n0.a;
+				return _List_fromArray(
+					[
+						A3(drawNoteFunc, currentNoteStyle, model.nextTargetNoteIndex, n)
+					]);
+			}
+		}();
+		var correctNoteStyle = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, 'correctNoteStyle');
+		var svgListAllNotes = A5(author$project$View$Note$drawAllNotes, width, lineHeight, margins, correctNoteStyle, model.targetNotes);
 		var gameLevelSvg = A2(
 			elm$svg$Svg$svg,
 			_Utils_ap(
@@ -9606,21 +10006,8 @@ var author$project$View$Game$svgView = F4(
 						elm$svg$Svg$Attributes$x('150'),
 						elm$svg$Svg$Attributes$y('0')
 					]),
-				mdgriffith$elm_style_animation$Animation$render(model.gameLevelScrollState)),
-			svgListAllNotes);
-		var drawNoteFunc = A2(author$project$View$Note$drawNote, lineHeight, margins);
-		var currentNoteDrawing = function () {
-			var _n0 = model.currentNote;
-			if (_n0.$ === 'Nothing') {
-				return _List_Nil;
-			} else {
-				var n = _n0.a;
-				return _List_fromArray(
-					[
-						A3(drawNoteFunc, model.currentNoteStyle, 100, n)
-					]);
-			}
-		}();
+				mdgriffith$elm_style_animation$Animation$render(gameLevelScrollState)),
+			_Utils_ap(currentNoteDrawing, svgListAllNotes));
 		return A2(
 			elm$svg$Svg$svg,
 			_List_fromArray(
@@ -9632,10 +10019,8 @@ var author$project$View$Game$svgView = F4(
 				]),
 			_Utils_ap(
 				A3(author$project$View$Game$backgroundStatic, width, lineHeight, margins),
-				_Utils_ap(
-					_List_fromArray(
-						[gameLevelSvg]),
-					currentNoteDrawing)));
+				_List_fromArray(
+					[gameLevelSvg])));
 	});
 var author$project$View$Game$view = function (model) {
 	return A4(

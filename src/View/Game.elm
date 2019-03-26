@@ -1,5 +1,6 @@
 module View.Game exposing (view)
 
+import Helpers exposing (..)
 import Config
 import Model exposing (Model, Margins)
 import Msg exposing (..)
@@ -21,6 +22,10 @@ view model =
 svgView : Model -> Float -> Float -> Margins -> Svg Msg
 svgView model width height margins =
     let
+        correctNoteStyle = getUniqueAnimState model.uniqueAnimStates "correctNoteStyle"
+        currentNoteStyle = getUniqueAnimState model.uniqueAnimStates "currentNoteStyle"
+        gameLevelScrollState = getUniqueAnimState model.uniqueAnimStates "gameLevelScrollState"
+
         lineHeight =
             height / 6
 
@@ -34,14 +39,16 @@ svgView model width height margins =
         
         drawNoteFunc = View.Note.drawNote lineHeight margins
 
-        svgListAllNotes = View.Note.drawAllNotes width lineHeight margins model.correctNoteStyle model.targetNotes
-
-        -- animate viewBox to scroll game level with all notes drawn inside
-        gameLevelSvg = svg ( [S.width widthS, S.height heightS, S.x "150", S.y "0"] ++ Animation.render model.gameLevelScrollState) svgListAllNotes
+        svgListAllNotes = View.Note.drawAllNotes width lineHeight margins correctNoteStyle model.targetNotes
 
         currentNoteDrawing = case model.currentNote of
                                  Nothing -> []
-                                 Just n -> [ drawNoteFunc model.currentNoteStyle 100 n ]
+                                 Just n -> [ drawNoteFunc currentNoteStyle model.nextTargetNoteIndex n ]
+
+        -- animate viewBox to scroll game level with all notes drawn inside
+        -- updated: draw the current note inside the game level?
+        gameLevelSvg = svg ( [S.width widthS, S.height heightS, S.x "150", S.y "0"] ++ Animation.render gameLevelScrollState) (currentNoteDrawing ++ svgListAllNotes)
+    
     in
     svg
         [ S.width widthS
@@ -52,7 +59,7 @@ svgView model width height margins =
         (
           (backgroundStatic width lineHeight margins)
            ++ [gameLevelSvg]
-           ++ currentNoteDrawing
+           -- ++ currentNoteDrawing
         ) 
 
 

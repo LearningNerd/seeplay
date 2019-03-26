@@ -1,5 +1,7 @@
 port module Main exposing (..)
 
+
+import Dict exposing (Dict)
 import Array exposing (..)
 import Browser
 import Random
@@ -13,13 +15,13 @@ import Html exposing (..)
 import Html.Attributes as A exposing (..)
 import Html.Events exposing (..)
 
+import Helpers exposing (..)
 import Config
 import Model exposing (Model, Score, initialModel)
 import Color
 import Animations
 import Msg exposing (..)
 import Note exposing (Note)
-import UpdateAnimations
 
 import View.Header
 import View.MidiStatus
@@ -90,6 +92,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
 
     case msg of
+
         InitMIDI isMIDIConnectedBool ->
             ( { model | isMIDIConnected = Just isMIDIConnectedBool
               , isPlaying = if model.isPlaying && isMIDIConnectedBool == False
@@ -101,33 +104,48 @@ update msg model =
             , Cmd.none
             )
 
+
         -- don't draw notes when they're not being held down
         NoteReleased _ ->
-          ( { model | -- currentNote = Nothing
-           currentNoteStyle = Animation.interrupt [ 
-                                                    Animation.wait (Time.millisToPosix 50)
-                                                   , Animation.to [ Animation.opacity 0.0 ]
-                                                   , Animation.Messenger.send (CurrentNoteFadeAnimCompleted)
-                                                   ]
-                                                   model.currentNoteStyle
-              }
-              , Cmd.none
+          let
+            newAnimSteps = [ Animation.wait (Time.millisToPosix 50)
+              , Animation.to [ Animation.opacity 0.0 ]
+              , Animation.Messenger.send (CurrentNoteFadeAnimCompleted)
+              ]
+          in
+            ( updateModelForUniqueAnim model Model.currentNoteStyle newAnimSteps
+            , Cmd.none
             )
-        
-        CurrentNoteFadeAnimCompleted -> ( { model | currentNote = Nothing }, Cmd.none )
+
+
+        CurrentNoteFadeAnimCompleted ->
+          let
+              test = Debug.log "hiiii" "CurrentNoteFadeAnimCompleted"
+          in
+            ( { model | currentNote = Nothing }, Cmd.none )
+
+
 
         NotePressed noteCode -> updateNotePressed noteCode model
 
 
+
         CorrectNoteFadeAnimCompleted ->
-          ( { model | correctNoteStyle = Animation.style [ Animation.opacity 0.0, Animation.fill Color.black ] }
-          , Task.perform RestartTimer Time.now
-          )
+          let
+              newAnimSteps = [Animation.to [ Animation.opacity 0.0, Animation.fill Color.black ] ]
+          in
+            ( updateModelForUniqueAnim model Model.correctNoteStyle newAnimSteps
+            , Task.perform RestartTimer Time.now
+            )
+
+
 
         StartGame ->
             ( { model | isPlaying = True }
             , Task.perform RestartTimer Time.now -- request current time...
             )
+
+
 
         -- called when page loads to initialize correctNote, and again on each correct note played!
         GenerateTargetNotes midiCodeList ->
@@ -142,13 +160,17 @@ update msg model =
             )
  
 
+
         UpdateCorrectNote midiCode ->
-            ( { model | correctNote = Note.createNote midiCode
-              , correctNoteStyle = Animation.interrupt [ Animation.to [ Animation.opacity 1.0] ] model.correctNoteStyle
-              }
-            , Cmd.none
-            )
-        
+          let
+              newAnimSteps = [ Animation.to [ Animation.opacity 1.0] ]
+          in
+             ( updateModelForUniqueAnim model Model.correctNoteStyle newAnimSteps
+             , Cmd.none
+             )
+
+
+
         RestartTimer currentTimestamp ->
           let
             newAnswerSpeed = getNewAnswerSpeed model.startTimestamp currentTimestamp
@@ -174,15 +196,31 @@ update msg model =
             , nextCommand
             )
 
+
+
+        -- UPDATE EVERY ANIMATED ELEMENT
+        Animate timestamp ->
+          let
+              updatedDict = updateEveryAnimState model.uniqueAnimStates timestamp
+              allCmds = List.map Tuple.second (Dict.values updatedDict)
+              test = Debug.log "allCmds " allCmds
+              dictStylesOnly = Dict.map (\key val -> Tuple.first val) updatedDict
+          in
+              ( { model
+                  | uniqueAnimStates = dictStylesOnly }
+              , Cmd.batch allCmds
+              )
+
+
+
         TestTick currentTimestamp ->
           ( { model | testCurrentTimestamp = Just currentTimestamp }
           , Cmd.none
           )
 
-        Animate animMsg ->
-            UpdateAnimations.update animMsg model
 
 -- --------- -------- test ----------------- ------
+{--
         StartSpriteTestAnim ->
           let
               test = Debug.log "called StartSpriteTestAnim section of update" model.coinStyle
@@ -190,30 +228,27 @@ update msg model =
             ( { model | coinStyle = Animation.interrupt [Animations.coinLoop] model.coinStyle }
             , Cmd.none
             )
-
-        TestSpriteAnim animMsg ->
-          let
-              (newStyle, cmd) = Animation.Messenger.update animMsg model.coinStyle
-          in
-            ( { model | coinStyle = newStyle } , cmd )
-
+--}
 
 
         StartScrollGameLevel ->
-            ( { model | gameLevelScrollState = Animation.interrupt [Animations.scrollGameLevel model.nextTargetNoteIndex] model.gameLevelScrollState }
+          let
+              currentScrollState = getUniqueAnimState model.uniqueAnimStates Model.scrollState
+              newScrollState = Animation.interrupt [Animations.scrollGameLevel model.nextTargetNoteIndex] currentScrollState
+          in
+            -- ( { model | gameLevelScrollState = Animation.interrupt [Animations.scrollGameLevel model.nextTargetNoteIndex] model.gameLevelScrollState }
+            (
+            { model | uniqueAnimStates = updateUniqueAnimState model.uniqueAnimStates (Model.scrollState, newScrollState) }
             , Cmd.none
             )
 
-
-
-
-
-        ScrollGameLevel animMsg ->
+{--
+        ScrollGameLevel timestamp ->
           let
-              (newStyle, cmd) = Animation.Messenger.update animMsg model.gameLevelScrollState
+              (newStyle, cmd) = Animation.Messenger.update timestamp model.gameLevelScrollState
           in
             ( { model | gameLevelScrollState = newStyle } , cmd )
-
+--}
 
 
 updateNotePressed noteCode model =
@@ -225,7 +260,8 @@ updateNotePressed noteCode model =
     newNextTargetNoteIndex = if isCorrect then (model.nextTargetNoteIndex + 1) else model.nextTargetNoteIndex
 
     test = Debug.log "new next target note index: " newNextTargetNoteIndex
-    
+   
+    currentNoteStyle = getUniqueAnimState model.uniqueAnimStates Model.currentNoteStyle
     newCurrentNoteStyle = if isCorrect
         then
             Animations.initialCurrentNoteStyle
@@ -233,7 +269,20 @@ updateNotePressed noteCode model =
             Animation.interrupt [ Animation.set [Animation.opacity 0.0 ]
                                 , Animation.to [ Animation.opacity 0.4 ]
                                 ]
-                                model.currentNoteStyle
+                                currentNoteStyle
+
+    currentScrollState = getUniqueAnimState model.uniqueAnimStates Model.scrollState
+    newScrollState = Animation.interrupt [
+          Animations.scrollGameLevel newNextTargetNoteIndex
+          ] currentScrollState
+  
+    -- test2 = Debug.log "new scroll anim state: " newScrollState
+    
+    newUniqueAnimStates = updateUniqueAnimState model.uniqueAnimStates (Model.currentNoteStyle, newCurrentNoteStyle)
+    -- yeah..... this is terrible =P 
+    newUniqueAnimStates2 = updateUniqueAnimState newUniqueAnimStates (Model.scrollState, newScrollState)
+    -- newUniqueAnimStates2 = updateUniqueAnimState model.uniqueAnimStates ("gameLevelScrollState", newScrollState)
+
   in
     ( { model
         | currentNote =
@@ -243,10 +292,7 @@ updateNotePressed noteCode model =
             if isCorrect then model.score + 1 else model.score
         , incorrectTries =
             if isCorrect then model.incorrectTries else model.incorrectTries + 1
-        , currentNoteStyle = newCurrentNoteStyle
-        , gameLevelScrollState = Animation.interrupt [
-          Animations.scrollGameLevel newNextTargetNoteIndex
-          ] model.gameLevelScrollState
+        , uniqueAnimStates = newUniqueAnimStates2
       }
 
     -- , nextCommand
@@ -296,12 +342,8 @@ subscriptions model =
         , fakeHandleInitMIDI InitMIDI
         , fakeHandleNotePressed NotePressed
         , fakeHandleNoteReleased NoteReleased
-        , Animation.subscription (Animate << CorrectNoteStyle) [ model.correctNoteStyle ]
-        , Animation.subscription (Animate << CurrentNoteStyle) [ model.currentNoteStyle ]
-        -- TEST: 
-        , Animation.subscription TestSpriteAnim [ model.coinStyle ]
         
-        , Animation.subscription ScrollGameLevel [ model.gameLevelScrollState ]
+        , Animation.subscription Animate (Dict.values model.uniqueAnimStates)
         ]
 
 

@@ -1,11 +1,7 @@
-module Msg exposing (AnimMsg(..), Msg(..))
+module Msg exposing (Msg(..))
 
 import Animation
 import Time
-
-type AnimMsg
-    = CorrectNoteStyle Animation.Msg
-    | CurrentNoteStyle Animation.Msg
 
 type Msg
     = InitMIDI Bool
@@ -16,15 +12,15 @@ type Msg
     | StartGame
     | RestartTimer Time.Posix
    
-    | Animate AnimMsg
+    | Animate Animation.Msg
     | CorrectNoteFadeAnimCompleted
     | CurrentNoteFadeAnimCompleted
    
     | StartScrollGameLevel
-    | ScrollGameLevel Animation.Msg
+    -- | ScrollGameLevel Animation.Msg
 
     -- test: delete this!
     | TestTick Time.Posix
-    | StartSpriteTestAnim
-    | TestSpriteAnim Animation.Msg
+    -- | StartSpriteTestAnim
+--    | TestSpriteAnim Animation.Msg
 

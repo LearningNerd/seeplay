@@ -1,6 +1,6 @@
 module Model exposing (..)
 
-
+import Dict exposing (Dict)
 import Array exposing (..)
 import Time
 import Msg exposing (..)
@@ -11,6 +11,23 @@ import Animations
 import Animation
 import Animation.Messenger
 
+
+type alias AnimProp = String
+
+
+-- ---------- Constants for animated elem states --------------
+coinStyle = "coinStyle"
+scrollState = "gameLevelScrollState"
+currentNoteStyle = "currentNoteStyle"
+correctNoteStyle = "correctNoteStyle"
+
+initUniqueAnimStates =
+  Dict.fromList [
+        (coinStyle, Animation.style [ Animation.viewBox 0 0 16 16 ])
+      , (scrollState, initialScrollAnimState)
+      , (currentNoteStyle, Animations.initialCurrentNoteStyle)
+      , (correctNoteStyle, Animations.initialCorrectNoteStyle)
+      ]
 
 type alias Model =
     { isMIDIConnected : Maybe Bool
@@ -26,13 +43,7 @@ type alias Model =
     , scoreList : List Score -- store a list of score records for each practice session ... goes into local storage
     , testCurrentTimestamp : Maybe Time.Posix
     , sessionId : Int
-    , style : Animation.Messenger.State Msg
-    , currentNoteStyle : Animation.Messenger.State Msg
-    , correctNoteStyle : Animation.Messenger.State Msg
-    , gameLevelScrollState : Animation.Messenger.State Msg
-
-    -- TEST:
-    , coinStyle : Animation.Messenger.State Msg
+    , uniqueAnimStates : Dict String (Animation.Messenger.State Msg)
     }
 
 type alias Score =
@@ -44,6 +55,10 @@ type alias Score =
 -- For views ... not sure where to put this =P
 type alias Margins =
     { top : Float, right : Float, bottom : Float, left : Float }
+
+
+initialScrollAnimState = Animation.style [ Animation.viewBox 0 0 Config.svgViewTotalWidth Config.svgViewTotalHeight ]
+
 
 
 initialModel : Model
@@ -61,13 +76,6 @@ initialModel =
     , scoreList = []
     , testCurrentTimestamp = Nothing
     , sessionId = 0
-    , style = Animation.style [ Animation.opacity 1.0 ]
-    , currentNoteStyle = Animations.initialCurrentNoteStyle
-    , correctNoteStyle = Animations.initialCorrectNoteStyle
-    -- NOTE: currently hard-coded here and in src/View/Game.elm
-    , gameLevelScrollState = Animation.style [ Animation.viewBox 0 0 Config.svgViewTotalWidth Config.svgViewTotalHeight ]
-
-    -- TEST:
-    , coinStyle = Animation.style [ Animation.viewBox 0 0 16 16 ]
+    , uniqueAnimStates = initUniqueAnimStates
     }
 

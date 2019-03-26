@@ -3,6 +3,9 @@ module Note exposing (..)
 
 import Array exposing (..)
 import Random
+import Animation
+import Animation.Messenger
+
 
 type alias Note =
     { noteName : NoteName -- ("C", 4)
