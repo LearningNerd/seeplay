@@ -1,9 +1,10 @@
 module Animations exposing (..)
 
-import Config
+import Constants
 import Animation
 import Color
 import Time
+import Dict exposing (Dict)
 
 -- initialCurrentNoteStyle : Animation.Messenger.State Msg
 initialCurrentNoteStyle =
@@ -12,6 +13,16 @@ initialCurrentNoteStyle =
 -- initialCorrectNoteStyle : Animation.Messenger.State Msg
 initialCorrectNoteStyle =
   Animation.style [ Animation.opacity 1.0, Animation.fill Color.black ]
+
+initialScrollAnimState = Animation.style [ Animation.viewBox 0 0 Constants.svgViewTotalWidth Constants.svgViewTotalHeight ]
+
+initUniqueAnimStates =
+  Dict.fromList [
+        (Constants.coinStyle, Animation.style [])
+      , (Constants.scrollState, initialScrollAnimState)
+      , (Constants.currentNoteStyle, initialCurrentNoteStyle)
+      , (Constants.correctNoteStyle, initialCorrectNoteStyle)
+      ]
 
 -- spriteLoop : Int -> Int -> Int -> Int -> Animation.Model.Step msg
 spriteLoop delayMillis spriteWidth spriteHeight numSprites =
@@ -33,7 +44,7 @@ coinLoop = spriteLoop 100 16 16 4
 -- scrollGameLevel : Int -> Animation.Step
 scrollGameLevel nextNoteIndex =
   let
-      nextViewBoxStartPos = ((toFloat nextNoteIndex) * Config.noteXInterval)
+      nextViewBoxStartPos = ((toFloat nextNoteIndex) * Constants.noteXInterval)
       test = Debug.log "next xPos: " nextViewBoxStartPos
   in
     Animation.toWith
@@ -49,5 +60,5 @@ scrollGameLevel nextNoteIndex =
             , damping = 50
             }
         ) 
-        [ Animation.viewBox nextViewBoxStartPos 0 Config.svgViewTotalWidth Config.svgViewTotalHeight ]
+        [ Animation.viewBox nextViewBoxStartPos 0 Constants.svgViewTotalWidth Constants.svgViewTotalHeight ]
 

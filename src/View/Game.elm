@@ -1,7 +1,7 @@
 module View.Game exposing (view)
 
 import Helpers exposing (..)
-import Config
+import Constants
 import Model exposing (Model, Margins)
 import Msg exposing (..)
 import Html as HTML exposing (..)
@@ -16,7 +16,7 @@ import View.Note
 
 view : Model -> Html Msg
 view model =
-    svgView model Config.svgViewWidth Config.svgViewHeight { top = Config.topMargin, left = Config.leftMargin, bottom = Config.bottomMargin, right = Config.rightMargin }
+    svgView model Constants.svgViewWidth Constants.svgViewHeight { top = Constants.topMargin, left = Constants.leftMargin, bottom = Constants.bottomMargin, right = Constants.rightMargin }
 
 
 svgView : Model -> Float -> Float -> Margins -> Svg Msg
@@ -30,12 +30,12 @@ svgView model width height margins =
             height / 6
 
         svgWidth =
-            Config.svgViewTotalWidth
+            Constants.svgViewTotalWidth
 
         widthS = String.fromFloat svgWidth
 
         heightS =
-            String.fromFloat Config.svgViewTotalHeight
+            String.fromFloat Constants.svgViewTotalHeight
         
         drawNoteFunc = View.Note.drawNote lineHeight margins
 

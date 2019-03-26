@@ -16,7 +16,7 @@ import Html.Attributes as A exposing (..)
 import Html.Events exposing (..)
 
 import Helpers exposing (..)
-import Config
+import Constants
 import Model exposing (Model, Score, initialModel)
 import Color
 import Animations
@@ -113,7 +113,7 @@ update msg model =
               , Animation.Messenger.send (CurrentNoteFadeAnimCompleted)
               ]
           in
-            ( updateModelForUniqueAnim model Model.currentNoteStyle newAnimSteps
+            ( updateModelForUniqueAnim model Constants.currentNoteStyle newAnimSteps
             , Cmd.none
             )
 
@@ -134,7 +134,7 @@ update msg model =
           let
               newAnimSteps = [Animation.to [ Animation.opacity 0.0, Animation.fill Color.black ] ]
           in
-            ( updateModelForUniqueAnim model Model.correctNoteStyle newAnimSteps
+            ( updateModelForUniqueAnim model Constants.correctNoteStyle newAnimSteps
             , Task.perform RestartTimer Time.now
             )
 
@@ -165,7 +165,7 @@ update msg model =
           let
               newAnimSteps = [ Animation.to [ Animation.opacity 1.0] ]
           in
-             ( updateModelForUniqueAnim model Model.correctNoteStyle newAnimSteps
+             ( updateModelForUniqueAnim model Constants.correctNoteStyle newAnimSteps
              , Cmd.none
              )
 
@@ -233,12 +233,12 @@ update msg model =
 
         StartScrollGameLevel ->
           let
-              currentScrollState = getUniqueAnimState model.uniqueAnimStates Model.scrollState
+              currentScrollState = getUniqueAnimState model.uniqueAnimStates Constants.scrollState
               newScrollState = Animation.interrupt [Animations.scrollGameLevel model.nextTargetNoteIndex] currentScrollState
           in
             -- ( { model | gameLevelScrollState = Animation.interrupt [Animations.scrollGameLevel model.nextTargetNoteIndex] model.gameLevelScrollState }
             (
-            { model | uniqueAnimStates = updateUniqueAnimState model.uniqueAnimStates (Model.scrollState, newScrollState) }
+            { model | uniqueAnimStates = updateUniqueAnimState model.uniqueAnimStates (Constants.scrollState, newScrollState) }
             , Cmd.none
             )
 
@@ -261,7 +261,7 @@ updateNotePressed noteCode model =
 
     test = Debug.log "new next target note index: " newNextTargetNoteIndex
    
-    currentNoteStyle = getUniqueAnimState model.uniqueAnimStates Model.currentNoteStyle
+    currentNoteStyle = getUniqueAnimState model.uniqueAnimStates Constants.currentNoteStyle
     newCurrentNoteStyle = if isCorrect
         then
             Animations.initialCurrentNoteStyle
@@ -271,16 +271,16 @@ updateNotePressed noteCode model =
                                 ]
                                 currentNoteStyle
 
-    currentScrollState = getUniqueAnimState model.uniqueAnimStates Model.scrollState
+    currentScrollState = getUniqueAnimState model.uniqueAnimStates Constants.scrollState
     newScrollState = Animation.interrupt [
           Animations.scrollGameLevel newNextTargetNoteIndex
           ] currentScrollState
   
     -- test2 = Debug.log "new scroll anim state: " newScrollState
     
-    newUniqueAnimStates = updateUniqueAnimState model.uniqueAnimStates (Model.currentNoteStyle, newCurrentNoteStyle)
+    newUniqueAnimStates = updateUniqueAnimState model.uniqueAnimStates (Constants.currentNoteStyle, newCurrentNoteStyle)
     -- yeah..... this is terrible =P 
-    newUniqueAnimStates2 = updateUniqueAnimState newUniqueAnimStates (Model.scrollState, newScrollState)
+    newUniqueAnimStates2 = updateUniqueAnimState newUniqueAnimStates (Constants.scrollState, newScrollState)
     -- newUniqueAnimStates2 = updateUniqueAnimState model.uniqueAnimStates ("gameLevelScrollState", newScrollState)
 
   in
@@ -364,7 +364,7 @@ init initialSessionId =
     -- Get session ID from JS flag (starts at 0, or incremented from localstorage)
     -- Generate list of random numbers
   ( { initialModel | sessionId = initialSessionId }
-    , Random.generate GenerateTargetNotes (Note.getRandomMidiList Config.notesPerLevel)
+    , Random.generate GenerateTargetNotes (Note.getRandomMidiList Constants.notesPerLevel)
   )
 
 

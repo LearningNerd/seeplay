@@ -4,30 +4,13 @@ import Dict exposing (Dict)
 import Array exposing (..)
 import Time
 import Msg exposing (..)
-import Config
+import Constants
 import Note exposing (Note)
 import Color
 import Animations
 import Animation
 import Animation.Messenger
 
-
-type alias AnimProp = String
-
-
--- ---------- Constants for animated elem states --------------
-coinStyle = "coinStyle"
-scrollState = "gameLevelScrollState"
-currentNoteStyle = "currentNoteStyle"
-correctNoteStyle = "correctNoteStyle"
-
-initUniqueAnimStates =
-  Dict.fromList [
-        (coinStyle, Animation.style [ Animation.viewBox 0 0 16 16 ])
-      , (scrollState, initialScrollAnimState)
-      , (currentNoteStyle, Animations.initialCurrentNoteStyle)
-      , (correctNoteStyle, Animations.initialCorrectNoteStyle)
-      ]
 
 type alias Model =
     { isMIDIConnected : Maybe Bool
@@ -57,10 +40,6 @@ type alias Margins =
     { top : Float, right : Float, bottom : Float, left : Float }
 
 
-initialScrollAnimState = Animation.style [ Animation.viewBox 0 0 Config.svgViewTotalWidth Config.svgViewTotalHeight ]
-
-
-
 initialModel : Model
 initialModel =
     { isMIDIConnected = Nothing
@@ -76,6 +55,6 @@ initialModel =
     , scoreList = []
     , testCurrentTimestamp = Nothing
     , sessionId = 0
-    , uniqueAnimStates = initUniqueAnimStates
+    , uniqueAnimStates = Animations.initUniqueAnimStates
     }
 

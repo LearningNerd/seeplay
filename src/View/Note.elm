@@ -1,6 +1,6 @@
 module View.Note exposing (drawNote, drawAllNotes)
 
-import Config
+import Constants
 import Model exposing (Model, Margins)
 import Msg exposing (..)
 import Html as HTML exposing (..)
@@ -23,7 +23,7 @@ drawNote lineHeight margins animStyle xPosIndex note =
             toFloat (getNoteHeight note.midi)
     
         cxString =
-            String.fromFloat (margins.left + ((toFloat xPosIndex) * (toFloat Config.noteXInterval) ) )
+            String.fromFloat (margins.left + ((toFloat xPosIndex) * (toFloat Constants.noteXInterval) ) )
 
         cyString =
             String.fromFloat (margins.top + (yPosFloat * lineHeight / 2))

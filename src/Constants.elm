@@ -1,4 +1,4 @@
-module Config exposing (..)
+module Constants exposing (..)
 
 notesPerLevel = 10
 
@@ -14,4 +14,11 @@ rightMargin = 0
 
 svgViewTotalWidth = svgViewWidth + leftMargin + rightMargin
 svgViewTotalHeight = svgViewHeight + topMargin + bottomMargin
+
+-- ---------- Constants for animated elem states --------------
+coinStyle = "coinStyle"
+scrollState = "gameLevelScrollState"
+currentNoteStyle = "currentNoteStyle"
+correctNoteStyle = "correctNoteStyle"
+
 
