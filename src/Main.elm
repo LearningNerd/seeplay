@@ -105,18 +105,15 @@ update msg model =
             )
 
 
-        -- don't draw notes when they're not being held down
-        NoteReleased _ ->
+        NoteReleased _ -> (model, Cmd.none)
+{--
           let
-            newAnimSteps = [ Animation.wait (Time.millisToPosix 50)
-              , Animation.to [ Animation.opacity 0.0 ]
-              , Animation.Messenger.send (CurrentNoteFadeAnimCompleted)
-              ]
+            newAnimSteps = Animations.marioWalkLoop
           in
             ( updateModelForUniqueAnim model Constants.currentNoteStyle newAnimSteps
             , Cmd.none
             )
-
+--}
 
         CurrentNoteFadeAnimCompleted ->
           let
@@ -141,8 +138,15 @@ update msg model =
 
 
         StartGame ->
+          let
+            currentMarioStyle = getUniqueAnimState model.uniqueAnimStates Constants.currentNoteStyle
+            newMarioAnimStyle = Animation.interrupt Animations.marioWalkLoop currentMarioStyle
+            newMarioState = Helpers.updateUniqueAnimState model.uniqueAnimStates (Constants.currentNoteStyle, newMarioAnimStyle)
+              
+          in
             ( { model | isPlaying = True
               , targetNotes = Helpers.startAnimEveryNote model.targetNotes Animations.coinLoop
+              , uniqueAnimStates = newMarioState
               }
             , Task.perform RestartTimer Time.now 
             )
@@ -259,16 +263,13 @@ updateNotePressed noteCode model =
     newNextTargetNoteIndex = if isCorrect then (model.nextTargetNoteIndex + 1) else model.nextTargetNoteIndex
 
     test = Debug.log "new next target note index: " newNextTargetNoteIndex
-   
-    currentNoteStyle = getUniqueAnimState model.uniqueAnimStates Constants.currentNoteStyle
-    newCurrentNoteStyle = if isCorrect
+{--
+    newMarioStyle = if isCorrect
         then
-            Animations.initialCurrentNoteStyle
+            Animation.interrupt Animations.marioWalkLoop currentMarioStyle
         else
-            Animation.interrupt [ Animation.set [Animation.opacity 0.0 ]
-                                , Animation.to [ Animation.opacity 0.4 ]
-                                ]
-                                currentNoteStyle
+            Animation.interrupt [ Animation.set [Animations.initialCurrentNoteStyle] ] currentMarioStyle
+--}
 
     currentScrollState = getUniqueAnimState model.uniqueAnimStates Constants.scrollState
     newScrollState = Animation.interrupt [
@@ -277,9 +278,9 @@ updateNotePressed noteCode model =
   
     -- test2 = Debug.log "new scroll anim state: " newScrollState
     
-    newUniqueAnimStates = updateUniqueAnimState model.uniqueAnimStates (Constants.currentNoteStyle, newCurrentNoteStyle)
+    -- newUniqueAnimStates = updateUniqueAnimState model.uniqueAnimStates (Constants.currentNoteStyle, newMarioStyle)
     -- yeah..... this is terrible =P 
-    newUniqueAnimStates2 = updateUniqueAnimState newUniqueAnimStates (Constants.scrollState, newScrollState)
+    newUniqueAnimStates2 = updateUniqueAnimState model.uniqueAnimStates (Constants.scrollState, newScrollState)
     -- newUniqueAnimStates2 = updateUniqueAnimState model.uniqueAnimStates ("gameLevelScrollState", newScrollState)
 
   in

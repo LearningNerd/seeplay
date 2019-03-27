@@ -25,9 +25,6 @@ svgView model width height margins =
         currentNoteStyle = getUniqueAnimState model.uniqueAnimStates "currentNoteStyle"
         gameLevelScrollState = getUniqueAnimState model.uniqueAnimStates "gameLevelScrollState"
 
-        lineHeight =
-            height / 6
-
         svgWidth =
             Constants.svgViewTotalWidth
 
@@ -36,10 +33,10 @@ svgView model width height margins =
         heightS =
             String.fromFloat Constants.svgViewTotalHeight
         
-        drawTargetNoteFunc = View.Note.drawTargetNote lineHeight margins
-        drawCurrentNoteFunc = View.Note.drawCurrentNote lineHeight margins
+        drawTargetNoteFunc = View.Note.drawTargetNote Constants.staffLineHeight margins
+        drawCurrentNoteFunc = View.Note.drawCurrentNote Constants.staffLineHeight margins
 
-        svgListAllNotes = View.Note.drawAllTargetNotes width lineHeight margins model.targetNotes
+        svgListAllNotes = View.Note.drawAllTargetNotes width Constants.staffLineHeight margins model.targetNotes
 
         currentNoteDrawing = case model.currentNote of
                                  Nothing -> []
@@ -57,7 +54,7 @@ svgView model width height margins =
         , S.class "center"
         ]
         (
-          (backgroundStatic width lineHeight margins)
+          (backgroundStatic width Constants.staffLineHeight margins)
            ++ [gameLevelSvg]
            -- ++ currentNoteDrawing
         ) 
@@ -65,7 +62,7 @@ svgView model width height margins =
 
 -- Treble clef and staff are static, other stuff scrolls on top
 backgroundStatic width lineHeight margins = 
-    (drawStaff width lineHeight margins)
+    (drawStaff width Constants.staffLineHeight margins)
     ++ [ trebleClef 50 237 ]
 
 
@@ -84,7 +81,7 @@ staffLines : Float -> Float -> Margins -> Int -> Svg msg
 staffLines staffWidth lineHeight margins yPos =
     let
         lineYString =
-            String.fromFloat (margins.top + (toFloat yPos * lineHeight))
+            String.fromFloat (margins.top + (toFloat yPos * Constants.staffLineHeight))
     in
     line
         [ S.x1 (String.fromFloat margins.left)
@@ -98,5 +95,5 @@ staffLines staffWidth lineHeight margins yPos =
 
 drawStaff : Float -> Float -> Margins -> List (Svg msg)
 drawStaff staffWidth lineHeight margins =
-    List.map (staffLines staffWidth lineHeight margins) (List.range 1 5)
+    List.map (staffLines staffWidth Constants.staffLineHeight margins) (List.range 1 5)
 

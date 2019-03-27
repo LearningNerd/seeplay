@@ -18,6 +18,7 @@ type alias Model =
     , correctNote : Note
     , targetNotes : Array Note
     , nextTargetNoteIndex : Int
+    , previousMidiCode : Maybe Int
     , currentNote : Maybe Note
     , score : Int
     , startTimestamp : Maybe Time.Posix
@@ -48,6 +49,7 @@ initialModel =
     , targetNotes = Array.empty
     , nextTargetNoteIndex = 0
     , currentNote = Nothing
+    , previousMidiCode = Nothing
     , score = 0
     , startTimestamp = Nothing
     , answerSpeed = 0
