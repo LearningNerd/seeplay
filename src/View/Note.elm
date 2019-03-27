@@ -1,4 +1,4 @@
-module View.Note exposing (drawCurrentNote, drawTargetNote, drawAllTargetNotes)
+module View.Note exposing (..)
 
 import Constants
 import Model exposing (Model, Margins)
@@ -48,29 +48,21 @@ drawTargetNote lineHeight margins xPosIndex note =
 drawCurrentNote : Float -> Margins -> (Animation.Messenger.State Msg) -> Int -> Note -> Svg msg
 drawCurrentNote lineHeight margins animStyle xPosIndex note =
     let
-        yPosFloat =
-            toFloat (getNoteHeight note.midi)
     
         cxString =
             String.fromFloat (margins.left + ((toFloat xPosIndex) * (toFloat Constants.noteXInterval) ) + 12 )
 
-        cyString =
-            String.fromFloat ((-1 * View.Mario.sizeOffset) + margins.top + (yPosFloat * lineHeight/ 2))
-
-        test = Debug.log "y pos " cyString
-
+        cyString = String.fromFloat (getMarioYPosition note.midi)
     in
       View.Mario.view animStyle cxString cyString
 
-{--
-  circle
-      ( [ S.cx cxString
-        , S.cy cyString
-        , S.r (String.fromFloat (lineHeight / 2))
-        ] ++ (Animation.render animStyle)
-      )
-        []
---}
+
+getMarioYPosition midiCode =
+  let
+        yPosFloat =
+            toFloat (getNoteHeight midiCode)
+  in
+    (-1 * View.Mario.sizeOffset) + Constants.topMargin + (yPosFloat * Constants.staffLineHeight/ 2)
 
 
 getNoteHeight midiCode = 

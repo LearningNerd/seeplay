@@ -19,6 +19,7 @@ type alias Model =
     , targetNotes : Array Note
     , nextTargetNoteIndex : Int
     , currentNote : Maybe Note
+    , prevMidi : Maybe Int
     , score : Int
     , startTimestamp : Maybe Time.Posix
     , answerSpeed : Int -- result of subtracting two times via posixToMillis
@@ -47,7 +48,8 @@ initialModel =
     , correctNote = Note.createNote 60
     , targetNotes = Array.empty
     , nextTargetNoteIndex = 0
-    , currentNote = Nothing
+    , currentNote = Just (Note.createNote 65)
+    , prevMidi = Nothing
     , score = 0
     , startTimestamp = Nothing
     , answerSpeed = 0

@@ -1,34 +1,33 @@
 module Animations exposing (..)
 
-
+import Msg exposing (..)
 import Constants
 import Animation
+import Animation.Messenger
 import Color
 import Time
 import Dict exposing (Dict)
 
------------- very temporary solution here =P need to refactor a BUNCH ------------
-marioWidthToHeightRatio = 17 / 24 -- 17 px wide, 24 px high
 
+----- refactor this!!! =P
 baseSpriteWidth = 17
 baseSpriteHeight = 24
 
-----------------------------------------------------------------------
 
-
--- initialCurrentNoteStyle : Animation.Messenger.State Msg
-initialCurrentNoteStyle = Animation.viewBox 0 0 baseSpriteWidth baseSpriteHeight
-                  
-
-marioWalkLoop = spriteLoop 100 baseSpriteWidth baseSpriteHeight 0 2
-
-
+coinDisappear =
+  [ Animation.to [ Animation.opacity 0 ]
+  , Animation.Messenger.send GetCoinDone
+  ]
 
 -- initialCorrectNoteStyle : Animation.Messenger.State Msg
 initialCorrectNoteStyle =
   Animation.style [ Animation.opacity 1.0, Animation.fill Color.black ]
 
+-- initialCurrentNoteStyle : Animation.Messenger.State Msg
+initialCurrentNoteStyle = Animation.viewBox 0 0 baseSpriteWidth baseSpriteHeight
+
 initialScrollAnimState = Animation.style [ Animation.viewBox 0 0 Constants.svgViewTotalWidth Constants.svgViewTotalHeight ]
+
 
 initUniqueAnimStates =
   Dict.fromList [
@@ -37,6 +36,12 @@ initUniqueAnimStates =
       , (Constants.currentNoteStyle, Animation.style [initialCurrentNoteStyle])
       , (Constants.correctNoteStyle, initialCorrectNoteStyle)
       ]
+
+
+-- individual sprite, static
+staticSprite spriteWidth spriteHeight spriteIndex =
+  Animation.set [Animation.viewBox ((spriteWidth * spriteIndex)) 0.0 (spriteWidth) (spriteHeight)]
+
 
 -- spriteLoop : Int -> Int -> Int -> Int -> Animation.Model.Step msg
 spriteLoop delayMillis spriteWidth spriteHeight firstSpriteIndex numSprites =

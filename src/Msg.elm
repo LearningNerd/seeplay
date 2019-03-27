@@ -7,20 +7,18 @@ type Msg
     = InitMIDI Bool
     | NotePressed Int
     | NoteReleased Bool
-    | UpdateCorrectNote Int
+    
     | GenerateTargetNotes (List Int)
     | StartGame
     | RestartTimer Time.Posix
    
     | Animate Animation.Msg
-    | CorrectNoteFadeAnimCompleted
-    | CurrentNoteFadeAnimCompleted
 
     | StartScrollGameLevel
-    -- | ScrollGameLevel Animation.Msg
+
+    | MoveToCoinDone
+    | GetCoinDone
 
     -- test: delete this!
     | TestTick Time.Posix
-    -- | StartSpriteTestAnim
---    | TestSpriteAnim Animation.Msg
 

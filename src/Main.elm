@@ -29,6 +29,7 @@ import View.StartScreen
 import View.Game
 -- TEST:
 import View.Coin
+import View.Mario
 
 port handleInitMIDI : (Bool -> msg) -> Sub msg
 port handleNotePressed : (Int -> msg) -> Sub msg
@@ -104,53 +105,20 @@ update msg model =
             , Cmd.none
             )
 
-
-        NoteReleased _ -> (model, Cmd.none)
-{--
-          let
-            newAnimSteps = Animations.marioWalkLoop
-          in
-            ( updateModelForUniqueAnim model Constants.currentNoteStyle newAnimSteps
-            , Cmd.none
-            )
---}
-
-        CurrentNoteFadeAnimCompleted ->
-          let
-              test = Debug.log "hiiii" "CurrentNoteFadeAnimCompleted"
-          in
-            ( { model | currentNote = Nothing }, Cmd.none )
-
-
-
-        NotePressed noteCode -> updateNotePressed noteCode model
-
-
-
-        CorrectNoteFadeAnimCompleted ->
-          let
-              newAnimSteps = [Animation.to [ Animation.opacity 0.0, Animation.fill Color.black ] ]
-          in
-            ( updateModelForUniqueAnim model Constants.correctNoteStyle newAnimSteps
-            , Task.perform RestartTimer Time.now
-            )
-
-
-
+        
         StartGame ->
           let
             currentMarioStyle = getUniqueAnimState model.uniqueAnimStates Constants.currentNoteStyle
-            newMarioAnimStyle = Animation.interrupt Animations.marioWalkLoop currentMarioStyle
-            newMarioState = Helpers.updateUniqueAnimState model.uniqueAnimStates (Constants.currentNoteStyle, newMarioAnimStyle)
+            newMarioAnimStyle = Animation.interrupt View.Mario.marioWalkLoop currentMarioStyle
+            updatedUniqueAnimStates = Helpers.updateUniqueAnimState model.uniqueAnimStates (Constants.currentNoteStyle, newMarioAnimStyle)
               
           in
             ( { model | isPlaying = True
               , targetNotes = Helpers.startAnimEveryNote model.targetNotes Animations.coinLoop
-              , uniqueAnimStates = newMarioState
+              , uniqueAnimStates = updatedUniqueAnimStates
               }
             , Task.perform RestartTimer Time.now 
             )
-
 
 
 -- called when page loads to initialize correctNote, and again on each correct note played!
@@ -164,16 +132,11 @@ update msg model =
               }
             , Cmd.none
             )
- 
 
 
-        UpdateCorrectNote midiCode ->
-          let
-              newAnimSteps = [ Animation.to [ Animation.opacity 1.0] ]
-          in
-             ( updateModelForUniqueAnim model Constants.correctNoteStyle newAnimSteps
-             , Cmd.none
-             )
+        NoteReleased _ -> (model, Cmd.none)
+        
+        NotePressed noteCode -> updateNotePressed noteCode model
 
 
 
@@ -201,6 +164,53 @@ update msg model =
               }
             , nextCommand
             )
+
+
+        -- after Mario reaches a coin, make it fade out, and trigger GetCoinDone
+        MoveToCoinDone ->
+          let
+              maybeTargetNote = Array.get model.nextTargetNoteIndex model.targetNotes
+              nextTargetNote = case maybeTargetNote of
+                  Nothing -> Note.createNote 60 -- ...not sure what other fallback =P
+                  Just n -> n
+
+              coinAnimSteps = Animation.interrupt Animations.coinDisappear nextTargetNote.animState
+              updatedTargetNote = { nextTargetNote | animState = coinAnimSteps }
+              
+              allUpdatedTargetNotes = Array.set model.nextTargetNoteIndex updatedTargetNote model.targetNotes
+          in
+             ( { model | targetNotes = allUpdatedTargetNotes }
+             , Cmd.none 
+             )
+
+
+        -- resume walk cycle, scroll to next note, update model with next note index
+        -- THIS ONLY HAPPENS IF CORRECT NOTE WAS PLAYED
+        GetCoinDone ->
+          let
+            currentMarioStyle = getUniqueAnimState model.uniqueAnimStates Constants.currentNoteStyle
+            newMarioAnimStyle = Animation.interrupt View.Mario.marioWalkLoop currentMarioStyle
+            newMarioState = Helpers.updateUniqueAnimState model.uniqueAnimStates (Constants.currentNoteStyle, newMarioAnimStyle)
+
+
+            newNextTargetNoteIndex = model.nextTargetNoteIndex + 1
+
+            currentScrollState = getUniqueAnimState model.uniqueAnimStates Constants.scrollState
+            newScrollState = Animation.interrupt [
+              Animations.scrollGameLevel newNextTargetNoteIndex
+              ] currentScrollState
+ 
+            newUniqueAnimStates = updateUniqueAnimState model.uniqueAnimStates (Constants.scrollState, newScrollState)
+
+          in
+            ( { model | 
+                nextTargetNoteIndex = newNextTargetNoteIndex
+              , uniqueAnimStates = newUniqueAnimStates
+              }
+            , Cmd.none
+            )
+
+
 
 
 
@@ -256,51 +266,48 @@ update msg model =
 
 updateNotePressed noteCode model =
   let
+    prevMidi = case model.prevMidi of
+      Nothing -> noteCode -- the note that was just pressed
+      Just m -> m
+
     newCurrentNote = Note.createNote noteCode
     nextTargetNote = getNextTargetNote model.nextTargetNoteIndex model.targetNotes
-    nextTargetNoteMidi = 
     isCorrect = getIsCorrect nextTargetNote (Just newCurrentNote)
     
-    newNextTargetNoteIndex = if isCorrect then (model.nextTargetNoteIndex + 1) else model.nextTargetNoteIndex
+    nextAnimStepsList = jumpOrFall prevMidi noteCode
 
-    test = Debug.log "new next target note index: " newNextTargetNoteIndex
-{--
+    currentMarioStyle = getUniqueAnimState model.uniqueAnimStates Constants.currentNoteStyle
+    
+    -- for now, only use jump/fall sprites when getting correct note. but this isn't what I actually want =P let's test this first!
     newMarioStyle = if isCorrect
         then
-            Animation.interrupt Animations.marioWalkLoop currentMarioStyle
+            nextAnimStepsList currentMarioStyle
         else
-            Animation.interrupt [ Animation.set [Animations.initialCurrentNoteStyle] ] currentMarioStyle
---}
-
-    currentScrollState = getUniqueAnimState model.uniqueAnimStates Constants.scrollState
-    newScrollState = Animation.interrupt [
-          Animations.scrollGameLevel newNextTargetNoteIndex
-          ] currentScrollState
-  
-    -- test2 = Debug.log "new scroll anim state: " newScrollState
+            Animation.interrupt View.Mario.marioWalkLoop currentMarioStyle
     
-    -- newUniqueAnimStates = updateUniqueAnimState model.uniqueAnimStates (Constants.currentNoteStyle, newMarioStyle)
-    -- yeah..... this is terrible =P 
-    newUniqueAnimStates2 = updateUniqueAnimState model.uniqueAnimStates (Constants.scrollState, newScrollState)
-    -- newUniqueAnimStates2 = updateUniqueAnimState model.uniqueAnimStates ("gameLevelScrollState", newScrollState)
+    newUniqueAnimStates = updateUniqueAnimState model.uniqueAnimStates (Constants.currentNoteStyle, newMarioStyle)
 
   in
     ( { model
         | currentNote =
             Just newCurrentNote
-        , nextTargetNoteIndex = newNextTargetNoteIndex
+        , prevMidi = Just noteCode
         , score =
             if isCorrect then model.score + 1 else model.score
         , incorrectTries =
             if isCorrect then model.incorrectTries else model.incorrectTries + 1
-        , uniqueAnimStates = newUniqueAnimStates2
+        , uniqueAnimStates = newUniqueAnimStates
       }
 
     -- , nextCommand
     , Cmd.none
     )
 
-
+-- need to handle case where note is at same level ... stay a bit in front of note, not directly on it? or just never have two same notes in a row?
+jumpOrFall prevMidi currentMidi =
+  if currentMidi > prevMidi
+     then Animation.interrupt ( View.Mario.marioJump currentMidi )
+     else Animation.interrupt ( View.Mario.marioFall currentMidi )
 
 
 -- Edge case: starting the timer when game begins shouldn't update answerSpeed

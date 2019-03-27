@@ -5710,11 +5710,13 @@ var author$project$Note$createNote = function (midiCode) {
 var author$project$Model$initialModel = {
 	answerSpeed: 0,
 	correctNote: author$project$Note$createNote(60),
-	currentNote: elm$core$Maybe$Nothing,
+	currentNote: elm$core$Maybe$Just(
+		author$project$Note$createNote(65)),
 	incorrectTries: 0,
 	isMIDIConnected: elm$core$Maybe$Nothing,
 	isPlaying: false,
 	nextTargetNoteIndex: 0,
+	prevMidi: elm$core$Maybe$Nothing,
 	score: 0,
 	scoreList: _List_Nil,
 	sessionId: 0,
@@ -6931,6 +6933,28 @@ var author$project$Main$subscriptions = function (model) {
 						elm$core$Array$toList(model.targetNotes))))
 			]));
 };
+var author$project$Msg$GetCoinDone = {$: 'GetCoinDone'};
+var mdgriffith$elm_style_animation$Animation$Model$To = function (a) {
+	return {$: 'To', a: a};
+};
+var mdgriffith$elm_style_animation$Animation$to = function (props) {
+	return mdgriffith$elm_style_animation$Animation$Model$To(props);
+};
+var mdgriffith$elm_style_animation$Animation$Model$Send = function (a) {
+	return {$: 'Send', a: a};
+};
+var mdgriffith$elm_style_animation$Animation$Messenger$send = function (msg) {
+	return mdgriffith$elm_style_animation$Animation$Model$Send(msg);
+};
+var author$project$Animations$coinDisappear = _List_fromArray(
+	[
+		mdgriffith$elm_style_animation$Animation$to(
+		_List_fromArray(
+			[
+				mdgriffith$elm_style_animation$Animation$opacity(0)
+			])),
+		mdgriffith$elm_style_animation$Animation$Messenger$send(author$project$Msg$GetCoinDone)
+	]);
 var elm$core$List$append = F2(
 	function (xs, ys) {
 		if (!ys.b) {
@@ -6991,7 +7015,6 @@ var author$project$Animations$spriteLoop = F5(
 			]);
 	});
 var author$project$Animations$coinLoop = A5(author$project$Animations$spriteLoop, 100, 16, 16, 0, 4);
-var author$project$Animations$marioWalkLoop = A5(author$project$Animations$spriteLoop, 100, author$project$Animations$baseSpriteWidth, author$project$Animations$baseSpriteHeight, 0, 2);
 var author$project$Constants$noteXInterval = 200;
 var elm$core$Debug$log = _Debug_log;
 var mdgriffith$elm_style_animation$Animation$spring = function (settings) {
@@ -8656,6 +8679,16 @@ var author$project$Helpers$updateEveryAnimState = F2(
 			});
 		return A2(elm$core$Dict$map, animEach, dict);
 	});
+var author$project$Helpers$updateNoteWithAnimState = F2(
+	function (timestamp, note) {
+		var _n0 = A2(mdgriffith$elm_style_animation$Animation$Messenger$update, timestamp, note.animState);
+		var newAnimState = _n0.a;
+		var cmd = _n0.b;
+		var newNote = _Utils_update(
+			note,
+			{animState: newAnimState});
+		return _Utils_Tuple2(newNote, cmd);
+	});
 var elm$core$Dict$getMin = function (dict) {
 	getMin:
 	while (true) {
@@ -9052,29 +9085,6 @@ var author$project$Helpers$updateUniqueAnimState = F2(
 				}),
 			dict);
 	});
-var author$project$Helpers$updateModelForUniqueAnim = F3(
-	function (model, animKey, newAnimSteps) {
-		var currentStyle = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, animKey);
-		var newStyle = A2(mdgriffith$elm_style_animation$Animation$interrupt, newAnimSteps, currentStyle);
-		return _Utils_update(
-			model,
-			{
-				uniqueAnimStates: A2(
-					author$project$Helpers$updateUniqueAnimState,
-					model.uniqueAnimStates,
-					_Utils_Tuple2(animKey, newStyle))
-			});
-	});
-var author$project$Helpers$updateNoteWithAnimState = F2(
-	function (timestamp, note) {
-		var _n0 = A2(mdgriffith$elm_style_animation$Animation$Messenger$update, timestamp, note.animState);
-		var newAnimState = _n0.a;
-		var cmd = _n0.b;
-		var newNote = _Utils_update(
-			note,
-			{animState: newAnimState});
-		return _Utils_Tuple2(newNote, cmd);
-	});
 var author$project$Main$cache = _Platform_outgoingPort('cache', elm$core$Basics$identity);
 var elm$json$Json$Encode$int = _Json_wrap;
 var elm$json$Json$Encode$object = function (pairs) {
@@ -9133,38 +9143,129 @@ var author$project$Main$getNextTargetNote = F2(
 			return n;
 		}
 	});
+var author$project$Animations$staticSprite = F3(
+	function (spriteWidth, spriteHeight, spriteIndex) {
+		return mdgriffith$elm_style_animation$Animation$set(
+			_List_fromArray(
+				[
+					A4(mdgriffith$elm_style_animation$Animation$viewBox, spriteWidth * spriteIndex, 0.0, spriteWidth, spriteHeight)
+				]));
+	});
+var author$project$Msg$MoveToCoinDone = {$: 'MoveToCoinDone'};
+var author$project$View$Mario$baseSpriteHeight = 24;
+var author$project$View$Mario$baseSpriteWidth = 17;
+var author$project$Constants$staffLineHeight = author$project$Constants$svgViewHeight / 6;
+var author$project$View$Mario$getNoteHeight = function (midiCode) {
+	switch (midiCode) {
+		case 60:
+			return 11;
+		case 62:
+			return 10;
+		case 64:
+			return 9;
+		case 65:
+			return 8;
+		case 67:
+			return 7;
+		case 69:
+			return 6;
+		case 71:
+			return 5;
+		case 72:
+			return 4;
+		case 74:
+			return 3;
+		case 76:
+			return 2;
+		case 77:
+			return 1;
+		case 79:
+			return 0;
+		default:
+			return 12;
+	}
+};
+var author$project$View$Mario$sizeOffset = 15;
+var author$project$View$Mario$getMarioYPosition = function (midiCode) {
+	var yPosFloat = author$project$View$Mario$getNoteHeight(midiCode);
+	return (((-1) * author$project$View$Mario$sizeOffset) + author$project$Constants$topMargin) + ((yPosFloat * author$project$Constants$staffLineHeight) / 2);
+};
+var mdgriffith$elm_style_animation$Animation$y = function (y_) {
+	return A3(mdgriffith$elm_style_animation$Animation$custom, 'y', y_, '');
+};
+var author$project$View$Mario$marioFall = function (midiCode) {
+	var yPos = author$project$View$Mario$getMarioYPosition(midiCode);
+	var setSprite = A3(author$project$Animations$staticSprite, author$project$View$Mario$baseSpriteWidth, author$project$View$Mario$baseSpriteHeight, 3);
+	return A2(
+		elm$core$List$cons,
+		setSprite,
+		_List_fromArray(
+			[
+				mdgriffith$elm_style_animation$Animation$to(
+				_List_fromArray(
+					[
+						mdgriffith$elm_style_animation$Animation$y(yPos)
+					])),
+				mdgriffith$elm_style_animation$Animation$Messenger$send(author$project$Msg$MoveToCoinDone)
+			]));
+};
+var author$project$View$Mario$marioJump = function (midiCode) {
+	var yPos = author$project$View$Mario$getMarioYPosition(midiCode);
+	var setSprite = A3(author$project$Animations$staticSprite, author$project$View$Mario$baseSpriteWidth, author$project$View$Mario$baseSpriteHeight, 2);
+	return A2(
+		elm$core$List$cons,
+		setSprite,
+		_List_fromArray(
+			[
+				mdgriffith$elm_style_animation$Animation$to(
+				_List_fromArray(
+					[
+						mdgriffith$elm_style_animation$Animation$y(yPos)
+					])),
+				mdgriffith$elm_style_animation$Animation$Messenger$send(author$project$Msg$MoveToCoinDone)
+			]));
+};
+var author$project$Main$jumpOrFall = F2(
+	function (prevMidi, currentMidi) {
+		return (_Utils_cmp(currentMidi, prevMidi) > 0) ? mdgriffith$elm_style_animation$Animation$interrupt(
+			author$project$View$Mario$marioJump(currentMidi)) : mdgriffith$elm_style_animation$Animation$interrupt(
+			author$project$View$Mario$marioFall(currentMidi));
+	});
+var author$project$View$Mario$marioWalkLoop = A5(author$project$Animations$spriteLoop, 100, author$project$View$Mario$baseSpriteWidth, author$project$View$Mario$baseSpriteHeight, 0, 2);
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var author$project$Main$updateNotePressed = F2(
 	function (noteCode, model) {
+		var prevMidi = function () {
+			var _n0 = model.prevMidi;
+			if (_n0.$ === 'Nothing') {
+				return noteCode;
+			} else {
+				var m = _n0.a;
+				return m;
+			}
+		}();
 		var nextTargetNote = A2(author$project$Main$getNextTargetNote, model.nextTargetNoteIndex, model.targetNotes);
+		var nextAnimStepsList = A2(author$project$Main$jumpOrFall, prevMidi, noteCode);
 		var newCurrentNote = author$project$Note$createNote(noteCode);
 		var isCorrect = A2(
 			author$project$Main$getIsCorrect,
 			nextTargetNote,
 			elm$core$Maybe$Just(newCurrentNote));
-		var newNextTargetNoteIndex = isCorrect ? (model.nextTargetNoteIndex + 1) : model.nextTargetNoteIndex;
-		var test = A2(elm$core$Debug$log, 'new next target note index: ', newNextTargetNoteIndex);
-		var currentScrollState = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, author$project$Constants$scrollState);
-		var newScrollState = A2(
-			mdgriffith$elm_style_animation$Animation$interrupt,
-			_List_fromArray(
-				[
-					author$project$Animations$scrollGameLevel(newNextTargetNoteIndex)
-				]),
-			currentScrollState);
-		var newUniqueAnimStates2 = A2(
+		var currentMarioStyle = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, author$project$Constants$currentNoteStyle);
+		var newMarioStyle = isCorrect ? nextAnimStepsList(currentMarioStyle) : A2(mdgriffith$elm_style_animation$Animation$interrupt, author$project$View$Mario$marioWalkLoop, currentMarioStyle);
+		var newUniqueAnimStates = A2(
 			author$project$Helpers$updateUniqueAnimState,
 			model.uniqueAnimStates,
-			_Utils_Tuple2(author$project$Constants$scrollState, newScrollState));
+			_Utils_Tuple2(author$project$Constants$currentNoteStyle, newMarioStyle));
 		return _Utils_Tuple2(
 			_Utils_update(
 				model,
 				{
 					currentNote: elm$core$Maybe$Just(newCurrentNote),
 					incorrectTries: isCorrect ? model.incorrectTries : (model.incorrectTries + 1),
-					nextTargetNoteIndex: newNextTargetNoteIndex,
+					prevMidi: elm$core$Maybe$Just(noteCode),
 					score: isCorrect ? (model.score + 1) : model.score,
-					uniqueAnimStates: newUniqueAnimStates2
+					uniqueAnimStates: newUniqueAnimStates
 				}),
 			elm$core$Platform$Cmd$none);
 	});
@@ -9175,6 +9276,49 @@ var author$project$Model$Score = F3(
 var author$project$Msg$RestartTimer = function (a) {
 	return {$: 'RestartTimer', a: a};
 };
+var elm$core$Elm$JsArray$unsafeSet = _JsArray_unsafeSet;
+var elm$core$Array$setHelp = F4(
+	function (shift, index, value, tree) {
+		var pos = elm$core$Array$bitMask & (index >>> shift);
+		var _n0 = A2(elm$core$Elm$JsArray$unsafeGet, pos, tree);
+		if (_n0.$ === 'SubTree') {
+			var subTree = _n0.a;
+			var newSub = A4(elm$core$Array$setHelp, shift - elm$core$Array$shiftStep, index, value, subTree);
+			return A3(
+				elm$core$Elm$JsArray$unsafeSet,
+				pos,
+				elm$core$Array$SubTree(newSub),
+				tree);
+		} else {
+			var values = _n0.a;
+			var newLeaf = A3(elm$core$Elm$JsArray$unsafeSet, elm$core$Array$bitMask & index, value, values);
+			return A3(
+				elm$core$Elm$JsArray$unsafeSet,
+				pos,
+				elm$core$Array$Leaf(newLeaf),
+				tree);
+		}
+	});
+var elm$core$Array$set = F3(
+	function (index, value, array) {
+		var len = array.a;
+		var startShift = array.b;
+		var tree = array.c;
+		var tail = array.d;
+		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? array : ((_Utils_cmp(
+			index,
+			elm$core$Array$tailIndex(len)) > -1) ? A4(
+			elm$core$Array$Array_elm_builtin,
+			len,
+			startShift,
+			tree,
+			A3(elm$core$Elm$JsArray$unsafeSet, elm$core$Array$bitMask & index, value, tail)) : A4(
+			elm$core$Array$Array_elm_builtin,
+			len,
+			startShift,
+			A4(elm$core$Array$setHelp, startShift, index, value, tree),
+			tail));
+	});
 var elm$core$List$unzip = function (pairs) {
 	var step = F2(
 		function (_n0, _n1) {
@@ -9201,12 +9345,6 @@ var elm$json$Json$Encode$list = F2(
 				_Json_emptyArray(_Utils_Tuple0),
 				entries));
 	});
-var mdgriffith$elm_style_animation$Animation$Model$To = function (a) {
-	return {$: 'To', a: a};
-};
-var mdgriffith$elm_style_animation$Animation$to = function (props) {
-	return mdgriffith$elm_style_animation$Animation$Model$To(props);
-};
 var author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -9220,35 +9358,10 @@ var author$project$Main$update = F2(
 							isPlaying: (model.isPlaying && (!isMIDIConnectedBool)) ? false : model.isPlaying
 						}),
 					elm$core$Platform$Cmd$none);
-			case 'NoteReleased':
-				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
-			case 'CurrentNoteFadeAnimCompleted':
-				var test = A2(elm$core$Debug$log, 'hiiii', 'CurrentNoteFadeAnimCompleted');
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{currentNote: elm$core$Maybe$Nothing}),
-					elm$core$Platform$Cmd$none);
-			case 'NotePressed':
-				var noteCode = msg.a;
-				return A2(author$project$Main$updateNotePressed, noteCode, model);
-			case 'CorrectNoteFadeAnimCompleted':
-				var newAnimSteps = _List_fromArray(
-					[
-						mdgriffith$elm_style_animation$Animation$to(
-						_List_fromArray(
-							[
-								mdgriffith$elm_style_animation$Animation$opacity(0.0),
-								mdgriffith$elm_style_animation$Animation$fill(author$project$Color$black)
-							]))
-					]);
-				return _Utils_Tuple2(
-					A3(author$project$Helpers$updateModelForUniqueAnim, model, author$project$Constants$correctNoteStyle, newAnimSteps),
-					A2(elm$core$Task$perform, author$project$Msg$RestartTimer, elm$time$Time$now));
 			case 'StartGame':
 				var currentMarioStyle = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, author$project$Constants$currentNoteStyle);
-				var newMarioAnimStyle = A2(mdgriffith$elm_style_animation$Animation$interrupt, author$project$Animations$marioWalkLoop, currentMarioStyle);
-				var newMarioState = A2(
+				var newMarioAnimStyle = A2(mdgriffith$elm_style_animation$Animation$interrupt, author$project$View$Mario$marioWalkLoop, currentMarioStyle);
+				var updatedUniqueAnimStates = A2(
 					author$project$Helpers$updateUniqueAnimState,
 					model.uniqueAnimStates,
 					_Utils_Tuple2(author$project$Constants$currentNoteStyle, newMarioAnimStyle));
@@ -9258,7 +9371,7 @@ var author$project$Main$update = F2(
 						{
 							isPlaying: true,
 							targetNotes: A2(author$project$Helpers$startAnimEveryNote, model.targetNotes, author$project$Animations$coinLoop),
-							uniqueAnimStates: newMarioState
+							uniqueAnimStates: updatedUniqueAnimStates
 						}),
 					A2(elm$core$Task$perform, author$project$Msg$RestartTimer, elm$time$Time$now));
 			case 'GenerateTargetNotes':
@@ -9271,19 +9384,11 @@ var author$project$Main$update = F2(
 						model,
 						{targetNotes: targetNotes}),
 					elm$core$Platform$Cmd$none);
-			case 'UpdateCorrectNote':
-				var midiCode = msg.a;
-				var newAnimSteps = _List_fromArray(
-					[
-						mdgriffith$elm_style_animation$Animation$to(
-						_List_fromArray(
-							[
-								mdgriffith$elm_style_animation$Animation$opacity(1.0)
-							]))
-					]);
-				return _Utils_Tuple2(
-					A3(author$project$Helpers$updateModelForUniqueAnim, model, author$project$Constants$correctNoteStyle, newAnimSteps),
-					elm$core$Platform$Cmd$none);
+			case 'NoteReleased':
+				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+			case 'NotePressed':
+				var noteCode = msg.a;
+				return A2(author$project$Main$updateNotePressed, noteCode, model);
 			case 'RestartTimer':
 				var currentTimestamp = msg.a;
 				var newAnswerSpeed = A2(author$project$Main$getNewAnswerSpeed, model.startTimestamp, currentTimestamp);
@@ -9311,6 +9416,51 @@ var author$project$Main$update = F2(
 							testCurrentTimestamp: elm$core$Maybe$Just(currentTimestamp)
 						}),
 					nextCommand);
+			case 'MoveToCoinDone':
+				var maybeTargetNote = A2(elm$core$Array$get, model.nextTargetNoteIndex, model.targetNotes);
+				var nextTargetNote = function () {
+					if (maybeTargetNote.$ === 'Nothing') {
+						return author$project$Note$createNote(60);
+					} else {
+						var n = maybeTargetNote.a;
+						return n;
+					}
+				}();
+				var coinAnimSteps = A2(mdgriffith$elm_style_animation$Animation$interrupt, author$project$Animations$coinDisappear, nextTargetNote.animState);
+				var updatedTargetNote = _Utils_update(
+					nextTargetNote,
+					{animState: coinAnimSteps});
+				var allUpdatedTargetNotes = A3(elm$core$Array$set, model.nextTargetNoteIndex, updatedTargetNote, model.targetNotes);
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{targetNotes: allUpdatedTargetNotes}),
+					elm$core$Platform$Cmd$none);
+			case 'GetCoinDone':
+				var newNextTargetNoteIndex = model.nextTargetNoteIndex + 1;
+				var currentScrollState = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, author$project$Constants$scrollState);
+				var newScrollState = A2(
+					mdgriffith$elm_style_animation$Animation$interrupt,
+					_List_fromArray(
+						[
+							author$project$Animations$scrollGameLevel(newNextTargetNoteIndex)
+						]),
+					currentScrollState);
+				var newUniqueAnimStates = A2(
+					author$project$Helpers$updateUniqueAnimState,
+					model.uniqueAnimStates,
+					_Utils_Tuple2(author$project$Constants$scrollState, newScrollState));
+				var currentMarioStyle = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, author$project$Constants$currentNoteStyle);
+				var newMarioAnimStyle = A2(mdgriffith$elm_style_animation$Animation$interrupt, author$project$View$Mario$marioWalkLoop, currentMarioStyle);
+				var newMarioState = A2(
+					author$project$Helpers$updateUniqueAnimState,
+					model.uniqueAnimStates,
+					_Utils_Tuple2(author$project$Constants$currentNoteStyle, newMarioAnimStyle));
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{nextTargetNoteIndex: newNextTargetNoteIndex, uniqueAnimStates: newUniqueAnimStates}),
+					elm$core$Platform$Cmd$none);
 			case 'Animate':
 				var timestamp = msg.a;
 				var updatedDict = A2(author$project$Helpers$updateEveryAnimState, model.uniqueAnimStates, timestamp);
@@ -9325,13 +9475,13 @@ var author$project$Main$update = F2(
 							return val.a;
 						}),
 					updatedDict);
-				var _n1 = elm$core$List$unzip(
+				var _n2 = elm$core$List$unzip(
 					A2(
 						elm$core$List$map,
 						author$project$Helpers$updateNoteWithAnimState(timestamp),
 						elm$core$Array$toList(model.targetNotes)));
-				var newNotes = _n1.a;
-				var noteAnimCmds = _n1.b;
+				var newNotes = _n2.a;
+				var noteAnimCmds = _n2.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -9372,7 +9522,6 @@ var author$project$Main$update = F2(
 		}
 	});
 var author$project$Msg$StartScrollGameLevel = {$: 'StartScrollGameLevel'};
-var author$project$Constants$staffLineHeight = author$project$Constants$svgViewHeight / 6;
 var elm$core$String$fromFloat = _String_fromNumber;
 var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
 var elm$svg$Svg$line = elm$svg$Svg$trustedNode('line');
@@ -15710,7 +15859,6 @@ var author$project$View$Note$drawAllTargetNotes = F4(
 			A2(author$project$View$Note$drawTargetNote, lineHeight, margins),
 			noteList);
 	});
-var author$project$View$Mario$sizeOffset = 15;
 var author$project$View$Mario$spriteHeight = author$project$View$Mario$sizeOffset + author$project$Constants$staffLineHeight;
 var author$project$View$Mario$widthToHeightRatio = 17 / 24;
 var author$project$View$Mario$spriteWidth = (author$project$View$Mario$sizeOffset + author$project$Constants$staffLineHeight) * author$project$View$Mario$widthToHeightRatio;
@@ -47167,11 +47315,14 @@ var author$project$View$Mario$view = F3(
 					_List_Nil)
 				]));
 	});
+var author$project$View$Note$getMarioYPosition = function (midiCode) {
+	var yPosFloat = author$project$View$Note$getNoteHeight(midiCode);
+	return (((-1) * author$project$View$Mario$sizeOffset) + author$project$Constants$topMargin) + ((yPosFloat * author$project$Constants$staffLineHeight) / 2);
+};
 var author$project$View$Note$drawCurrentNote = F5(
 	function (lineHeight, margins, animStyle, xPosIndex, note) {
-		var yPosFloat = author$project$View$Note$getNoteHeight(note.midi);
-		var cyString = elm$core$String$fromFloat((((-1) * author$project$View$Mario$sizeOffset) + margins.top) + ((yPosFloat * lineHeight) / 2));
-		var test = A2(elm$core$Debug$log, 'y pos ', cyString);
+		var cyString = elm$core$String$fromFloat(
+			author$project$View$Note$getMarioYPosition(note.midi));
 		var cxString = elm$core$String$fromFloat((margins.left + (xPosIndex * author$project$Constants$noteXInterval)) + 12);
 		return A3(author$project$View$Mario$view, animStyle, cxString, cyString);
 	});
