@@ -14,6 +14,7 @@ import Array exposing (Array)
 
 import Note exposing (Note)
 import View.Coin exposing (view)
+import View.Mario exposing (view)
 
 
 
@@ -54,18 +55,43 @@ drawCurrentNote lineHeight margins animStyle xPosIndex note =
             String.fromFloat (margins.left + ((toFloat xPosIndex) * (toFloat Constants.noteXInterval) ) + 12 )
 
         cyString =
-            String.fromFloat (margins.top + (yPosFloat * lineHeight / 2))
+            String.fromFloat ((-1 * View.Mario.sizeOffset) + margins.top + (yPosFloat * lineHeight/ 2))
+
+        test = Debug.log "y pos " cyString
+
     in
-    circle
+      View.Mario.view animStyle cxString cyString
+
+{--
+  circle
       ( [ S.cx cxString
         , S.cy cyString
         , S.r (String.fromFloat (lineHeight / 2))
         ] ++ (Animation.render animStyle)
       )
         []
+--}
+
+
+getNoteHeight midiCode = 
+  case midiCode of
+    60 -> 11
+    62 -> 10
+    64 -> 9
+    65 -> 8
+    67 -> 7
+    69 -> 6
+    71 -> 5
+    72 -> 4
+    74 -> 3
+    76 -> 2
+    77 -> 1
+    79 -> 0
+    _ -> 12
 
 
 
+{--
 getNoteHeight midiCode = 
   case midiCode of
     60 -> 12
@@ -81,7 +107,7 @@ getNoteHeight midiCode =
     77 -> 2
     79 -> 1
     _ -> 12
-
+--}
 
 drawAllTargetNotes : Float -> Float -> Margins -> Array Note -> List (Svg msg)
 drawAllTargetNotes staffWidth lineHeight margins notes =

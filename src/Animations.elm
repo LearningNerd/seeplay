@@ -1,14 +1,28 @@
 module Animations exposing (..)
 
+
 import Constants
 import Animation
 import Color
 import Time
 import Dict exposing (Dict)
 
+------------ very temporary solution here =P need to refactor a BUNCH ------------
+marioWidthToHeightRatio = 17 / 24 -- 17 px wide, 24 px high
+
+baseSpriteWidth = 17
+baseSpriteHeight = 24
+
+----------------------------------------------------------------------
+
+
 -- initialCurrentNoteStyle : Animation.Messenger.State Msg
-initialCurrentNoteStyle =
-  Animation.style [ Animation.opacity 0.0, Animation.fill Color.red ]
+initialCurrentNoteStyle = Animation.viewBox 0 0 baseSpriteWidth baseSpriteHeight
+                  
+
+marioWalkLoop = spriteLoop 100 baseSpriteWidth baseSpriteHeight 0 2
+
+
 
 -- initialCorrectNoteStyle : Animation.Messenger.State Msg
 initialCorrectNoteStyle =
@@ -20,25 +34,25 @@ initUniqueAnimStates =
   Dict.fromList [
         (Constants.coinStyle, Animation.style [])
       , (Constants.scrollState, initialScrollAnimState)
-      , (Constants.currentNoteStyle, initialCurrentNoteStyle)
+      , (Constants.currentNoteStyle, Animation.style [initialCurrentNoteStyle])
       , (Constants.correctNoteStyle, initialCorrectNoteStyle)
       ]
 
 -- spriteLoop : Int -> Int -> Int -> Int -> Animation.Model.Step msg
-spriteLoop delayMillis spriteWidth spriteHeight numSprites =
+spriteLoop delayMillis spriteWidth spriteHeight firstSpriteIndex numSprites =
   let
       loopForwardHalf = 
         List.concatMap (\i ->
-          [Animation.set [Animation.viewBox (toFloat (spriteWidth * i)) 0.0 (toFloat spriteWidth) (toFloat spriteHeight)]
+          [Animation.set [Animation.viewBox ((spriteWidth * i)) 0.0 (spriteWidth) (spriteHeight)]
           , Animation.wait (Time.millisToPosix delayMillis)
           ]
-        ) (List.range 0 (numSprites - 1))
+        ) (List.map toFloat <| List.range firstSpriteIndex (numSprites - 1))
       -- loopBackwardHalf = List.reverse loopForwardHalf |> List.drop 2 -- don't repeat last sprite twice
   in
     -- Animation.loop (loopForwardHalf ++ loopBackwardHalf)
     [ Animation.loop loopForwardHalf ]
 
-coinLoop = spriteLoop 100 16 16 4
+coinLoop = spriteLoop 100 16 16 0 4
 -- **** store the above, and starting locations of each sprite also???
 
 -- scrollGameLevel : Int -> Animation.Step
