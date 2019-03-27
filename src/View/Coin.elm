@@ -7,14 +7,16 @@ import Msg exposing (..)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 
-view model =
+view animState xS yS heightS =
   let
     spriteWidth = 16
     spriteHeight = 16
   in
-  svg (Animation.render model.coinStyle ++ 
-    [ width (String.fromInt 16)
-    , height (String.fromInt 16)
+  svg (Animation.render animState ++ 
+    [ width heightS -- (String.fromInt 16) ,
+    , height heightS
+    , x xS
+    , y yS
     ])
     [ -- starting SVG data below: 
       rect [ width "1"

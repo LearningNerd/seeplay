@@ -36,7 +36,7 @@ spriteLoop delayMillis spriteWidth spriteHeight numSprites =
       -- loopBackwardHalf = List.reverse loopForwardHalf |> List.drop 2 -- don't repeat last sprite twice
   in
     -- Animation.loop (loopForwardHalf ++ loopBackwardHalf)
-    Animation.loop loopForwardHalf
+    [ Animation.loop loopForwardHalf ]
 
 coinLoop = spriteLoop 100 16 16 4
 -- **** store the above, and starting locations of each sprite also???

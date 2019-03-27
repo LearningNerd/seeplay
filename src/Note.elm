@@ -5,12 +5,15 @@ import Array exposing (..)
 import Random
 import Animation
 import Animation.Messenger
+import Msg exposing (Msg)
+import Animations
 
 
 type alias Note =
     { noteName : NoteName -- ("C", 4)
     , midi : Int -- from 21 to 108, for piano
     , frequency : Float
+    , animState : Animation.Messenger.State Msg
     }
 
 type alias NoteName =
@@ -21,6 +24,7 @@ createNote midiCode =
     { noteName = midiToNoteName midiCode
     , midi = clamp 21 108 midiCode -- assuming piano MIDI!
     , frequency = midiToFrequency midiCode
+    , animState = Animations.initialCorrectNoteStyle
     }
 
 -- Generate list of [num] random midi codes

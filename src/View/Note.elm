@@ -1,4 +1,4 @@
-module View.Note exposing (drawNote, drawAllNotes)
+module View.Note exposing (drawCurrentNote, drawTargetNote, drawAllTargetNotes)
 
 import Constants
 import Model exposing (Model, Margins)
@@ -13,17 +13,45 @@ import Animation.Messenger
 import Array exposing (Array)
 
 import Note exposing (Note)
+import View.Coin exposing (view)
 
 
 
-drawNote : Float -> Margins -> (Animation.Messenger.State Msg) -> Int -> Note -> Svg msg
-drawNote lineHeight margins animStyle xPosIndex note =
+drawTargetNote : Float -> Margins -> Int -> Note -> Svg msg
+drawTargetNote lineHeight margins xPosIndex note =
     let
         yPosFloat =
             toFloat (getNoteHeight note.midi)
     
         cxString =
             String.fromFloat (margins.left + ((toFloat xPosIndex) * (toFloat Constants.noteXInterval) ) )
+
+        cyString =
+            String.fromFloat (margins.top + (yPosFloat * lineHeight / 2))
+        
+        heightString = (String.fromFloat lineHeight)
+    in
+      View.Coin.view note.animState cxString cyString heightString
+
+{--
+    circle
+      ( [ S.cx cxString
+        , S.cy cyString
+        , S.r (String.fromFloat (lineHeight / 2))
+        ] ++ (Animation.render animStyle)
+      )
+        []
+--}
+
+
+drawCurrentNote : Float -> Margins -> (Animation.Messenger.State Msg) -> Int -> Note -> Svg msg
+drawCurrentNote lineHeight margins animStyle xPosIndex note =
+    let
+        yPosFloat =
+            toFloat (getNoteHeight note.midi)
+    
+        cxString =
+            String.fromFloat (margins.left + ((toFloat xPosIndex) * (toFloat Constants.noteXInterval) ) + 12 )
 
         cyString =
             String.fromFloat (margins.top + (yPosFloat * lineHeight / 2))
@@ -35,6 +63,7 @@ drawNote lineHeight margins animStyle xPosIndex note =
         ] ++ (Animation.render animStyle)
       )
         []
+
 
 
 getNoteHeight midiCode = 
@@ -54,8 +83,11 @@ getNoteHeight midiCode =
     _ -> 12
 
 
-drawAllNotes : Float -> Float -> Margins -> (Animation.Messenger.State Msg) -> Array Note -> List (Svg msg)
-drawAllNotes staffWidth lineHeight margins animStyle noteList =
-    List.indexedMap (drawNote lineHeight margins animStyle) (Array.toList noteList)
+drawAllTargetNotes : Float -> Float -> Margins -> Array Note -> List (Svg msg)
+drawAllTargetNotes staffWidth lineHeight margins notes =
+    let 
+        noteList = Array.toList notes
+    in
+      List.indexedMap (drawTargetNote lineHeight margins) noteList 
 -- (List.map toFloat (List.range 1 12))
 

@@ -66,7 +66,7 @@ view : Model -> Html Msg
 view model =
     div [ ]
         [ View.Header.view model
-        , main_ [A.class "container"] [ Html.p [onClick StartScrollGameLevel ] [ Html.text " click me to scroll the game level!"] , case model.isMIDIConnected of
+        , main_ [A.class "container"] [ Html.p [onClick StartScrollGameLevel ] [ Html.text "....???? test!"] , case model.isMIDIConnected of
             -- If Nothing or False (waiting to init or no MIDI available), then show the MidiStatus screen (waiting for input)
             Nothing ->
               View.MidiStatus.view model
@@ -141,13 +141,15 @@ update msg model =
 
 
         StartGame ->
-            ( { model | isPlaying = True }
-            , Task.perform RestartTimer Time.now -- request current time...
+            ( { model | isPlaying = True
+              , targetNotes = Helpers.startAnimEveryNote model.targetNotes Animations.coinLoop
+              }
+            , Task.perform RestartTimer Time.now 
             )
 
 
 
-        -- called when page loads to initialize correctNote, and again on each correct note played!
+-- called when page loads to initialize correctNote, and again on each correct note played!
         GenerateTargetNotes midiCodeList ->
           let
             targetNotes = Array.fromList (List.map Note.createNote midiCodeList)
@@ -202,13 +204,18 @@ update msg model =
         Animate timestamp ->
           let
               updatedDict = updateEveryAnimState model.uniqueAnimStates timestamp
-              allCmds = List.map Tuple.second (Dict.values updatedDict)
-              test = Debug.log "allCmds " allCmds
+              
+              uniqueElemAnimCmds = List.map Tuple.second (Dict.values updatedDict)
+              
               dictStylesOnly = Dict.map (\key val -> Tuple.first val) updatedDict
+              
+              (newNotes, noteAnimCmds) = List.unzip (List.map (Helpers.updateNoteWithAnimState timestamp) (Array.toList model.targetNotes))
           in
               ( { model
-                  | uniqueAnimStates = dictStylesOnly }
-              , Cmd.batch allCmds
+                  | uniqueAnimStates = dictStylesOnly
+                  , targetNotes = Array.fromList newNotes
+                }
+              , Cmd.batch (uniqueElemAnimCmds ++ noteAnimCmds)
               )
 
 
@@ -241,14 +248,6 @@ update msg model =
             { model | uniqueAnimStates = updateUniqueAnimState model.uniqueAnimStates (Constants.scrollState, newScrollState) }
             , Cmd.none
             )
-
-{--
-        ScrollGameLevel timestamp ->
-          let
-              (newStyle, cmd) = Animation.Messenger.update timestamp model.gameLevelScrollState
-          in
-            ( { model | gameLevelScrollState = newStyle } , cmd )
---}
 
 
 updateNotePressed noteCode model =
@@ -343,7 +342,7 @@ subscriptions model =
         , fakeHandleNotePressed NotePressed
         , fakeHandleNoteReleased NoteReleased
         
-        , Animation.subscription Animate (Dict.values model.uniqueAnimStates)
+        , Animation.subscription Animate ( (Dict.values model.uniqueAnimStates) ++ (List.map .animState (Array.toList model.targetNotes)))
         ]
 
 

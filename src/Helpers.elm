@@ -1,6 +1,7 @@
 module Helpers exposing (..)
 
 
+import Array
 import Dict exposing (Dict)
 import Animation
 import Animation.Messenger
@@ -33,4 +34,27 @@ updateModelForUniqueAnim model animKey newAnimSteps =
   in
     { model | uniqueAnimStates = updateUniqueAnimState model.uniqueAnimStates (animKey, newStyle) }
 
+
+
+-- returns (newNote, cmd)
+updateNoteWithAnimState timestamp note =
+  let
+      (newAnimState, cmd) = Animation.Messenger.update timestamp note.animState
+      newNote = { note | animState = newAnimState }
+  in
+     (newNote, cmd)
+
+-- returns ( [list of updated notes], [list of cmds] )
+-- updateAllNotesAnimStates timestamp notesList =
+  -- List.unzip (List.map (updateNoteWithAnimState timestamp) notesList))
+
+
+updateNoteWithAnimSteps animStepsList note =
+  { note | animState = Animation.interrupt animStepsList note.animState }
+
+startAnimEveryNote noteList animStepsList =
+  let
+      notes = Array.toList noteList
+  in
+    Array.fromList <| List.map (updateNoteWithAnimSteps animStepsList) notes
 

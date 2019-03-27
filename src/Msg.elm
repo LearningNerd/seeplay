@@ -15,7 +15,7 @@ type Msg
     | Animate Animation.Msg
     | CorrectNoteFadeAnimCompleted
     | CurrentNoteFadeAnimCompleted
-   
+
     | StartScrollGameLevel
     -- | ScrollGameLevel Animation.Msg
 

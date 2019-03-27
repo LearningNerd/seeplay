@@ -22,7 +22,6 @@ view model =
 svgView : Model -> Float -> Float -> Margins -> Svg Msg
 svgView model width height margins =
     let
-        correctNoteStyle = getUniqueAnimState model.uniqueAnimStates "correctNoteStyle"
         currentNoteStyle = getUniqueAnimState model.uniqueAnimStates "currentNoteStyle"
         gameLevelScrollState = getUniqueAnimState model.uniqueAnimStates "gameLevelScrollState"
 
@@ -37,13 +36,14 @@ svgView model width height margins =
         heightS =
             String.fromFloat Constants.svgViewTotalHeight
         
-        drawNoteFunc = View.Note.drawNote lineHeight margins
+        drawTargetNoteFunc = View.Note.drawTargetNote lineHeight margins
+        drawCurrentNoteFunc = View.Note.drawCurrentNote lineHeight margins
 
-        svgListAllNotes = View.Note.drawAllNotes width lineHeight margins correctNoteStyle model.targetNotes
+        svgListAllNotes = View.Note.drawAllTargetNotes width lineHeight margins model.targetNotes
 
         currentNoteDrawing = case model.currentNote of
                                  Nothing -> []
-                                 Just n -> [ drawNoteFunc currentNoteStyle model.nextTargetNoteIndex n ]
+                                 Just n -> [ drawCurrentNoteFunc currentNoteStyle model.nextTargetNoteIndex n ]
 
         -- animate viewBox to scroll game level with all notes drawn inside
         -- updated: draw the current note inside the game level?
