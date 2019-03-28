@@ -6946,12 +6946,35 @@ var author$project$Main$subscriptions = function (model) {
 			]));
 };
 var author$project$Msg$GetCoinDone = {$: 'GetCoinDone'};
-var mdgriffith$elm_style_animation$Animation$Model$To = function (a) {
-	return {$: 'To', a: a};
+var elm$core$Basics$round = _Basics_round;
+var mdgriffith$elm_style_animation$Animation$easing = function (_n0) {
+	var duration = _n0.duration;
+	var ease = _n0.ease;
+	return mdgriffith$elm_style_animation$Animation$Model$Easing(
+		{
+			duration: elm$time$Time$millisToPosix(
+				elm$core$Basics$round(duration)),
+			ease: ease,
+			progress: 1,
+			start: 0
+		});
 };
-var mdgriffith$elm_style_animation$Animation$to = function (props) {
-	return mdgriffith$elm_style_animation$Animation$Model$To(props);
+var mdgriffith$elm_style_animation$Animation$Model$ToWith = function (a) {
+	return {$: 'ToWith', a: a};
 };
+var mdgriffith$elm_style_animation$Animation$toWith = F2(
+	function (interp, props) {
+		return mdgriffith$elm_style_animation$Animation$Model$ToWith(
+			A2(
+				elm$core$List$map,
+				mdgriffith$elm_style_animation$Animation$Model$mapToMotion(
+					function (m) {
+						return _Utils_update(
+							m,
+							{interpolation: interp});
+					}),
+				props));
+	});
 var mdgriffith$elm_style_animation$Animation$Model$Send = function (a) {
 	return {$: 'Send', a: a};
 };
@@ -6960,7 +6983,15 @@ var mdgriffith$elm_style_animation$Animation$Messenger$send = function (msg) {
 };
 var author$project$Animations$coinDisappear = _List_fromArray(
 	[
-		mdgriffith$elm_style_animation$Animation$to(
+		A2(
+		mdgriffith$elm_style_animation$Animation$toWith,
+		mdgriffith$elm_style_animation$Animation$easing(
+			{
+				duration: 300,
+				ease: function (x) {
+					return A2(elm$core$Basics$pow, x, 2);
+				}
+			}),
 		_List_fromArray(
 			[
 				mdgriffith$elm_style_animation$Animation$opacity(0)
@@ -7027,34 +7058,19 @@ var author$project$Animations$spriteLoop = F5(
 			]);
 	});
 var author$project$Animations$coinLoop = A5(author$project$Animations$spriteLoop, 100, 16, 16, 0, 4);
-var author$project$Constants$noteXInterval = 200;
-var elm$core$Debug$log = _Debug_log;
 var mdgriffith$elm_style_animation$Animation$spring = function (settings) {
 	return mdgriffith$elm_style_animation$Animation$Model$Spring(settings);
 };
-var mdgriffith$elm_style_animation$Animation$Model$ToWith = function (a) {
-	return {$: 'ToWith', a: a};
-};
-var mdgriffith$elm_style_animation$Animation$toWith = F2(
-	function (interp, props) {
-		return mdgriffith$elm_style_animation$Animation$Model$ToWith(
-			A2(
-				elm$core$List$map,
-				mdgriffith$elm_style_animation$Animation$Model$mapToMotion(
-					function (m) {
-						return _Utils_update(
-							m,
-							{interpolation: interp});
-					}),
-				props));
-	});
+var author$project$Animations$scrollAndWalkEasing = mdgriffith$elm_style_animation$Animation$spring(
+	{damping: 80, stiffness: 100});
+var author$project$Constants$noteXInterval = 200;
+var elm$core$Debug$log = _Debug_log;
 var author$project$Animations$scrollGameLevel = function (nextNoteIndex) {
 	var nextViewBoxStartPos = nextNoteIndex * author$project$Constants$noteXInterval;
 	var test = A2(elm$core$Debug$log, 'next xPos: ', nextViewBoxStartPos);
 	return A2(
 		mdgriffith$elm_style_animation$Animation$toWith,
-		mdgriffith$elm_style_animation$Animation$spring(
-			{damping: 50, stiffness: 100}),
+		author$project$Animations$scrollAndWalkEasing,
 		_List_fromArray(
 			[
 				A4(mdgriffith$elm_style_animation$Animation$viewBox, nextViewBoxStartPos, 0, author$project$Constants$svgViewTotalWidth, author$project$Constants$svgViewTotalHeight)
@@ -7192,7 +7208,6 @@ var elm$core$List$partition = F2(
 			list);
 	});
 var elm$core$Platform$Cmd$batch = _Platform_batch;
-var elm$core$Basics$round = _Basics_round;
 var mdgriffith$elm_style_animation$Animation$Model$refreshTiming = F2(
 	function (now, timing) {
 		var dt = elm$time$Time$posixToMillis(now) - elm$time$Time$posixToMillis(timing.current);
@@ -9202,6 +9217,12 @@ var author$project$View$Mario$getMarioYPosition = function (midiCode) {
 	var yPosFloat = author$project$View$Mario$getNoteHeight(midiCode);
 	return (((-1) * author$project$View$Mario$sizeOffset) + author$project$Constants$topMargin) + ((yPosFloat * author$project$Constants$staffLineHeight) / 2);
 };
+var mdgriffith$elm_style_animation$Animation$Model$To = function (a) {
+	return {$: 'To', a: a};
+};
+var mdgriffith$elm_style_animation$Animation$to = function (props) {
+	return mdgriffith$elm_style_animation$Animation$Model$To(props);
+};
 var mdgriffith$elm_style_animation$Animation$y = function (y_) {
 	return A3(mdgriffith$elm_style_animation$Animation$custom, 'y', y_, '');
 };
@@ -9469,7 +9490,9 @@ var author$project$Main$update = F2(
 					mdgriffith$elm_style_animation$Animation$interrupt,
 					_List_fromArray(
 						[
-							mdgriffith$elm_style_animation$Animation$to(
+							A2(
+							mdgriffith$elm_style_animation$Animation$toWith,
+							author$project$Animations$scrollAndWalkEasing,
 							_List_fromArray(
 								[
 									mdgriffith$elm_style_animation$Animation$x(

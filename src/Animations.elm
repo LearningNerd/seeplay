@@ -15,7 +15,14 @@ baseSpriteHeight = 24
 
 
 coinDisappear =
-  [ Animation.to [ Animation.opacity 0 ]
+  [ Animation.toWith 
+        (Animation.easing
+            { duration = 300
+            , ease = (\x -> x^2)
+            }
+        ) 
+    [ Animation.opacity 0 ]
+
   , Animation.Messenger.send GetCoinDone
   ]
 
@@ -68,24 +75,29 @@ spriteLoop delayMillis spriteWidth spriteHeight firstSpriteIndex numSprites =
 coinLoop = spriteLoop 100 16 16 0 4
 -- **** store the above, and starting locations of each sprite also???
 
+
+scrollAndWalkEasing =
+        (Animation.spring
+            { stiffness = 50
+            , damping = 50
+            }
+        ) 
+{--
+                    (Animation.easing
+                      { duration = 2000
+                      , ease = (\x -> x^2)
+                      }
+                  )
+--}
+
+
 -- scrollGameLevel : Int -> Animation.Step
 scrollGameLevel nextNoteIndex =
   let
       nextViewBoxStartPos = ((toFloat nextNoteIndex) * Constants.noteXInterval)
       test = Debug.log "next xPos: " nextViewBoxStartPos
   in
-    Animation.toWith
-{--
-        (Animation.easing
-            { duration = 2000
-            , ease = (\x -> x^2)
-            }
-        ) 
---}
-        (Animation.spring
-            { stiffness = 100
-            , damping = 50
-            }
-        ) 
-        [ Animation.viewBox nextViewBoxStartPos 0 Constants.svgViewTotalWidth Constants.svgViewTotalHeight ]
+    Animation.toWith scrollAndWalkEasing
+
+       [ Animation.viewBox nextViewBoxStartPos 0 Constants.svgViewTotalWidth Constants.svgViewTotalHeight ]
 

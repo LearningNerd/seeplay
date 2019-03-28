@@ -208,7 +208,7 @@ update msg model =
             -- test3 = Debug.log "xPos .. " (View.Mario.getMarioXPosition newNextTargetNoteIndex)
 
             newMarioPos = Animation.interrupt 
-              [ Animation.to
+              [ Animation.toWith Animations.scrollAndWalkEasing
                 [ Animation.x (View.Mario.getMarioXPosition newNextTargetNoteIndex)]
               ]
               currentMarioContainerPos
