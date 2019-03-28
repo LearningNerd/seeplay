@@ -78,8 +78,8 @@ coinLoop = spriteLoop 100 16 16 0 4
 
 scrollAndWalkEasing =
         (Animation.spring
-            { stiffness = 50
-            , damping = 50
+            { stiffness = 400
+            , damping = 100
             }
         ) 
 {--

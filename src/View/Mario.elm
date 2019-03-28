@@ -11,7 +11,7 @@ import Msg exposing (..)
 import Constants
 import Animations exposing (staticSprite, spriteLoop)
 
-sizeOffset = 15
+sizeOffset = 10
 
 widthToHeightRatio = 17 / 24 -- 17 px wide, 24 px high
 

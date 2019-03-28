@@ -5886,7 +5886,7 @@ var author$project$Note$getRandomMidiList = function (num) {
 			elm$random$Random$uniform,
 			60,
 			_List_fromArray(
-				[64, 67])));
+				[62, 64, 65, 67, 69, 71])));
 };
 var elm$random$Random$Generate = function (a) {
 	return {$: 'Generate', a: a};
@@ -7062,7 +7062,7 @@ var mdgriffith$elm_style_animation$Animation$spring = function (settings) {
 	return mdgriffith$elm_style_animation$Animation$Model$Spring(settings);
 };
 var author$project$Animations$scrollAndWalkEasing = mdgriffith$elm_style_animation$Animation$spring(
-	{damping: 80, stiffness: 100});
+	{damping: 100, stiffness: 400});
 var author$project$Constants$noteXInterval = 200;
 var elm$core$Debug$log = _Debug_log;
 var author$project$Animations$scrollGameLevel = function (nextNoteIndex) {
@@ -9212,7 +9212,7 @@ var author$project$View$Mario$getNoteHeight = function (midiCode) {
 			return 12;
 	}
 };
-var author$project$View$Mario$sizeOffset = 15;
+var author$project$View$Mario$sizeOffset = 10;
 var author$project$View$Mario$getMarioYPosition = function (midiCode) {
 	var yPosFloat = author$project$View$Mario$getNoteHeight(midiCode);
 	return (((-1) * author$project$View$Mario$sizeOffset) + author$project$Constants$topMargin) + ((yPosFloat * author$project$Constants$staffLineHeight) / 2);
