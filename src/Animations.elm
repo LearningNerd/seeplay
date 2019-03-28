@@ -23,8 +23,15 @@ coinDisappear =
 initialCorrectNoteStyle =
   Animation.style [ Animation.opacity 1.0, Animation.fill Color.black ]
 
+
+    -- calculate all future x positions in View/Mario/getMarioXPosition!
 -- initialCurrentNoteStyle : Animation.Messenger.State Msg
-initialCurrentNoteStyle = Animation.viewBox 0 0 baseSpriteWidth baseSpriteHeight
+initialCurrentNoteStyle = [ Animation.viewBox 0 0 baseSpriteWidth baseSpriteHeight ]
+
+-- outer SVG for Mario's x / y position!
+initialMarioContainerStyle = [ Animation.x (Constants.leftMargin) ]
+
+
 
 initialScrollAnimState = Animation.style [ Animation.viewBox 0 0 Constants.svgViewTotalWidth Constants.svgViewTotalHeight ]
 
@@ -33,7 +40,8 @@ initUniqueAnimStates =
   Dict.fromList [
         (Constants.coinStyle, Animation.style [])
       , (Constants.scrollState, initialScrollAnimState)
-      , (Constants.currentNoteStyle, Animation.style [initialCurrentNoteStyle])
+      , (Constants.currentNoteStyle, Animation.style initialCurrentNoteStyle)
+      , (Constants.marioContainer, Animation.style initialMarioContainerStyle)
       , (Constants.correctNoteStyle, initialCorrectNoteStyle)
       ]
 

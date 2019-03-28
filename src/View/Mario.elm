@@ -22,7 +22,6 @@ spriteWidth = (sizeOffset + Constants.staffLineHeight) * widthToHeightRatio
 spriteHeight = sizeOffset + Constants.staffLineHeight
 
 
-
 marioWalkLoop = spriteLoop 100 baseSpriteWidth baseSpriteHeight 0 2
 
 marioJump midiCode =
@@ -48,6 +47,14 @@ marioFall midiCode =
 
 
 -------------- refactor, duplicated in View/Note.elm !!!!!
+getMarioXPosition targetNoteIndex =
+  let
+      test = Debug.log "targetNoteIndex " targetNoteIndex
+  in
+    Constants.leftMargin
+    + ( (toFloat targetNoteIndex) * (toFloat Constants.noteXInterval) )
+    - 5
+
 
 getMarioYPosition midiCode =
   let
@@ -74,19 +81,27 @@ getNoteHeight midiCode =
     _ -> 12
 ------------------------------------
 
+-- for now, no viewbox .... will it still work????
+view animStyleSprite animStylePos yS =
+    svg (Animation.render animStylePos ++ 
+    [ -- viewBox "0 0 " ++ String.fromFloat spriteWidth ++ " " ++ String.fromFloat spriteHeight
+    width (String.fromFloat spriteWidth)
+    , height (String.fromFloat spriteHeight)
+    , y yS
+    ])
+    [spriteView animStyleSprite]
 
-
-view animState xS yS =
+spriteView animStyleSprite =
 --  let
     -- spriteWidth = heightNum * widthToHeightRatio
     -- spriteWidth = 17
     -- spriteHeight = 24 -- make sprite bigger based on lineheight????
 --  in
-    svg (Animation.render animState ++ 
+    svg (Animation.render animStyleSprite ++ 
     [ width (String.fromFloat spriteWidth)
     , height (String.fromFloat spriteHeight)
-    , x xS
-    , y yS
+    -- , x xS
+    -- , y yS
     ])
     [ -- starting SVG data below: 
       rect [ width "1"

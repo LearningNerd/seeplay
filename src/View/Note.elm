@@ -45,16 +45,16 @@ drawTargetNote lineHeight margins xPosIndex note =
 --}
 
 
-drawCurrentNote : Float -> Margins -> (Animation.Messenger.State Msg) -> Int -> Note -> Svg msg
-drawCurrentNote lineHeight margins animStyle xPosIndex note =
+drawCurrentNote : Float -> Margins -> (Animation.Messenger.State Msg) -> (Animation.Messenger.State Msg) -> Int -> Note -> Svg msg
+drawCurrentNote lineHeight margins animStyleSprite animStylePos xPosIndex note =
     let
     
-        cxString =
-            String.fromFloat (margins.left + ((toFloat xPosIndex) * (toFloat Constants.noteXInterval) ) + 12 )
+        -- cxString =
+            -- String.fromFloat (margins.left + ((toFloat xPosIndex) * (toFloat Constants.noteXInterval) ) + 12 )
 
         cyString = String.fromFloat (getMarioYPosition note.midi)
     in
-      View.Mario.view animStyle cxString cyString
+      View.Mario.view animStyleSprite animStylePos cyString
 
 
 getMarioYPosition midiCode =

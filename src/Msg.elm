@@ -18,6 +18,7 @@ type Msg
 
     | MoveToCoinDone
     | GetCoinDone
+--    | ResumeWalkingDone
 
     -- test: delete this!
     | TestTick Time.Posix

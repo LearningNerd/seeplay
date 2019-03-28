@@ -108,9 +108,9 @@ update msg model =
         
         StartGame ->
           let
-            currentMarioStyle = getUniqueAnimState model.uniqueAnimStates Constants.currentNoteStyle
-            newMarioAnimStyle = Animation.interrupt View.Mario.marioWalkLoop currentMarioStyle
-            updatedUniqueAnimStates = Helpers.updateUniqueAnimState model.uniqueAnimStates (Constants.currentNoteStyle, newMarioAnimStyle)
+            currentMarioSpriteStyle = getUniqueAnimState model.uniqueAnimStates Constants.currentNoteStyle
+            newMarioSprite = Animation.interrupt View.Mario.marioWalkLoop currentMarioSpriteStyle
+            updatedUniqueAnimStates = Helpers.updateUniqueAnimState model.uniqueAnimStates (Constants.currentNoteStyle, newMarioSprite)
               
           in
             ( { model | isPlaying = True
@@ -170,8 +170,10 @@ update msg model =
 
 
         -- after Mario reaches a coin, make it fade out, and trigger GetCoinDone
+        -- .... and set Mario back to walk cycle ....
         MoveToCoinDone ->
           let
+              -- update coin to disappear anim
               maybeTargetNote = Array.get model.nextTargetNoteIndex model.targetNotes
               nextTargetNote = case maybeTargetNote of
                   Nothing -> Note.createNote 60 -- ...not sure what other fallback =P
@@ -181,30 +183,56 @@ update msg model =
               updatedTargetNote = { nextTargetNote | animState = coinAnimSteps }
               
               allUpdatedTargetNotes = Array.set model.nextTargetNoteIndex updatedTargetNote model.targetNotes
+
+
           in
              ( { model | targetNotes = allUpdatedTargetNotes }
              , Cmd.none 
              )
 
 
-        -- resume walk cycle, scroll to next note, update model with next note index
+        -- resume walk sprite, move mario x pos, scroll to next note, update model with next note index
         -- THIS ONLY HAPPENS IF CORRECT NOTE WAS PLAYED
         GetCoinDone ->
           let
-              -- Resume Mario walk cycle anim
-            currentMarioStyle = getUniqueAnimState model.uniqueAnimStates Constants.currentNoteStyle
-            newMarioAnimStyle = Animation.interrupt View.Mario.marioWalkLoop currentMarioStyle
-            newMarioState = Helpers.updateUniqueAnimState model.uniqueAnimStates (Constants.currentNoteStyle, newMarioAnimStyle)
-
             -- Update next target note in model, scroll game level to next note
             newNextTargetNoteIndex = model.nextTargetNoteIndex + 1
 
+            -- test = Debug.log "old target note index " model.nextTargetNoteIndex
+            -- test2 = Debug.log "NEW target note index " newNextTargetNoteIndex
+              
+
+            -- move mario x pos to the next note!
+            currentMarioContainerPos = getUniqueAnimState model.uniqueAnimStates Constants.marioContainer
+
+            -- test3 = Debug.log "xPos .. " (View.Mario.getMarioXPosition newNextTargetNoteIndex)
+
+            newMarioPos = Animation.interrupt 
+              [ Animation.to
+                [ Animation.x (View.Mario.getMarioXPosition newNextTargetNoteIndex)]
+              ]
+              currentMarioContainerPos
+
+            newMarioPosState = Helpers.updateUniqueAnimState model.uniqueAnimStates (Constants.marioContainer, newMarioPos)
+
+
+              -- update mario to resume walk cycle
+            currentMarioSpriteStyle = getUniqueAnimState model.uniqueAnimStates Constants.currentNoteStyle
+
+            newMarioSprite = Animation.interrupt View.Mario.marioWalkLoop currentMarioSpriteStyle
+
+            newMarioSpriteAndPosState = Helpers.updateUniqueAnimState newMarioPosState  (Constants.currentNoteStyle, newMarioSprite)
+
+
+
+
+            -- update game level scroll anim
             currentScrollState = getUniqueAnimState model.uniqueAnimStates Constants.scrollState
             newScrollState = Animation.interrupt [
-              Animations.scrollGameLevel newNextTargetNoteIndex
+              Animations.scrollGameLevel model.nextTargetNoteIndex
               ] currentScrollState
- 
-            newUniqueAnimStates = Helpers.updateUniqueAnimState newMarioState (Constants.scrollState, newScrollState)
+
+            newUniqueAnimStates = Helpers.updateUniqueAnimState newMarioSpriteAndPosState (Constants.scrollState, newScrollState)
 
           in
             ( { model | 
@@ -271,14 +299,14 @@ updateNotePressed noteCode model =
     
     nextAnimStepsList = jumpOrFall prevMidi noteCode
 
-    currentMarioStyle = getUniqueAnimState model.uniqueAnimStates Constants.currentNoteStyle
+    currentMarioSpriteStyle = getUniqueAnimState model.uniqueAnimStates Constants.currentNoteStyle
     
     -- for now, only use jump/fall sprites when getting correct note. but this isn't what I actually want =P let's test this first!
     newMarioStyle = if isCorrect
         then
-            nextAnimStepsList currentMarioStyle
+            nextAnimStepsList currentMarioSpriteStyle
         else
-            Animation.interrupt View.Mario.marioWalkLoop currentMarioStyle
+            Animation.interrupt View.Mario.marioWalkLoop currentMarioSpriteStyle
     
     newUniqueAnimStates = Helpers.updateUniqueAnimState model.uniqueAnimStates (Constants.currentNoteStyle, newMarioStyle)
 
