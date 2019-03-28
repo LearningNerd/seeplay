@@ -6880,27 +6880,6 @@ var elm$core$List$concatMap = F2(
 		return elm$core$List$concat(
 			A2(elm$core$List$map, f, list));
 	});
-var elm$core$List$drop = F2(
-	function (n, list) {
-		drop:
-		while (true) {
-			if (n <= 0) {
-				return list;
-			} else {
-				if (!list.b) {
-					return list;
-				} else {
-					var x = list.a;
-					var xs = list.b;
-					var $temp$n = n - 1,
-						$temp$list = xs;
-					n = $temp$n;
-					list = $temp$list;
-					continue drop;
-				}
-			}
-		}
-	});
 var mdgriffith$elm_style_animation$Animation$Model$Loop = function (a) {
 	return {$: 'Loop', a: a};
 };
@@ -6936,10 +6915,6 @@ var author$project$Animations$spriteLoop = F4(
 					]);
 			},
 			A2(elm$core$List$range, 0, numSprites - 1));
-		var loopBackwardHalf = A2(
-			elm$core$List$drop,
-			2,
-			elm$core$List$reverse(loopForwardHalf));
 		return mdgriffith$elm_style_animation$Animation$loop(loopForwardHalf);
 	});
 var author$project$Animations$coinLoop = A4(author$project$Animations$spriteLoop, 100, 16, 16, 4);
@@ -7037,6 +7012,27 @@ var elm$core$List$all = F2(
 			elm$core$List$any,
 			A2(elm$core$Basics$composeL, elm$core$Basics$not, isOkay),
 			list);
+	});
+var elm$core$List$drop = F2(
+	function (n, list) {
+		drop:
+		while (true) {
+			if (n <= 0) {
+				return list;
+			} else {
+				if (!list.b) {
+					return list;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs;
+					n = $temp$n;
+					list = $temp$list;
+					continue drop;
+				}
+			}
+		}
 	});
 var mdgriffith$elm_style_animation$Animation$Model$Repeat = F2(
 	function (a, b) {
