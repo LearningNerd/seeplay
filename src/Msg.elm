@@ -16,7 +16,8 @@ type Msg
 
     | StartScrollGameLevel
 
-    | MoveToCoinDone
+    | ScrollToCoinDone Int Int
+    | JumpToCoinDone
     | GetCoinDone
 --    | ResumeWalkingDone
 

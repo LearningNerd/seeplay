@@ -167,11 +167,28 @@ update msg model =
 
         NotePressed noteCode -> updateNotePressed noteCode model
 
+        
+        -- once Mario is lined up with the note that was just correctly played, animate jump/fall and trigger next anim steps...
+        ScrollToCoinDone prevNoteMidi currentNoteMidi ->
+          let 
+            nextAnimStepsList = jumpOrFall prevNoteMidi currentNoteMidi
+
+            currentMarioSpriteStyle = getUniqueAnimState model.uniqueAnimStates Constants.currentNoteStyle
+    
+            newMarioSpriteStyle = nextAnimStepsList currentMarioSpriteStyle
+    
+            newUniqueAnimStates = Helpers.updateUniqueAnimState model.uniqueAnimStates (Constants.currentNoteStyle, newMarioSpriteStyle)
+
+          in
+            ( { model | uniqueAnimStates = newUniqueAnimStates }
+            , Cmd.none
+            )
+
 
 
         -- after Mario reaches a coin, make it fade out, and trigger GetCoinDone
         -- .... and set Mario back to walk cycle ....
-        MoveToCoinDone ->
+        JumpToCoinDone ->
           let
               -- update coin to disappear anim
               maybeTargetNote = Array.get model.nextTargetNoteIndex model.targetNotes
@@ -300,15 +317,34 @@ updateNotePressed noteCode model =
     nextAnimStepsList = jumpOrFall prevMidi noteCode
 
     currentMarioSpriteStyle = getUniqueAnimState model.uniqueAnimStates Constants.currentNoteStyle
-    
+
+
+    -- update game level scroll anim
+    currentScrollState = getUniqueAnimState model.uniqueAnimStates Constants.scrollState
+    newScrollState = Animation.interrupt [
+      Animations.scrollGameLevel model.nextTargetNoteIndex
+      , Animation.Messenger.send (ScrollToCoinDone prevMidi noteCode) 
+      ] currentScrollState
+
+    -- if correct, scroll towards the coin and then trigger the reset of the animations
+    newAnimStates = if isCorrect
+        then
+            Helpers.updateUniqueAnimState model.uniqueAnimStates (Constants.scrollState, newScrollState)
+        else
+           model.uniqueAnimStates -- don't change anything otherwise!
+
+            -- otherwise, resume walk cycle...????
+            --Animation.interrupt View.Mario.marioWalkLoop currentMarioSpriteStyle
+{--
     -- for now, only use jump/fall sprites when getting correct note. but this isn't what I actually want =P let's test this first!
     newMarioStyle = if isCorrect
         then
             nextAnimStepsList currentMarioSpriteStyle
         else
             Animation.interrupt View.Mario.marioWalkLoop currentMarioSpriteStyle
-    
-    newUniqueAnimStates = Helpers.updateUniqueAnimState model.uniqueAnimStates (Constants.currentNoteStyle, newMarioStyle)
+--}
+
+    -- newUniqueAnimStates = Helpers.updateUniqueAnimState model.uniqueAnimStates (Constants.currentNoteStyle, newMarioStyle)
 
   in
     ( { model
@@ -319,7 +355,7 @@ updateNotePressed noteCode model =
             if isCorrect then model.score + 1 else model.score
         , incorrectTries =
             if isCorrect then model.incorrectTries else model.incorrectTries + 1
-        , uniqueAnimStates = newUniqueAnimStates
+        , uniqueAnimStates = newAnimStates
       }
 
     -- , nextCommand

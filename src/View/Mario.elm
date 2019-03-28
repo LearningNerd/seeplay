@@ -31,7 +31,7 @@ marioJump midiCode =
   in
     setSprite ::
     [ Animation.to [ Animation.y yPos ]
-    , Animation.Messenger.send MoveToCoinDone
+    , Animation.Messenger.send JumpToCoinDone
     ]
 
 
@@ -42,7 +42,7 @@ marioFall midiCode =
   in
     setSprite ::
     [ Animation.to [ Animation.y yPos ]
-    , Animation.Messenger.send MoveToCoinDone
+    , Animation.Messenger.send JumpToCoinDone
     ]
 
 
