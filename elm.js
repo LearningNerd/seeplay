@@ -9384,11 +9384,6 @@ var author$project$Main$update = F2(
 						model,
 						{targetNotes: targetNotes}),
 					elm$core$Platform$Cmd$none);
-			case 'NoteReleased':
-				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
-			case 'NotePressed':
-				var noteCode = msg.a;
-				return A2(author$project$Main$updateNotePressed, noteCode, model);
 			case 'RestartTimer':
 				var currentTimestamp = msg.a;
 				var newAnswerSpeed = A2(author$project$Main$getNewAnswerSpeed, model.startTimestamp, currentTimestamp);
@@ -9416,6 +9411,11 @@ var author$project$Main$update = F2(
 							testCurrentTimestamp: elm$core$Maybe$Just(currentTimestamp)
 						}),
 					nextCommand);
+			case 'NoteReleased':
+				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+			case 'NotePressed':
+				var noteCode = msg.a;
+				return A2(author$project$Main$updateNotePressed, noteCode, model);
 			case 'MoveToCoinDone':
 				var maybeTargetNote = A2(elm$core$Array$get, model.nextTargetNoteIndex, model.targetNotes);
 				var nextTargetNote = function () {
@@ -9446,20 +9446,39 @@ var author$project$Main$update = F2(
 							author$project$Animations$scrollGameLevel(newNextTargetNoteIndex)
 						]),
 					currentScrollState);
-				var newUniqueAnimStates = A2(
-					author$project$Helpers$updateUniqueAnimState,
-					model.uniqueAnimStates,
-					_Utils_Tuple2(author$project$Constants$scrollState, newScrollState));
 				var currentMarioStyle = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, author$project$Constants$currentNoteStyle);
 				var newMarioAnimStyle = A2(mdgriffith$elm_style_animation$Animation$interrupt, author$project$View$Mario$marioWalkLoop, currentMarioStyle);
 				var newMarioState = A2(
 					author$project$Helpers$updateUniqueAnimState,
 					model.uniqueAnimStates,
 					_Utils_Tuple2(author$project$Constants$currentNoteStyle, newMarioAnimStyle));
+				var newUniqueAnimStates = A2(
+					author$project$Helpers$updateUniqueAnimState,
+					newMarioState,
+					_Utils_Tuple2(author$project$Constants$scrollState, newScrollState));
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{nextTargetNoteIndex: newNextTargetNoteIndex, uniqueAnimStates: newUniqueAnimStates}),
+					elm$core$Platform$Cmd$none);
+			case 'StartScrollGameLevel':
+				var currentScrollState = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, author$project$Constants$scrollState);
+				var newScrollState = A2(
+					mdgriffith$elm_style_animation$Animation$interrupt,
+					_List_fromArray(
+						[
+							author$project$Animations$scrollGameLevel(model.nextTargetNoteIndex)
+						]),
+					currentScrollState);
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							uniqueAnimStates: A2(
+								author$project$Helpers$updateUniqueAnimState,
+								model.uniqueAnimStates,
+								_Utils_Tuple2(author$project$Constants$scrollState, newScrollState))
+						}),
 					elm$core$Platform$Cmd$none);
 			case 'Animate':
 				var timestamp = msg.a;
@@ -9491,32 +9510,13 @@ var author$project$Main$update = F2(
 						}),
 					elm$core$Platform$Cmd$batch(
 						_Utils_ap(uniqueElemAnimCmds, noteAnimCmds)));
-			case 'TestTick':
+			default:
 				var currentTimestamp = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
 							testCurrentTimestamp: elm$core$Maybe$Just(currentTimestamp)
-						}),
-					elm$core$Platform$Cmd$none);
-			default:
-				var currentScrollState = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, author$project$Constants$scrollState);
-				var newScrollState = A2(
-					mdgriffith$elm_style_animation$Animation$interrupt,
-					_List_fromArray(
-						[
-							author$project$Animations$scrollGameLevel(model.nextTargetNoteIndex)
-						]),
-					currentScrollState);
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							uniqueAnimStates: A2(
-								author$project$Helpers$updateUniqueAnimState,
-								model.uniqueAnimStates,
-								_Utils_Tuple2(author$project$Constants$scrollState, newScrollState))
 						}),
 					elm$core$Platform$Cmd$none);
 		}

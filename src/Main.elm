@@ -134,12 +134,6 @@ update msg model =
             )
 
 
-        NoteReleased _ -> (model, Cmd.none)
-        
-        NotePressed noteCode -> updateNotePressed noteCode model
-
-
-
         RestartTimer currentTimestamp ->
           let
             newAnswerSpeed = getNewAnswerSpeed model.startTimestamp currentTimestamp
@@ -166,6 +160,15 @@ update msg model =
             )
 
 
+
+        NoteReleased _ -> (model, Cmd.none)
+
+
+
+        NotePressed noteCode -> updateNotePressed noteCode model
+
+
+
         -- after Mario reaches a coin, make it fade out, and trigger GetCoinDone
         MoveToCoinDone ->
           let
@@ -188,11 +191,12 @@ update msg model =
         -- THIS ONLY HAPPENS IF CORRECT NOTE WAS PLAYED
         GetCoinDone ->
           let
+              -- Resume Mario walk cycle anim
             currentMarioStyle = getUniqueAnimState model.uniqueAnimStates Constants.currentNoteStyle
             newMarioAnimStyle = Animation.interrupt View.Mario.marioWalkLoop currentMarioStyle
             newMarioState = Helpers.updateUniqueAnimState model.uniqueAnimStates (Constants.currentNoteStyle, newMarioAnimStyle)
 
-
+            -- Update next target note in model, scroll game level to next note
             newNextTargetNoteIndex = model.nextTargetNoteIndex + 1
 
             currentScrollState = getUniqueAnimState model.uniqueAnimStates Constants.scrollState
@@ -200,7 +204,7 @@ update msg model =
               Animations.scrollGameLevel newNextTargetNoteIndex
               ] currentScrollState
  
-            newUniqueAnimStates = updateUniqueAnimState model.uniqueAnimStates (Constants.scrollState, newScrollState)
+            newUniqueAnimStates = Helpers.updateUniqueAnimState newMarioState (Constants.scrollState, newScrollState)
 
           in
             ( { model | 
@@ -210,6 +214,20 @@ update msg model =
             , Cmd.none
             )
 
+
+
+
+--------------------- NOT BEING USED RIGHT NOW -------------
+        StartScrollGameLevel ->
+          let
+              currentScrollState = getUniqueAnimState model.uniqueAnimStates Constants.scrollState
+              newScrollState = Animation.interrupt [Animations.scrollGameLevel model.nextTargetNoteIndex] currentScrollState
+          in
+            -- ( { model | gameLevelScrollState = Animation.interrupt [Animations.scrollGameLevel model.nextTargetNoteIndex] model.gameLevelScrollState }
+            (
+            { model | uniqueAnimStates = Helpers.updateUniqueAnimState model.uniqueAnimStates (Constants.scrollState, newScrollState) }
+            , Cmd.none
+            )
 
 
 
@@ -233,35 +251,12 @@ update msg model =
               )
 
 
-
         TestTick currentTimestamp ->
           ( { model | testCurrentTimestamp = Just currentTimestamp }
           , Cmd.none
           )
+------------------------------------------------------------
 
-
--- --------- -------- test ----------------- ------
-{--
-        StartSpriteTestAnim ->
-          let
-              test = Debug.log "called StartSpriteTestAnim section of update" model.coinStyle
-          in
-            ( { model | coinStyle = Animation.interrupt [Animations.coinLoop] model.coinStyle }
-            , Cmd.none
-            )
---}
-
-
-        StartScrollGameLevel ->
-          let
-              currentScrollState = getUniqueAnimState model.uniqueAnimStates Constants.scrollState
-              newScrollState = Animation.interrupt [Animations.scrollGameLevel model.nextTargetNoteIndex] currentScrollState
-          in
-            -- ( { model | gameLevelScrollState = Animation.interrupt [Animations.scrollGameLevel model.nextTargetNoteIndex] model.gameLevelScrollState }
-            (
-            { model | uniqueAnimStates = updateUniqueAnimState model.uniqueAnimStates (Constants.scrollState, newScrollState) }
-            , Cmd.none
-            )
 
 
 updateNotePressed noteCode model =
@@ -285,7 +280,7 @@ updateNotePressed noteCode model =
         else
             Animation.interrupt View.Mario.marioWalkLoop currentMarioStyle
     
-    newUniqueAnimStates = updateUniqueAnimState model.uniqueAnimStates (Constants.currentNoteStyle, newMarioStyle)
+    newUniqueAnimStates = Helpers.updateUniqueAnimState model.uniqueAnimStates (Constants.currentNoteStyle, newMarioStyle)
 
   in
     ( { model
@@ -302,6 +297,7 @@ updateNotePressed noteCode model =
     -- , nextCommand
     , Cmd.none
     )
+
 
 -- need to handle case where note is at same level ... stay a bit in front of note, not directly on it? or just never have two same notes in a row?
 jumpOrFall prevMidi currentMidi =
@@ -334,6 +330,8 @@ getNextTargetNote index targetNotesArray =
     case next of
       Nothing -> Note.createNote 60 -- temporary fix =P last note is always C4 ?
       Just n -> n
+
+
 
 -- SUBSCRIPTIONS
 
