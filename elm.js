@@ -6223,14 +6223,6 @@ var author$project$Main$init = function (initialSessionId) {
 			author$project$Msg$GenerateTargetNotes,
 			author$project$Note$getRandomMidiList(author$project$Constants$notesPerLevel)));
 };
-var elm$json$Json$Decode$bool = _Json_decodeBool;
-var author$project$Main$fakeHandleInitMIDI = _Platform_incomingPort('fakeHandleInitMIDI', elm$json$Json$Decode$bool);
-var elm$json$Json$Decode$int = _Json_decodeInt;
-var author$project$Main$fakeHandleNotePressed = _Platform_incomingPort('fakeHandleNotePressed', elm$json$Json$Decode$int);
-var author$project$Main$fakeHandleNoteReleased = _Platform_incomingPort('fakeHandleNoteReleased', elm$json$Json$Decode$bool);
-var author$project$Main$handleInitMIDI = _Platform_incomingPort('handleInitMIDI', elm$json$Json$Decode$bool);
-var author$project$Main$handleNotePressed = _Platform_incomingPort('handleNotePressed', elm$json$Json$Decode$int);
-var author$project$Main$handleNoteReleased = _Platform_incomingPort('handleNoteReleased', elm$json$Json$Decode$bool);
 var author$project$Msg$Animate = function (a) {
 	return {$: 'Animate', a: a};
 };
@@ -6246,6 +6238,14 @@ var author$project$Msg$NoteReleased = function (a) {
 var author$project$Msg$TestTick = function (a) {
 	return {$: 'TestTick', a: a};
 };
+var elm$json$Json$Decode$bool = _Json_decodeBool;
+var author$project$Ports$fakeHandleInitMIDI = _Platform_incomingPort('fakeHandleInitMIDI', elm$json$Json$Decode$bool);
+var elm$json$Json$Decode$int = _Json_decodeInt;
+var author$project$Ports$fakeHandleNotePressed = _Platform_incomingPort('fakeHandleNotePressed', elm$json$Json$Decode$int);
+var author$project$Ports$fakeHandleNoteReleased = _Platform_incomingPort('fakeHandleNoteReleased', elm$json$Json$Decode$bool);
+var author$project$Ports$handleInitMIDI = _Platform_incomingPort('handleInitMIDI', elm$json$Json$Decode$bool);
+var author$project$Ports$handleNotePressed = _Platform_incomingPort('handleNotePressed', elm$json$Json$Decode$int);
+var author$project$Ports$handleNoteReleased = _Platform_incomingPort('handleNoteReleased', elm$json$Json$Decode$bool);
 var elm$core$Dict$values = function (dict) {
 	return A3(
 		elm$core$Dict$foldr,
@@ -6925,13 +6925,13 @@ var author$project$Main$subscriptions = function (model) {
 	return elm$core$Platform$Sub$batch(
 		_List_fromArray(
 			[
-				author$project$Main$handleInitMIDI(author$project$Msg$InitMIDI),
-				author$project$Main$handleNotePressed(author$project$Msg$NotePressed),
-				author$project$Main$handleNoteReleased(author$project$Msg$NoteReleased),
+				author$project$Ports$handleInitMIDI(author$project$Msg$InitMIDI),
+				author$project$Ports$handleNotePressed(author$project$Msg$NotePressed),
+				author$project$Ports$handleNoteReleased(author$project$Msg$NoteReleased),
 				A2(elm$time$Time$every, 10, author$project$Msg$TestTick),
-				author$project$Main$fakeHandleInitMIDI(author$project$Msg$InitMIDI),
-				author$project$Main$fakeHandleNotePressed(author$project$Msg$NotePressed),
-				author$project$Main$fakeHandleNoteReleased(author$project$Msg$NoteReleased),
+				author$project$Ports$fakeHandleInitMIDI(author$project$Msg$InitMIDI),
+				author$project$Ports$fakeHandleNotePressed(author$project$Msg$NotePressed),
+				author$project$Ports$fakeHandleNoteReleased(author$project$Msg$NoteReleased),
 				A2(
 				mdgriffith$elm_style_animation$Animation$subscription,
 				author$project$Msg$Animate,
@@ -6945,137 +6945,8 @@ var author$project$Main$subscriptions = function (model) {
 						elm$core$Array$toList(model.targetNotes))))
 			]));
 };
-var author$project$Msg$GetCoinDone = {$: 'GetCoinDone'};
-var elm$core$Basics$round = _Basics_round;
-var mdgriffith$elm_style_animation$Animation$easing = function (_n0) {
-	var duration = _n0.duration;
-	var ease = _n0.ease;
-	return mdgriffith$elm_style_animation$Animation$Model$Easing(
-		{
-			duration: elm$time$Time$millisToPosix(
-				elm$core$Basics$round(duration)),
-			ease: ease,
-			progress: 1,
-			start: 0
-		});
-};
-var mdgriffith$elm_style_animation$Animation$Model$ToWith = function (a) {
-	return {$: 'ToWith', a: a};
-};
-var mdgriffith$elm_style_animation$Animation$toWith = F2(
-	function (interp, props) {
-		return mdgriffith$elm_style_animation$Animation$Model$ToWith(
-			A2(
-				elm$core$List$map,
-				mdgriffith$elm_style_animation$Animation$Model$mapToMotion(
-					function (m) {
-						return _Utils_update(
-							m,
-							{interpolation: interp});
-					}),
-				props));
-	});
-var mdgriffith$elm_style_animation$Animation$Model$Send = function (a) {
-	return {$: 'Send', a: a};
-};
-var mdgriffith$elm_style_animation$Animation$Messenger$send = function (msg) {
-	return mdgriffith$elm_style_animation$Animation$Model$Send(msg);
-};
-var author$project$Animations$coinDisappear = _List_fromArray(
-	[
-		A2(
-		mdgriffith$elm_style_animation$Animation$toWith,
-		mdgriffith$elm_style_animation$Animation$easing(
-			{
-				duration: 300,
-				ease: function (x) {
-					return A2(elm$core$Basics$pow, x, 2);
-				}
-			}),
-		_List_fromArray(
-			[
-				mdgriffith$elm_style_animation$Animation$opacity(0)
-			])),
-		mdgriffith$elm_style_animation$Animation$Messenger$send(author$project$Msg$GetCoinDone)
-	]);
-var elm$core$List$append = F2(
-	function (xs, ys) {
-		if (!ys.b) {
-			return xs;
-		} else {
-			return A3(elm$core$List$foldr, elm$core$List$cons, ys, xs);
-		}
-	});
-var elm$core$List$concat = function (lists) {
-	return A3(elm$core$List$foldr, elm$core$List$append, _List_Nil, lists);
-};
-var elm$core$List$concatMap = F2(
-	function (f, list) {
-		return elm$core$List$concat(
-			A2(elm$core$List$map, f, list));
-	});
-var mdgriffith$elm_style_animation$Animation$Model$Loop = function (a) {
-	return {$: 'Loop', a: a};
-};
-var mdgriffith$elm_style_animation$Animation$loop = function (steps) {
-	return mdgriffith$elm_style_animation$Animation$Model$Loop(steps);
-};
-var mdgriffith$elm_style_animation$Animation$Model$Set = function (a) {
-	return {$: 'Set', a: a};
-};
-var mdgriffith$elm_style_animation$Animation$set = function (props) {
-	return mdgriffith$elm_style_animation$Animation$Model$Set(props);
-};
-var mdgriffith$elm_style_animation$Animation$Model$Wait = function (a) {
-	return {$: 'Wait', a: a};
-};
-var mdgriffith$elm_style_animation$Animation$wait = function (till) {
-	return mdgriffith$elm_style_animation$Animation$Model$Wait(till);
-};
-var author$project$Animations$spriteLoop = F5(
-	function (delayMillis, spriteWidth, spriteHeight, firstSpriteIndex, numSprites) {
-		var loopForwardHalf = A2(
-			elm$core$List$concatMap,
-			function (i) {
-				return _List_fromArray(
-					[
-						mdgriffith$elm_style_animation$Animation$set(
-						_List_fromArray(
-							[
-								A4(mdgriffith$elm_style_animation$Animation$viewBox, spriteWidth * i, 0.0, spriteWidth, spriteHeight)
-							])),
-						mdgriffith$elm_style_animation$Animation$wait(
-						elm$time$Time$millisToPosix(delayMillis))
-					]);
-			},
-			A2(
-				elm$core$List$map,
-				elm$core$Basics$toFloat,
-				A2(elm$core$List$range, firstSpriteIndex, numSprites - 1)));
-		return _List_fromArray(
-			[
-				mdgriffith$elm_style_animation$Animation$loop(loopForwardHalf)
-			]);
-	});
-var author$project$Animations$coinLoop = A5(author$project$Animations$spriteLoop, 100, 16, 16, 0, 4);
-var mdgriffith$elm_style_animation$Animation$spring = function (settings) {
-	return mdgriffith$elm_style_animation$Animation$Model$Spring(settings);
-};
-var author$project$Animations$scrollAndWalkEasing = mdgriffith$elm_style_animation$Animation$spring(
-	{damping: 50, stiffness: 50});
-var author$project$Constants$noteXInterval = 200;
-var elm$core$Debug$log = _Debug_log;
-var author$project$Animations$scrollGameLevel = function (nextNoteIndex) {
-	var nextViewBoxStartPos = nextNoteIndex * author$project$Constants$noteXInterval;
-	var test = A2(elm$core$Debug$log, 'next xPos: ', nextViewBoxStartPos);
-	return A2(
-		mdgriffith$elm_style_animation$Animation$toWith,
-		author$project$Animations$scrollAndWalkEasing,
-		_List_fromArray(
-			[
-				A4(mdgriffith$elm_style_animation$Animation$viewBox, nextViewBoxStartPos, 0, author$project$Constants$svgViewTotalWidth, author$project$Constants$svgViewTotalHeight)
-			]));
-};
+var author$project$Msg$StartScrollGameLevel = {$: 'StartScrollGameLevel'};
+var author$project$Constants$staffLineHeight = author$project$Constants$svgViewHeight / 6;
 var elm$core$Maybe$withDefault = F2(
 	function (_default, maybe) {
 		if (maybe.$ === 'Just') {
@@ -7092,2492 +6963,6 @@ var author$project$Helpers$getUniqueAnimState = F2(
 			mdgriffith$elm_style_animation$Animation$style(_List_Nil),
 			A2(elm$core$Dict$get, key, dict));
 	});
-var elm$core$List$drop = F2(
-	function (n, list) {
-		drop:
-		while (true) {
-			if (n <= 0) {
-				return list;
-			} else {
-				if (!list.b) {
-					return list;
-				} else {
-					var x = list.a;
-					var xs = list.b;
-					var $temp$n = n - 1,
-						$temp$list = xs;
-					n = $temp$n;
-					list = $temp$list;
-					continue drop;
-				}
-			}
-		}
-	});
-var mdgriffith$elm_style_animation$Animation$extractInitialWait = function (steps) {
-	var _n0 = elm$core$List$head(steps);
-	if (_n0.$ === 'Nothing') {
-		return _Utils_Tuple2(
-			elm$time$Time$millisToPosix(0),
-			_List_Nil);
-	} else {
-		var step = _n0.a;
-		if (step.$ === 'Wait') {
-			var till = step.a;
-			var _n2 = mdgriffith$elm_style_animation$Animation$extractInitialWait(
-				A2(elm$core$List$drop, 1, steps));
-			var additionalTime = _n2.a;
-			var remainingSteps = _n2.b;
-			return _Utils_Tuple2(
-				elm$time$Time$millisToPosix(
-					elm$time$Time$posixToMillis(till) + elm$time$Time$posixToMillis(additionalTime)),
-				remainingSteps);
-		} else {
-			return _Utils_Tuple2(
-				elm$time$Time$millisToPosix(0),
-				steps);
-		}
-	}
-};
-var mdgriffith$elm_style_animation$Animation$interrupt = F2(
-	function (steps, _n0) {
-		var model = _n0.a;
-		return mdgriffith$elm_style_animation$Animation$Model$Animation(
-			_Utils_update(
-				model,
-				{
-					interruption: A2(
-						elm$core$List$cons,
-						mdgriffith$elm_style_animation$Animation$extractInitialWait(steps),
-						model.interruption),
-					running: true
-				}));
-	});
-var author$project$Helpers$updateNoteWithAnimSteps = F2(
-	function (animStepsList, note) {
-		return _Utils_update(
-			note,
-			{
-				animState: A2(mdgriffith$elm_style_animation$Animation$interrupt, animStepsList, note.animState)
-			});
-	});
-var author$project$Helpers$startAnimEveryNote = F2(
-	function (noteList, animStepsList) {
-		var notes = elm$core$Array$toList(noteList);
-		return elm$core$Array$fromList(
-			A2(
-				elm$core$List$map,
-				author$project$Helpers$updateNoteWithAnimSteps(animStepsList),
-				notes));
-	});
-var elm$core$Dict$map = F2(
-	function (func, dict) {
-		if (dict.$ === 'RBEmpty_elm_builtin') {
-			return elm$core$Dict$RBEmpty_elm_builtin;
-		} else {
-			var color = dict.a;
-			var key = dict.b;
-			var value = dict.c;
-			var left = dict.d;
-			var right = dict.e;
-			return A5(
-				elm$core$Dict$RBNode_elm_builtin,
-				color,
-				key,
-				A2(func, key, value),
-				A2(elm$core$Dict$map, func, left),
-				A2(elm$core$Dict$map, func, right));
-		}
-	});
-var elm$core$Basics$neq = _Utils_notEqual;
-var elm$core$List$partition = F2(
-	function (pred, list) {
-		var step = F2(
-			function (x, _n0) {
-				var trues = _n0.a;
-				var falses = _n0.b;
-				return pred(x) ? _Utils_Tuple2(
-					A2(elm$core$List$cons, x, trues),
-					falses) : _Utils_Tuple2(
-					trues,
-					A2(elm$core$List$cons, x, falses));
-			});
-		return A3(
-			elm$core$List$foldr,
-			step,
-			_Utils_Tuple2(_List_Nil, _List_Nil),
-			list);
-	});
-var elm$core$Platform$Cmd$batch = _Platform_batch;
-var mdgriffith$elm_style_animation$Animation$Model$refreshTiming = F2(
-	function (now, timing) {
-		var dt = elm$time$Time$posixToMillis(now) - elm$time$Time$posixToMillis(timing.current);
-		return {
-			current: now,
-			dt: ((dt > 34) || (!elm$time$Time$posixToMillis(timing.current))) ? elm$time$Time$millisToPosix(
-				elm$core$Basics$round(16.666)) : elm$time$Time$millisToPosix(dt)
-		};
-	});
-var elm$core$List$all = F2(
-	function (isOkay, list) {
-		return !A2(
-			elm$core$List$any,
-			A2(elm$core$Basics$composeL, elm$core$Basics$not, isOkay),
-			list);
-	});
-var mdgriffith$elm_style_animation$Animation$Model$Repeat = F2(
-	function (a, b) {
-		return {$: 'Repeat', a: a, b: b};
-	});
-var mdgriffith$elm_style_animation$Animation$Model$Step = {$: 'Step'};
-var mdgriffith$elm_style_animation$Animation$Model$isCmdDone = function (cmd) {
-	var motionDone = function (motion) {
-		return (!motion.velocity) && _Utils_eq(motion.position, motion.target);
-	};
-	switch (cmd.$) {
-		case 'Move':
-			var m1 = cmd.a;
-			var m2 = cmd.b;
-			return motionDone(m1) && motionDone(m2);
-		case 'MoveTo':
-			var m1 = cmd.a;
-			var m2 = cmd.b;
-			return motionDone(m1) && motionDone(m2);
-		case 'Line':
-			var m1 = cmd.a;
-			var m2 = cmd.b;
-			return motionDone(m1) && motionDone(m2);
-		case 'LineTo':
-			var m1 = cmd.a;
-			var m2 = cmd.b;
-			return motionDone(m1) && motionDone(m2);
-		case 'Horizontal':
-			var motion = cmd.a;
-			return motionDone(motion);
-		case 'HorizontalTo':
-			var motion = cmd.a;
-			return motionDone(motion);
-		case 'Vertical':
-			var motion = cmd.a;
-			return motionDone(motion);
-		case 'VerticalTo':
-			var motion = cmd.a;
-			return motionDone(motion);
-		case 'Curve':
-			var control1 = cmd.a.control1;
-			var control2 = cmd.a.control2;
-			var point = cmd.a.point;
-			return motionDone(control1.a) && (motionDone(control1.b) && (motionDone(control2.a) && (motionDone(control2.b) && (motionDone(point.a) && motionDone(point.b)))));
-		case 'CurveTo':
-			var control1 = cmd.a.control1;
-			var control2 = cmd.a.control2;
-			var point = cmd.a.point;
-			return motionDone(control1.a) && (motionDone(control1.b) && (motionDone(control2.a) && (motionDone(control2.b) && (motionDone(point.a) && motionDone(point.b)))));
-		case 'Quadratic':
-			var control = cmd.a.control;
-			var point = cmd.a.point;
-			return motionDone(control.a) && (motionDone(control.b) && (motionDone(point.a) && motionDone(point.b)));
-		case 'QuadraticTo':
-			var control = cmd.a.control;
-			var point = cmd.a.point;
-			return motionDone(control.a) && (motionDone(control.b) && (motionDone(point.a) && motionDone(point.b)));
-		case 'SmoothQuadratic':
-			var coords = cmd.a;
-			return A2(
-				elm$core$List$all,
-				function (_n1) {
-					var x = _n1.a;
-					var y = _n1.b;
-					return motionDone(x) && motionDone(y);
-				},
-				coords);
-		case 'SmoothQuadraticTo':
-			var coords = cmd.a;
-			return A2(
-				elm$core$List$all,
-				function (_n2) {
-					var x = _n2.a;
-					var y = _n2.b;
-					return motionDone(x) && motionDone(y);
-				},
-				coords);
-		case 'Smooth':
-			var coords = cmd.a;
-			return A2(
-				elm$core$List$all,
-				function (_n3) {
-					var x = _n3.a;
-					var y = _n3.b;
-					return motionDone(x) && motionDone(y);
-				},
-				coords);
-		case 'SmoothTo':
-			var coords = cmd.a;
-			return A2(
-				elm$core$List$all,
-				function (_n4) {
-					var x = _n4.a;
-					var y = _n4.b;
-					return motionDone(x) && motionDone(y);
-				},
-				coords);
-		case 'ClockwiseArc':
-			var arc = cmd.a;
-			return motionDone(arc.x) && (motionDone(arc.y) && (motionDone(arc.radius) && (motionDone(arc.startAngle) && motionDone(arc.endAngle))));
-		case 'AntiClockwiseArc':
-			var arc = cmd.a;
-			return motionDone(arc.x) && (motionDone(arc.y) && (motionDone(arc.radius) && (motionDone(arc.startAngle) && motionDone(arc.endAngle))));
-		default:
-			return true;
-	}
-};
-var mdgriffith$elm_style_animation$Animation$Model$isDone = function (property) {
-	var motionDone = function (motion) {
-		var runningInterpolation = A2(elm$core$Maybe$withDefault, motion.interpolation, motion.interpolationOverride);
-		switch (runningInterpolation.$) {
-			case 'Spring':
-				return (!motion.velocity) && _Utils_eq(motion.position, motion.target);
-			case 'Easing':
-				var eased = runningInterpolation.a;
-				return (eased.progress === 1) || ((!eased.progress) && _Utils_eq(motion.position, motion.target));
-			default:
-				var speed = runningInterpolation.a;
-				return _Utils_eq(motion.position, motion.target);
-		}
-	};
-	switch (property.$) {
-		case 'ExactProperty':
-			return true;
-		case 'ColorProperty':
-			var m1 = property.b;
-			var m2 = property.c;
-			var m3 = property.d;
-			var m4 = property.e;
-			return A2(
-				elm$core$List$all,
-				motionDone,
-				_List_fromArray(
-					[m1, m2, m3, m4]));
-		case 'ShadowProperty':
-			var shadow = property.c;
-			return A2(
-				elm$core$List$all,
-				motionDone,
-				_List_fromArray(
-					[shadow.offsetX, shadow.offsetY, shadow.size, shadow.blur, shadow.red, shadow.green, shadow.blue, shadow.alpha]));
-		case 'Property':
-			var m1 = property.b;
-			return motionDone(m1);
-		case 'Property2':
-			var m1 = property.b;
-			var m2 = property.c;
-			return motionDone(m1) && motionDone(m2);
-		case 'Property3':
-			var m1 = property.b;
-			var m2 = property.c;
-			var m3 = property.d;
-			return A2(
-				elm$core$List$all,
-				motionDone,
-				_List_fromArray(
-					[m1, m2, m3]));
-		case 'Property4':
-			var m1 = property.b;
-			var m2 = property.c;
-			var m3 = property.d;
-			var m4 = property.e;
-			return A2(
-				elm$core$List$all,
-				motionDone,
-				_List_fromArray(
-					[m1, m2, m3, m4]));
-		case 'AngleProperty':
-			var m1 = property.b;
-			return motionDone(m1);
-		case 'Points':
-			var ms = property.a;
-			return A2(
-				elm$core$List$all,
-				function (_n1) {
-					var x = _n1.a;
-					var y = _n1.b;
-					return motionDone(x) && motionDone(y);
-				},
-				ms);
-		default:
-			var cmds = property.a;
-			return A2(elm$core$List$all, mdgriffith$elm_style_animation$Animation$Model$isCmdDone, cmds);
-	}
-};
-var elm$core$List$maybeCons = F3(
-	function (f, mx, xs) {
-		var _n0 = f(mx);
-		if (_n0.$ === 'Just') {
-			var x = _n0.a;
-			return A2(elm$core$List$cons, x, xs);
-		} else {
-			return xs;
-		}
-	});
-var elm$core$List$filterMap = F2(
-	function (f, xs) {
-		return A3(
-			elm$core$List$foldr,
-			elm$core$List$maybeCons(f),
-			_List_Nil,
-			xs);
-	});
-var elm$core$List$repeatHelp = F3(
-	function (result, n, value) {
-		repeatHelp:
-		while (true) {
-			if (n <= 0) {
-				return result;
-			} else {
-				var $temp$result = A2(elm$core$List$cons, value, result),
-					$temp$n = n - 1,
-					$temp$value = value;
-				result = $temp$result;
-				n = $temp$n;
-				value = $temp$value;
-				continue repeatHelp;
-			}
-		}
-	});
-var elm$core$List$repeat = F2(
-	function (n, value) {
-		return A3(elm$core$List$repeatHelp, _List_Nil, n, value);
-	});
-var mdgriffith$elm_style_animation$Animation$Model$matchPoints = F2(
-	function (points1, points2) {
-		var diff = elm$core$List$length(points1) - elm$core$List$length(points2);
-		if (diff > 0) {
-			var _n0 = elm$core$List$head(
-				elm$core$List$reverse(points2));
-			if (_n0.$ === 'Nothing') {
-				return _Utils_Tuple2(points1, points2);
-			} else {
-				var last2 = _n0.a;
-				return _Utils_Tuple2(
-					points1,
-					_Utils_ap(
-						points2,
-						A2(
-							elm$core$List$repeat,
-							elm$core$Basics$abs(diff),
-							last2)));
-			}
-		} else {
-			if (diff < 0) {
-				var _n1 = elm$core$List$head(
-					elm$core$List$reverse(points1));
-				if (_n1.$ === 'Nothing') {
-					return _Utils_Tuple2(points1, points2);
-				} else {
-					var last1 = _n1.a;
-					return _Utils_Tuple2(
-						_Utils_ap(
-							points1,
-							A2(
-								elm$core$List$repeat,
-								elm$core$Basics$abs(diff),
-								last1)),
-						points2);
-				}
-			} else {
-				return _Utils_Tuple2(points1, points2);
-			}
-		}
-	});
-var mdgriffith$elm_style_animation$Animation$Model$setPathTarget = F2(
-	function (cmd, targetCmd) {
-		var setMotionTarget = F2(
-			function (motion, targetMotion) {
-				var _n27 = motion.interpolation;
-				if (_n27.$ === 'Easing') {
-					var ease = _n27.a;
-					return _Utils_update(
-						motion,
-						{
-							interpolation: mdgriffith$elm_style_animation$Animation$Model$Easing(
-								_Utils_update(
-									ease,
-									{start: motion.position})),
-							target: targetMotion.position
-						});
-				} else {
-					return _Utils_update(
-						motion,
-						{target: targetMotion.position});
-				}
-			});
-		switch (cmd.$) {
-			case 'Move':
-				var m1 = cmd.a;
-				var m2 = cmd.b;
-				if (targetCmd.$ === 'Move') {
-					var t1 = targetCmd.a;
-					var t2 = targetCmd.b;
-					return A2(
-						mdgriffith$elm_style_animation$Animation$Model$Move,
-						A2(setMotionTarget, m1, t1),
-						A2(setMotionTarget, m2, t2));
-				} else {
-					return cmd;
-				}
-			case 'MoveTo':
-				var m1 = cmd.a;
-				var m2 = cmd.b;
-				if (targetCmd.$ === 'MoveTo') {
-					var t1 = targetCmd.a;
-					var t2 = targetCmd.b;
-					return A2(
-						mdgriffith$elm_style_animation$Animation$Model$MoveTo,
-						A2(setMotionTarget, m1, t1),
-						A2(setMotionTarget, m2, t2));
-				} else {
-					return cmd;
-				}
-			case 'Line':
-				var m1 = cmd.a;
-				var m2 = cmd.b;
-				if (targetCmd.$ === 'Line') {
-					var t1 = targetCmd.a;
-					var t2 = targetCmd.b;
-					return A2(
-						mdgriffith$elm_style_animation$Animation$Model$Line,
-						A2(setMotionTarget, m1, t1),
-						A2(setMotionTarget, m2, t2));
-				} else {
-					return cmd;
-				}
-			case 'LineTo':
-				var m1 = cmd.a;
-				var m2 = cmd.b;
-				if (targetCmd.$ === 'LineTo') {
-					var t1 = targetCmd.a;
-					var t2 = targetCmd.b;
-					return A2(
-						mdgriffith$elm_style_animation$Animation$Model$LineTo,
-						A2(setMotionTarget, m1, t1),
-						A2(setMotionTarget, m2, t2));
-				} else {
-					return cmd;
-				}
-			case 'Horizontal':
-				var m1 = cmd.a;
-				if (targetCmd.$ === 'Horizontal') {
-					var t1 = targetCmd.a;
-					return mdgriffith$elm_style_animation$Animation$Model$Horizontal(
-						A2(setMotionTarget, m1, t1));
-				} else {
-					return cmd;
-				}
-			case 'HorizontalTo':
-				var m1 = cmd.a;
-				if (targetCmd.$ === 'HorizontalTo') {
-					var t1 = targetCmd.a;
-					return mdgriffith$elm_style_animation$Animation$Model$HorizontalTo(
-						A2(setMotionTarget, m1, t1));
-				} else {
-					return cmd;
-				}
-			case 'Vertical':
-				var m1 = cmd.a;
-				if (targetCmd.$ === 'Vertical') {
-					var t1 = targetCmd.a;
-					return mdgriffith$elm_style_animation$Animation$Model$Vertical(
-						A2(setMotionTarget, m1, t1));
-				} else {
-					return cmd;
-				}
-			case 'VerticalTo':
-				var m1 = cmd.a;
-				if (targetCmd.$ === 'VerticalTo') {
-					var t1 = targetCmd.a;
-					return mdgriffith$elm_style_animation$Animation$Model$VerticalTo(
-						A2(setMotionTarget, m1, t1));
-				} else {
-					return cmd;
-				}
-			case 'Curve':
-				var points = cmd.a;
-				if (targetCmd.$ === 'Curve') {
-					var targets = targetCmd.a;
-					return mdgriffith$elm_style_animation$Animation$Model$Curve(
-						{
-							control1: _Utils_Tuple2(
-								A2(setMotionTarget, points.control1.a, targets.control1.a),
-								A2(setMotionTarget, points.control1.b, targets.control1.b)),
-							control2: _Utils_Tuple2(
-								A2(setMotionTarget, points.control2.a, targets.control2.a),
-								A2(setMotionTarget, points.control2.b, targets.control2.b)),
-							point: _Utils_Tuple2(
-								A2(setMotionTarget, points.point.a, targets.point.a),
-								A2(setMotionTarget, points.point.b, targets.point.b))
-						});
-				} else {
-					return cmd;
-				}
-			case 'CurveTo':
-				var points = cmd.a;
-				if (targetCmd.$ === 'CurveTo') {
-					var targets = targetCmd.a;
-					return mdgriffith$elm_style_animation$Animation$Model$CurveTo(
-						{
-							control1: _Utils_Tuple2(
-								A2(setMotionTarget, points.control1.a, targets.control1.a),
-								A2(setMotionTarget, points.control1.b, targets.control1.b)),
-							control2: _Utils_Tuple2(
-								A2(setMotionTarget, points.control2.a, targets.control2.a),
-								A2(setMotionTarget, points.control2.b, targets.control2.b)),
-							point: _Utils_Tuple2(
-								A2(setMotionTarget, points.point.a, targets.point.a),
-								A2(setMotionTarget, points.point.b, targets.point.b))
-						});
-				} else {
-					return cmd;
-				}
-			case 'Quadratic':
-				var points = cmd.a;
-				if (targetCmd.$ === 'Quadratic') {
-					var targets = targetCmd.a;
-					return mdgriffith$elm_style_animation$Animation$Model$Quadratic(
-						{
-							control: _Utils_Tuple2(
-								A2(setMotionTarget, points.control.a, targets.control.a),
-								A2(setMotionTarget, points.control.b, targets.control.b)),
-							point: _Utils_Tuple2(
-								A2(setMotionTarget, points.point.a, targets.point.a),
-								A2(setMotionTarget, points.point.b, targets.point.b))
-						});
-				} else {
-					return cmd;
-				}
-			case 'QuadraticTo':
-				var points = cmd.a;
-				if (targetCmd.$ === 'QuadraticTo') {
-					var targets = targetCmd.a;
-					return mdgriffith$elm_style_animation$Animation$Model$QuadraticTo(
-						{
-							control: _Utils_Tuple2(
-								A2(setMotionTarget, points.control.a, targets.control.a),
-								A2(setMotionTarget, points.control.b, targets.control.b)),
-							point: _Utils_Tuple2(
-								A2(setMotionTarget, points.point.a, targets.point.a),
-								A2(setMotionTarget, points.point.b, targets.point.b))
-						});
-				} else {
-					return cmd;
-				}
-			case 'SmoothQuadratic':
-				var coords = cmd.a;
-				if (targetCmd.$ === 'SmoothQuadratic') {
-					var targetCoords = targetCmd.a;
-					return mdgriffith$elm_style_animation$Animation$Model$SmoothQuadratic(
-						A3(
-							elm$core$List$map2,
-							F2(
-								function (_n14, _n15) {
-									var x1 = _n14.a;
-									var y1 = _n14.b;
-									var x2 = _n15.a;
-									var y2 = _n15.b;
-									return _Utils_Tuple2(
-										A2(setMotionTarget, x1, x2),
-										A2(setMotionTarget, y1, y2));
-								}),
-							coords,
-							targetCoords));
-				} else {
-					return cmd;
-				}
-			case 'SmoothQuadraticTo':
-				var coords = cmd.a;
-				if (targetCmd.$ === 'SmoothQuadraticTo') {
-					var targetCoords = targetCmd.a;
-					return mdgriffith$elm_style_animation$Animation$Model$SmoothQuadraticTo(
-						A3(
-							elm$core$List$map2,
-							F2(
-								function (_n17, _n18) {
-									var x1 = _n17.a;
-									var y1 = _n17.b;
-									var x2 = _n18.a;
-									var y2 = _n18.b;
-									return _Utils_Tuple2(
-										A2(setMotionTarget, x1, x2),
-										A2(setMotionTarget, y1, y2));
-								}),
-							coords,
-							targetCoords));
-				} else {
-					return cmd;
-				}
-			case 'Smooth':
-				var coords = cmd.a;
-				if (targetCmd.$ === 'Smooth') {
-					var targetCoords = targetCmd.a;
-					return mdgriffith$elm_style_animation$Animation$Model$Smooth(
-						A3(
-							elm$core$List$map2,
-							F2(
-								function (_n20, _n21) {
-									var x1 = _n20.a;
-									var y1 = _n20.b;
-									var x2 = _n21.a;
-									var y2 = _n21.b;
-									return _Utils_Tuple2(
-										A2(setMotionTarget, x1, x2),
-										A2(setMotionTarget, y1, y2));
-								}),
-							coords,
-							targetCoords));
-				} else {
-					return cmd;
-				}
-			case 'SmoothTo':
-				var coords = cmd.a;
-				if (targetCmd.$ === 'SmoothTo') {
-					var targetCoords = targetCmd.a;
-					return mdgriffith$elm_style_animation$Animation$Model$SmoothTo(
-						A3(
-							elm$core$List$map2,
-							F2(
-								function (_n23, _n24) {
-									var x1 = _n23.a;
-									var y1 = _n23.b;
-									var x2 = _n24.a;
-									var y2 = _n24.b;
-									return _Utils_Tuple2(
-										A2(setMotionTarget, x1, x2),
-										A2(setMotionTarget, y1, y2));
-								}),
-							coords,
-							targetCoords));
-				} else {
-					return cmd;
-				}
-			case 'ClockwiseArc':
-				var arc = cmd.a;
-				if (targetCmd.$ === 'ClockwiseArc') {
-					var target = targetCmd.a;
-					return mdgriffith$elm_style_animation$Animation$Model$ClockwiseArc(
-						function () {
-							var y = arc.y;
-							var x = arc.x;
-							var startAngle = arc.startAngle;
-							var radius = arc.radius;
-							var endAngle = arc.endAngle;
-							return _Utils_update(
-								arc,
-								{
-									endAngle: A2(setMotionTarget, endAngle, target.endAngle),
-									radius: A2(setMotionTarget, radius, target.radius),
-									startAngle: A2(setMotionTarget, startAngle, target.startAngle),
-									x: A2(setMotionTarget, x, target.x),
-									y: A2(setMotionTarget, y, target.y)
-								});
-						}());
-				} else {
-					return cmd;
-				}
-			case 'AntiClockwiseArc':
-				var arc = cmd.a;
-				if (targetCmd.$ === 'AntiClockwiseArc') {
-					var target = targetCmd.a;
-					return mdgriffith$elm_style_animation$Animation$Model$AntiClockwiseArc(
-						function () {
-							var y = arc.y;
-							var x = arc.x;
-							var startAngle = arc.startAngle;
-							var radius = arc.radius;
-							var endAngle = arc.endAngle;
-							return _Utils_update(
-								arc,
-								{
-									endAngle: A2(setMotionTarget, endAngle, target.endAngle),
-									radius: A2(setMotionTarget, radius, target.radius),
-									startAngle: A2(setMotionTarget, startAngle, target.startAngle),
-									x: A2(setMotionTarget, x, target.x),
-									y: A2(setMotionTarget, y, target.y)
-								});
-						}());
-				} else {
-					return cmd;
-				}
-			default:
-				return mdgriffith$elm_style_animation$Animation$Model$Close;
-		}
-	});
-var mdgriffith$elm_style_animation$Animation$Model$setTarget = F3(
-	function (overrideInterpolation, current, newTarget) {
-		var setMotionTarget = F2(
-			function (motion, targetMotion) {
-				var newMotion = overrideInterpolation ? _Utils_update(
-					motion,
-					{
-						interpolationOverride: elm$core$Maybe$Just(targetMotion.interpolation)
-					}) : motion;
-				var _n13 = newMotion.interpolationOverride;
-				if (_n13.$ === 'Nothing') {
-					var _n14 = newMotion.interpolation;
-					if (_n14.$ === 'Easing') {
-						var ease = _n14.a;
-						return _Utils_update(
-							newMotion,
-							{
-								interpolation: mdgriffith$elm_style_animation$Animation$Model$Easing(
-									_Utils_update(
-										ease,
-										{progress: 0, start: motion.position})),
-								target: targetMotion.position
-							});
-					} else {
-						return _Utils_update(
-							newMotion,
-							{target: targetMotion.position});
-					}
-				} else {
-					var override = _n13.a;
-					if (override.$ === 'Easing') {
-						var ease = override.a;
-						return _Utils_update(
-							newMotion,
-							{
-								interpolationOverride: elm$core$Maybe$Just(
-									mdgriffith$elm_style_animation$Animation$Model$Easing(
-										_Utils_update(
-											ease,
-											{progress: 0, start: motion.position}))),
-								target: targetMotion.position
-							});
-					} else {
-						return _Utils_update(
-							newMotion,
-							{target: targetMotion.position});
-					}
-				}
-			});
-		switch (current.$) {
-			case 'ExactProperty':
-				var name = current.a;
-				var value = current.b;
-				return A2(mdgriffith$elm_style_animation$Animation$Model$ExactProperty, name, value);
-			case 'ColorProperty':
-				var name = current.a;
-				var m1 = current.b;
-				var m2 = current.c;
-				var m3 = current.d;
-				var m4 = current.e;
-				if (newTarget.$ === 'ColorProperty') {
-					var t1 = newTarget.b;
-					var t2 = newTarget.c;
-					var t3 = newTarget.d;
-					var t4 = newTarget.e;
-					return A5(
-						mdgriffith$elm_style_animation$Animation$Model$ColorProperty,
-						name,
-						A2(setMotionTarget, m1, t1),
-						A2(setMotionTarget, m2, t2),
-						A2(setMotionTarget, m3, t3),
-						A2(setMotionTarget, m4, t4));
-				} else {
-					return current;
-				}
-			case 'ShadowProperty':
-				var name = current.a;
-				var inset = current.b;
-				var shadow = current.c;
-				if (newTarget.$ === 'ShadowProperty') {
-					var targetShadow = newTarget.c;
-					return A3(
-						mdgriffith$elm_style_animation$Animation$Model$ShadowProperty,
-						name,
-						inset,
-						{
-							alpha: A2(setMotionTarget, shadow.alpha, targetShadow.alpha),
-							blue: A2(setMotionTarget, shadow.blue, targetShadow.blue),
-							blur: A2(setMotionTarget, shadow.blur, targetShadow.blur),
-							green: A2(setMotionTarget, shadow.green, targetShadow.green),
-							offsetX: A2(setMotionTarget, shadow.offsetX, targetShadow.offsetX),
-							offsetY: A2(setMotionTarget, shadow.offsetY, targetShadow.offsetY),
-							red: A2(setMotionTarget, shadow.red, targetShadow.red),
-							size: A2(setMotionTarget, shadow.size, targetShadow.size)
-						});
-				} else {
-					return current;
-				}
-			case 'Property':
-				var name = current.a;
-				var m1 = current.b;
-				if (newTarget.$ === 'Property') {
-					var t1 = newTarget.b;
-					return A2(
-						mdgriffith$elm_style_animation$Animation$Model$Property,
-						name,
-						A2(setMotionTarget, m1, t1));
-				} else {
-					return current;
-				}
-			case 'Property2':
-				var name = current.a;
-				var m1 = current.b;
-				var m2 = current.c;
-				if (newTarget.$ === 'Property2') {
-					var t1 = newTarget.b;
-					var t2 = newTarget.c;
-					return A3(
-						mdgriffith$elm_style_animation$Animation$Model$Property2,
-						name,
-						A2(setMotionTarget, m1, t1),
-						A2(setMotionTarget, m2, t2));
-				} else {
-					return current;
-				}
-			case 'Property3':
-				var name = current.a;
-				var m1 = current.b;
-				var m2 = current.c;
-				var m3 = current.d;
-				if (newTarget.$ === 'Property3') {
-					var t1 = newTarget.b;
-					var t2 = newTarget.c;
-					var t3 = newTarget.d;
-					return A4(
-						mdgriffith$elm_style_animation$Animation$Model$Property3,
-						name,
-						A2(setMotionTarget, m1, t1),
-						A2(setMotionTarget, m2, t2),
-						A2(setMotionTarget, m3, t3));
-				} else {
-					return current;
-				}
-			case 'Property4':
-				var name = current.a;
-				var m1 = current.b;
-				var m2 = current.c;
-				var m3 = current.d;
-				var m4 = current.e;
-				if (newTarget.$ === 'Property4') {
-					var t1 = newTarget.b;
-					var t2 = newTarget.c;
-					var t3 = newTarget.d;
-					var t4 = newTarget.e;
-					return A5(
-						mdgriffith$elm_style_animation$Animation$Model$Property4,
-						name,
-						A2(setMotionTarget, m1, t1),
-						A2(setMotionTarget, m2, t2),
-						A2(setMotionTarget, m3, t3),
-						A2(setMotionTarget, m4, t4));
-				} else {
-					return current;
-				}
-			case 'AngleProperty':
-				var name = current.a;
-				var m1 = current.b;
-				if (newTarget.$ === 'AngleProperty') {
-					var t1 = newTarget.b;
-					return A2(
-						mdgriffith$elm_style_animation$Animation$Model$AngleProperty,
-						name,
-						A2(setMotionTarget, m1, t1));
-				} else {
-					return current;
-				}
-			case 'Points':
-				var currentPts = current.a;
-				if (newTarget.$ === 'Points') {
-					var targetPts = newTarget.a;
-					var _n9 = A2(mdgriffith$elm_style_animation$Animation$Model$matchPoints, currentPts, targetPts);
-					var m1s = _n9.a;
-					var m2s = _n9.b;
-					return mdgriffith$elm_style_animation$Animation$Model$Points(
-						A3(
-							elm$core$List$map2,
-							F2(
-								function (_n10, _n11) {
-									var x1 = _n10.a;
-									var y1 = _n10.b;
-									var x2 = _n11.a;
-									var y2 = _n11.b;
-									return _Utils_Tuple2(
-										A2(setMotionTarget, x1, x2),
-										A2(setMotionTarget, y1, y2));
-								}),
-							m1s,
-							m2s));
-				} else {
-					return current;
-				}
-			default:
-				var cmds = current.a;
-				if (newTarget.$ === 'Path') {
-					var targets = newTarget.a;
-					return mdgriffith$elm_style_animation$Animation$Model$Path(
-						A3(elm$core$List$map2, mdgriffith$elm_style_animation$Animation$Model$setPathTarget, cmds, targets));
-				} else {
-					return current;
-				}
-		}
-	});
-var mdgriffith$elm_style_animation$Animation$Model$zipPropertiesGreedy = F2(
-	function (initialProps, newTargetProps) {
-		var propertyMatch = F2(
-			function (prop1, prop2) {
-				return _Utils_eq(
-					mdgriffith$elm_style_animation$Animation$Model$propertyName(prop1),
-					mdgriffith$elm_style_animation$Animation$Model$propertyName(prop2));
-			});
-		var _n0 = A3(
-			elm$core$List$foldl,
-			F2(
-				function (_n1, _n2) {
-					var stackA = _n2.a;
-					var stackB = _n2.b;
-					var result = _n2.c;
-					var _n3 = elm$core$List$head(stackA);
-					if (_n3.$ === 'Nothing') {
-						return _Utils_Tuple3(stackA, stackB, result);
-					} else {
-						var a = _n3.a;
-						var _n4 = A2(
-							elm$core$List$partition,
-							propertyMatch(a),
-							stackB);
-						var matchingBs = _n4.a;
-						var nonMatchingBs = _n4.b;
-						return _Utils_Tuple3(
-							A2(elm$core$List$drop, 1, stackA),
-							function () {
-								if (!matchingBs.b) {
-									return nonMatchingBs;
-								} else {
-									var b = matchingBs.a;
-									var remainingBs = matchingBs.b;
-									return _Utils_ap(remainingBs, nonMatchingBs);
-								}
-							}(),
-							A2(
-								elm$core$List$cons,
-								_Utils_Tuple2(
-									a,
-									elm$core$List$head(matchingBs)),
-								result));
-					}
-				}),
-			_Utils_Tuple3(initialProps, newTargetProps, _List_Nil),
-			A2(
-				elm$core$List$repeat,
-				elm$core$List$length(initialProps),
-				0));
-		var warnings = _n0.b;
-		var props = _n0.c;
-		var _n6 = warnings;
-		return elm$core$List$reverse(props);
-	});
-var mdgriffith$elm_style_animation$Animation$Model$startTowards = F3(
-	function (overrideInterpolation, current, target) {
-		return A2(
-			elm$core$List$filterMap,
-			function (propPair) {
-				if (propPair.b.$ === 'Just') {
-					var cur = propPair.a;
-					var to = propPair.b.a;
-					return elm$core$Maybe$Just(
-						A3(mdgriffith$elm_style_animation$Animation$Model$setTarget, overrideInterpolation, cur, to));
-				} else {
-					var prop = propPair.a;
-					var _n1 = propPair.b;
-					return elm$core$Maybe$Just(prop);
-				}
-			},
-			A2(mdgriffith$elm_style_animation$Animation$Model$zipPropertiesGreedy, current, target));
-	});
-var elm$core$Basics$truncate = _Basics_truncate;
-var mdgriffith$elm_style_animation$Animation$Model$tolerance = 1.0e-2;
-var mdgriffith$elm_style_animation$Animation$Model$vTolerance = 0.1;
-var mdgriffith$elm_style_animation$Animation$Model$stepInterpolation = F2(
-	function (posix, motion) {
-		var interpolationToUse = A2(elm$core$Maybe$withDefault, motion.interpolation, motion.interpolationOverride);
-		var dtms = elm$time$Time$posixToMillis(posix);
-		switch (interpolationToUse.$) {
-			case 'AtSpeed':
-				var perSecond = interpolationToUse.a.perSecond;
-				var _n1 = function () {
-					if (_Utils_cmp(motion.position, motion.target) < 0) {
-						var _new = motion.position + (perSecond * (dtms / 1000));
-						return _Utils_Tuple2(
-							_new,
-							_Utils_cmp(_new, motion.target) > -1);
-					} else {
-						var _new = motion.position - (perSecond * (dtms / 1000));
-						return _Utils_Tuple2(
-							_new,
-							_Utils_cmp(_new, motion.target) < 1);
-					}
-				}();
-				var newPos = _n1.a;
-				var finished = _n1.b;
-				return finished ? _Utils_update(
-					motion,
-					{position: motion.target, velocity: 0.0}) : _Utils_update(
-					motion,
-					{position: newPos, velocity: perSecond * 1000});
-			case 'Spring':
-				var stiffness = interpolationToUse.a.stiffness;
-				var damping = interpolationToUse.a.damping;
-				var fspring = stiffness * (motion.target - motion.position);
-				var fdamper = ((-1) * damping) * motion.velocity;
-				var dt = dtms / 1000;
-				var a = fspring + fdamper;
-				var newVelocity = motion.velocity + (a * dt);
-				var newPos = motion.position + (newVelocity * dt);
-				var dx = elm$core$Basics$abs(motion.target - newPos);
-				return ((_Utils_cmp(dx, mdgriffith$elm_style_animation$Animation$Model$tolerance) < 0) && (_Utils_cmp(
-					elm$core$Basics$abs(newVelocity),
-					mdgriffith$elm_style_animation$Animation$Model$vTolerance) < 0)) ? _Utils_update(
-					motion,
-					{position: motion.target, velocity: 0.0}) : _Utils_update(
-					motion,
-					{position: newPos, velocity: newVelocity});
-			default:
-				var progress = interpolationToUse.a.progress;
-				var duration = interpolationToUse.a.duration;
-				var ease = interpolationToUse.a.ease;
-				var start = interpolationToUse.a.start;
-				var durationMs = elm$time$Time$posixToMillis(duration);
-				var newProgress = (((dtms / durationMs) + progress) < 1) ? ((dtms / durationMs) + progress) : 1;
-				var eased = ease(newProgress);
-				var distance = motion.target - start;
-				var newPos = ((((eased * distance) + start) * 10000) | 0) / 10000;
-				var newVelocity = (newProgress === 1) ? 0 : ((newPos - motion.position) / dtms);
-				var _n2 = motion.interpolationOverride;
-				if (_n2.$ === 'Nothing') {
-					return _Utils_update(
-						motion,
-						{
-							interpolation: mdgriffith$elm_style_animation$Animation$Model$Easing(
-								{duration: duration, ease: ease, progress: newProgress, start: start}),
-							position: newPos,
-							velocity: newVelocity
-						});
-				} else {
-					var override = _n2.a;
-					return _Utils_update(
-						motion,
-						{
-							interpolationOverride: elm$core$Maybe$Just(
-								mdgriffith$elm_style_animation$Animation$Model$Easing(
-									{duration: duration, ease: ease, progress: newProgress, start: start})),
-							position: newPos,
-							velocity: newVelocity
-						});
-				}
-		}
-	});
-var mdgriffith$elm_style_animation$Animation$Model$stepPath = F2(
-	function (dt, cmd) {
-		var stepCoords = function (coords) {
-			return A2(
-				elm$core$List$map,
-				function (_n1) {
-					var x = _n1.a;
-					var y = _n1.b;
-					return _Utils_Tuple2(
-						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, x),
-						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, y));
-				},
-				coords);
-		};
-		switch (cmd.$) {
-			case 'Move':
-				var m1 = cmd.a;
-				var m2 = cmd.b;
-				return A2(
-					mdgriffith$elm_style_animation$Animation$Model$Move,
-					A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, m1),
-					A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, m2));
-			case 'MoveTo':
-				var m1 = cmd.a;
-				var m2 = cmd.b;
-				return A2(
-					mdgriffith$elm_style_animation$Animation$Model$MoveTo,
-					A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, m1),
-					A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, m2));
-			case 'Line':
-				var m1 = cmd.a;
-				var m2 = cmd.b;
-				return A2(
-					mdgriffith$elm_style_animation$Animation$Model$Line,
-					A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, m1),
-					A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, m2));
-			case 'LineTo':
-				var m1 = cmd.a;
-				var m2 = cmd.b;
-				return A2(
-					mdgriffith$elm_style_animation$Animation$Model$LineTo,
-					A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, m1),
-					A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, m2));
-			case 'Horizontal':
-				var motion = cmd.a;
-				return mdgriffith$elm_style_animation$Animation$Model$Horizontal(
-					A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion));
-			case 'HorizontalTo':
-				var motion = cmd.a;
-				return mdgriffith$elm_style_animation$Animation$Model$HorizontalTo(
-					A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion));
-			case 'Vertical':
-				var motion = cmd.a;
-				return mdgriffith$elm_style_animation$Animation$Model$Vertical(
-					A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion));
-			case 'VerticalTo':
-				var motion = cmd.a;
-				return mdgriffith$elm_style_animation$Animation$Model$VerticalTo(
-					A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion));
-			case 'Curve':
-				var control1 = cmd.a.control1;
-				var control2 = cmd.a.control2;
-				var point = cmd.a.point;
-				return mdgriffith$elm_style_animation$Animation$Model$Curve(
-					{
-						control1: _Utils_Tuple2(
-							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, control1.a),
-							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, control1.b)),
-						control2: _Utils_Tuple2(
-							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, control2.a),
-							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, control2.b)),
-						point: _Utils_Tuple2(
-							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, point.a),
-							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, point.b))
-					});
-			case 'CurveTo':
-				var control1 = cmd.a.control1;
-				var control2 = cmd.a.control2;
-				var point = cmd.a.point;
-				return mdgriffith$elm_style_animation$Animation$Model$CurveTo(
-					{
-						control1: _Utils_Tuple2(
-							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, control1.a),
-							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, control1.b)),
-						control2: _Utils_Tuple2(
-							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, control2.a),
-							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, control2.b)),
-						point: _Utils_Tuple2(
-							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, point.a),
-							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, point.b))
-					});
-			case 'Quadratic':
-				var control = cmd.a.control;
-				var point = cmd.a.point;
-				return mdgriffith$elm_style_animation$Animation$Model$Quadratic(
-					{
-						control: _Utils_Tuple2(
-							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, control.a),
-							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, control.b)),
-						point: _Utils_Tuple2(
-							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, point.a),
-							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, point.b))
-					});
-			case 'QuadraticTo':
-				var control = cmd.a.control;
-				var point = cmd.a.point;
-				return mdgriffith$elm_style_animation$Animation$Model$QuadraticTo(
-					{
-						control: _Utils_Tuple2(
-							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, control.a),
-							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, control.b)),
-						point: _Utils_Tuple2(
-							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, point.a),
-							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, point.b))
-					});
-			case 'SmoothQuadratic':
-				var coords = cmd.a;
-				return mdgriffith$elm_style_animation$Animation$Model$SmoothQuadratic(
-					stepCoords(coords));
-			case 'SmoothQuadraticTo':
-				var coords = cmd.a;
-				return mdgriffith$elm_style_animation$Animation$Model$SmoothQuadraticTo(
-					stepCoords(coords));
-			case 'Smooth':
-				var coords = cmd.a;
-				return mdgriffith$elm_style_animation$Animation$Model$Smooth(
-					stepCoords(coords));
-			case 'SmoothTo':
-				var coords = cmd.a;
-				return mdgriffith$elm_style_animation$Animation$Model$SmoothTo(
-					stepCoords(coords));
-			case 'ClockwiseArc':
-				var arc = cmd.a;
-				return mdgriffith$elm_style_animation$Animation$Model$ClockwiseArc(
-					_Utils_update(
-						arc,
-						{
-							endAngle: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, arc.endAngle),
-							radius: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, arc.radius),
-							startAngle: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, arc.startAngle),
-							x: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, arc.x),
-							y: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, arc.y)
-						}));
-			case 'AntiClockwiseArc':
-				var arc = cmd.a;
-				return mdgriffith$elm_style_animation$Animation$Model$AntiClockwiseArc(
-					_Utils_update(
-						arc,
-						{
-							endAngle: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, arc.endAngle),
-							radius: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, arc.radius),
-							startAngle: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, arc.startAngle),
-							x: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, arc.x),
-							y: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, arc.y)
-						}));
-			default:
-				return mdgriffith$elm_style_animation$Animation$Model$Close;
-		}
-	});
-var mdgriffith$elm_style_animation$Animation$Model$step = F2(
-	function (dt, props) {
-		var stepProp = function (property) {
-			switch (property.$) {
-				case 'ExactProperty':
-					var name = property.a;
-					var value = property.b;
-					return A2(mdgriffith$elm_style_animation$Animation$Model$ExactProperty, name, value);
-				case 'Property':
-					var name = property.a;
-					var motion = property.b;
-					return A2(
-						mdgriffith$elm_style_animation$Animation$Model$Property,
-						name,
-						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion));
-				case 'Property2':
-					var name = property.a;
-					var motion1 = property.b;
-					var motion2 = property.c;
-					return A3(
-						mdgriffith$elm_style_animation$Animation$Model$Property2,
-						name,
-						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion1),
-						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion2));
-				case 'Property3':
-					var name = property.a;
-					var motion1 = property.b;
-					var motion2 = property.c;
-					var motion3 = property.d;
-					return A4(
-						mdgriffith$elm_style_animation$Animation$Model$Property3,
-						name,
-						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion1),
-						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion2),
-						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion3));
-				case 'Property4':
-					var name = property.a;
-					var motion1 = property.b;
-					var motion2 = property.c;
-					var motion3 = property.d;
-					var motion4 = property.e;
-					return A5(
-						mdgriffith$elm_style_animation$Animation$Model$Property4,
-						name,
-						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion1),
-						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion2),
-						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion3),
-						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion4));
-				case 'AngleProperty':
-					var name = property.a;
-					var motion = property.b;
-					return A2(
-						mdgriffith$elm_style_animation$Animation$Model$AngleProperty,
-						name,
-						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion));
-				case 'ColorProperty':
-					var name = property.a;
-					var red = property.b;
-					var green = property.c;
-					var blue = property.d;
-					var alpha = property.e;
-					return A5(
-						mdgriffith$elm_style_animation$Animation$Model$ColorProperty,
-						name,
-						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, red),
-						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, green),
-						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, blue),
-						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, alpha));
-				case 'ShadowProperty':
-					var name = property.a;
-					var inset = property.b;
-					var shadow = property.c;
-					return A3(
-						mdgriffith$elm_style_animation$Animation$Model$ShadowProperty,
-						name,
-						inset,
-						{
-							alpha: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, shadow.alpha),
-							blue: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, shadow.blue),
-							blur: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, shadow.blur),
-							green: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, shadow.green),
-							offsetX: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, shadow.offsetX),
-							offsetY: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, shadow.offsetY),
-							red: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, shadow.red),
-							size: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, shadow.size)
-						});
-				case 'Points':
-					var points = property.a;
-					return mdgriffith$elm_style_animation$Animation$Model$Points(
-						A2(
-							elm$core$List$map,
-							function (_n1) {
-								var x = _n1.a;
-								var y = _n1.b;
-								return _Utils_Tuple2(
-									A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, x),
-									A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, y));
-							},
-							points));
-				default:
-					var cmds = property.a;
-					return mdgriffith$elm_style_animation$Animation$Model$Path(
-						A2(
-							elm$core$List$map,
-							mdgriffith$elm_style_animation$Animation$Model$stepPath(dt),
-							cmds));
-			}
-		};
-		return A2(elm$core$List$map, stepProp, props);
-	});
-var mdgriffith$elm_style_animation$Animation$Model$alreadyThere = F2(
-	function (current, target) {
-		return A2(
-			elm$core$List$all,
-			mdgriffith$elm_style_animation$Animation$Model$isDone,
-			A2(
-				mdgriffith$elm_style_animation$Animation$Model$step,
-				elm$time$Time$millisToPosix(0),
-				A3(mdgriffith$elm_style_animation$Animation$Model$startTowards, false, current, target)));
-	});
-var mdgriffith$elm_style_animation$Animation$Model$replaceProps = F2(
-	function (props, replacements) {
-		var replacementNames = A2(elm$core$List$map, mdgriffith$elm_style_animation$Animation$Model$propertyName, replacements);
-		var removed = A2(
-			elm$core$List$filter,
-			function (prop) {
-				return !A2(
-					elm$core$List$member,
-					mdgriffith$elm_style_animation$Animation$Model$propertyName(prop),
-					replacementNames);
-			},
-			props);
-		return _Utils_ap(removed, replacements);
-	});
-var mdgriffith$elm_style_animation$Animation$Model$resolveSteps = F3(
-	function (currentStyle, steps, dt) {
-		resolveSteps:
-		while (true) {
-			var _n0 = elm$core$List$head(steps);
-			if (_n0.$ === 'Nothing') {
-				return _Utils_Tuple3(currentStyle, _List_Nil, _List_Nil);
-			} else {
-				var currentStep = _n0.a;
-				switch (currentStep.$) {
-					case 'Wait':
-						var n = currentStep.a;
-						if (elm$time$Time$posixToMillis(n) <= 0) {
-							var $temp$currentStyle = currentStyle,
-								$temp$steps = A2(elm$core$List$drop, 1, steps),
-								$temp$dt = dt;
-							currentStyle = $temp$currentStyle;
-							steps = $temp$steps;
-							dt = $temp$dt;
-							continue resolveSteps;
-						} else {
-							return _Utils_Tuple3(
-								currentStyle,
-								_List_Nil,
-								A2(
-									elm$core$List$cons,
-									mdgriffith$elm_style_animation$Animation$Model$Wait(
-										elm$time$Time$millisToPosix(
-											elm$time$Time$posixToMillis(n) - elm$time$Time$posixToMillis(dt))),
-									A2(elm$core$List$drop, 1, steps)));
-						}
-					case 'Send':
-						var msg = currentStep.a;
-						var _n2 = A3(
-							mdgriffith$elm_style_animation$Animation$Model$resolveSteps,
-							currentStyle,
-							A2(elm$core$List$drop, 1, steps),
-							dt);
-						var newStyle = _n2.a;
-						var msgs = _n2.b;
-						var remainingSteps = _n2.c;
-						return _Utils_Tuple3(
-							newStyle,
-							A2(elm$core$List$cons, msg, msgs),
-							remainingSteps);
-					case 'To':
-						var target = currentStep.a;
-						if (A2(mdgriffith$elm_style_animation$Animation$Model$alreadyThere, currentStyle, target)) {
-							return _Utils_Tuple3(
-								currentStyle,
-								_List_Nil,
-								A2(elm$core$List$drop, 1, steps));
-						} else {
-							var $temp$currentStyle = A3(mdgriffith$elm_style_animation$Animation$Model$startTowards, false, currentStyle, target),
-								$temp$steps = A2(
-								elm$core$List$cons,
-								mdgriffith$elm_style_animation$Animation$Model$Step,
-								A2(elm$core$List$drop, 1, steps)),
-								$temp$dt = dt;
-							currentStyle = $temp$currentStyle;
-							steps = $temp$steps;
-							dt = $temp$dt;
-							continue resolveSteps;
-						}
-					case 'ToWith':
-						var target = currentStep.a;
-						if (A2(mdgriffith$elm_style_animation$Animation$Model$alreadyThere, currentStyle, target)) {
-							return _Utils_Tuple3(
-								currentStyle,
-								_List_Nil,
-								A2(elm$core$List$drop, 1, steps));
-						} else {
-							var $temp$currentStyle = A3(mdgriffith$elm_style_animation$Animation$Model$startTowards, true, currentStyle, target),
-								$temp$steps = A2(
-								elm$core$List$cons,
-								mdgriffith$elm_style_animation$Animation$Model$Step,
-								A2(elm$core$List$drop, 1, steps)),
-								$temp$dt = dt;
-							currentStyle = $temp$currentStyle;
-							steps = $temp$steps;
-							dt = $temp$dt;
-							continue resolveSteps;
-						}
-					case 'Set':
-						var props = currentStep.a;
-						var $temp$currentStyle = A2(mdgriffith$elm_style_animation$Animation$Model$replaceProps, currentStyle, props),
-							$temp$steps = A2(elm$core$List$drop, 1, steps),
-							$temp$dt = dt;
-						currentStyle = $temp$currentStyle;
-						steps = $temp$steps;
-						dt = $temp$dt;
-						continue resolveSteps;
-					case 'Step':
-						var stepped = A2(mdgriffith$elm_style_animation$Animation$Model$step, dt, currentStyle);
-						return A2(elm$core$List$all, mdgriffith$elm_style_animation$Animation$Model$isDone, stepped) ? _Utils_Tuple3(
-							A2(
-								elm$core$List$map,
-								mdgriffith$elm_style_animation$Animation$Model$mapToMotion(
-									function (m) {
-										return _Utils_update(
-											m,
-											{interpolationOverride: elm$core$Maybe$Nothing});
-									}),
-								stepped),
-							_List_Nil,
-							A2(elm$core$List$drop, 1, steps)) : _Utils_Tuple3(stepped, _List_Nil, steps);
-					case 'Loop':
-						var substeps = currentStep.a;
-						var $temp$currentStyle = currentStyle,
-							$temp$steps = _Utils_ap(
-							substeps,
-							_List_fromArray(
-								[
-									mdgriffith$elm_style_animation$Animation$Model$Loop(substeps)
-								])),
-							$temp$dt = dt;
-						currentStyle = $temp$currentStyle;
-						steps = $temp$steps;
-						dt = $temp$dt;
-						continue resolveSteps;
-					default:
-						var n = currentStep.a;
-						var substeps = currentStep.b;
-						if (n <= 0) {
-							var $temp$currentStyle = currentStyle,
-								$temp$steps = A2(elm$core$List$drop, 1, steps),
-								$temp$dt = dt;
-							currentStyle = $temp$currentStyle;
-							steps = $temp$steps;
-							dt = $temp$dt;
-							continue resolveSteps;
-						} else {
-							var $temp$currentStyle = currentStyle,
-								$temp$steps = _Utils_ap(
-								substeps,
-								_Utils_ap(
-									_List_fromArray(
-										[
-											A2(mdgriffith$elm_style_animation$Animation$Model$Repeat, n - 1, substeps)
-										]),
-									A2(elm$core$List$drop, 1, steps))),
-								$temp$dt = dt;
-							currentStyle = $temp$currentStyle;
-							steps = $temp$steps;
-							dt = $temp$dt;
-							continue resolveSteps;
-						}
-				}
-			}
-		}
-	});
-var mdgriffith$elm_style_animation$Animation$Model$updateAnimation = F2(
-	function (_n0, _n1) {
-		var now = _n0.a;
-		var model = _n1.a;
-		var timing = A2(mdgriffith$elm_style_animation$Animation$Model$refreshTiming, now, model.timing);
-		var _n2 = A2(
-			elm$core$List$partition,
-			function (_n4) {
-				var wait = _n4.a;
-				var mySteps = _n4.b;
-				return elm$time$Time$posixToMillis(wait) <= 0;
-			},
-			A2(
-				elm$core$List$map,
-				function (_n3) {
-					var wait = _n3.a;
-					var mySteps = _n3.b;
-					return _Utils_Tuple2(
-						elm$time$Time$millisToPosix(
-							elm$time$Time$posixToMillis(wait) - elm$time$Time$posixToMillis(timing.dt)),
-						mySteps);
-				},
-				model.interruption));
-		var readyInterruption = _n2.a;
-		var queuedInterruptions = _n2.b;
-		var _n5 = function () {
-			var _n6 = elm$core$List$head(readyInterruption);
-			if (_n6.$ === 'Just') {
-				var _n7 = _n6.a;
-				var wait = _n7.a;
-				var interrupt = _n7.b;
-				return _Utils_Tuple2(
-					interrupt,
-					A2(
-						elm$core$List$map,
-						mdgriffith$elm_style_animation$Animation$Model$mapToMotion(
-							function (m) {
-								return _Utils_update(
-									m,
-									{interpolationOverride: elm$core$Maybe$Nothing});
-							}),
-						model.style));
-			} else {
-				return _Utils_Tuple2(model.steps, model.style);
-			}
-		}();
-		var steps = _n5.a;
-		var style = _n5.b;
-		var _n8 = A3(mdgriffith$elm_style_animation$Animation$Model$resolveSteps, style, steps, timing.dt);
-		var revisedStyle = _n8.a;
-		var sentMessages = _n8.b;
-		var revisedSteps = _n8.c;
-		return _Utils_Tuple2(
-			mdgriffith$elm_style_animation$Animation$Model$Animation(
-				_Utils_update(
-					model,
-					{
-						interruption: queuedInterruptions,
-						running: elm$core$List$length(revisedSteps) || elm$core$List$length(queuedInterruptions),
-						steps: revisedSteps,
-						style: revisedStyle,
-						timing: timing
-					})),
-			elm$core$Platform$Cmd$batch(
-				A2(
-					elm$core$List$map,
-					function (m) {
-						return A2(
-							elm$core$Task$perform,
-							elm$core$Basics$identity,
-							elm$core$Task$succeed(m));
-					},
-					sentMessages)));
-	});
-var mdgriffith$elm_style_animation$Animation$Messenger$update = F2(
-	function (tick, animation) {
-		return A2(mdgriffith$elm_style_animation$Animation$Model$updateAnimation, tick, animation);
-	});
-var author$project$Helpers$updateEveryAnimState = F2(
-	function (dict, timestamp) {
-		var animEach = F2(
-			function (key, val) {
-				return A2(mdgriffith$elm_style_animation$Animation$Messenger$update, timestamp, val);
-			});
-		return A2(elm$core$Dict$map, animEach, dict);
-	});
-var author$project$Helpers$updateNoteWithAnimState = F2(
-	function (timestamp, note) {
-		var _n0 = A2(mdgriffith$elm_style_animation$Animation$Messenger$update, timestamp, note.animState);
-		var newAnimState = _n0.a;
-		var cmd = _n0.b;
-		var newNote = _Utils_update(
-			note,
-			{animState: newAnimState});
-		return _Utils_Tuple2(newNote, cmd);
-	});
-var elm$core$Dict$getMin = function (dict) {
-	getMin:
-	while (true) {
-		if ((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) {
-			var left = dict.d;
-			var $temp$dict = left;
-			dict = $temp$dict;
-			continue getMin;
-		} else {
-			return dict;
-		}
-	}
-};
-var elm$core$Dict$moveRedLeft = function (dict) {
-	if (((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) && (dict.e.$ === 'RBNode_elm_builtin')) {
-		if ((dict.e.d.$ === 'RBNode_elm_builtin') && (dict.e.d.a.$ === 'Red')) {
-			var clr = dict.a;
-			var k = dict.b;
-			var v = dict.c;
-			var _n1 = dict.d;
-			var lClr = _n1.a;
-			var lK = _n1.b;
-			var lV = _n1.c;
-			var lLeft = _n1.d;
-			var lRight = _n1.e;
-			var _n2 = dict.e;
-			var rClr = _n2.a;
-			var rK = _n2.b;
-			var rV = _n2.c;
-			var rLeft = _n2.d;
-			var _n3 = rLeft.a;
-			var rlK = rLeft.b;
-			var rlV = rLeft.c;
-			var rlL = rLeft.d;
-			var rlR = rLeft.e;
-			var rRight = _n2.e;
-			return A5(
-				elm$core$Dict$RBNode_elm_builtin,
-				elm$core$Dict$Red,
-				rlK,
-				rlV,
-				A5(
-					elm$core$Dict$RBNode_elm_builtin,
-					elm$core$Dict$Black,
-					k,
-					v,
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, lK, lV, lLeft, lRight),
-					rlL),
-				A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, rK, rV, rlR, rRight));
-		} else {
-			var clr = dict.a;
-			var k = dict.b;
-			var v = dict.c;
-			var _n4 = dict.d;
-			var lClr = _n4.a;
-			var lK = _n4.b;
-			var lV = _n4.c;
-			var lLeft = _n4.d;
-			var lRight = _n4.e;
-			var _n5 = dict.e;
-			var rClr = _n5.a;
-			var rK = _n5.b;
-			var rV = _n5.c;
-			var rLeft = _n5.d;
-			var rRight = _n5.e;
-			if (clr.$ === 'Black') {
-				return A5(
-					elm$core$Dict$RBNode_elm_builtin,
-					elm$core$Dict$Black,
-					k,
-					v,
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, lK, lV, lLeft, lRight),
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, rK, rV, rLeft, rRight));
-			} else {
-				return A5(
-					elm$core$Dict$RBNode_elm_builtin,
-					elm$core$Dict$Black,
-					k,
-					v,
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, lK, lV, lLeft, lRight),
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, rK, rV, rLeft, rRight));
-			}
-		}
-	} else {
-		return dict;
-	}
-};
-var elm$core$Dict$moveRedRight = function (dict) {
-	if (((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) && (dict.e.$ === 'RBNode_elm_builtin')) {
-		if ((dict.d.d.$ === 'RBNode_elm_builtin') && (dict.d.d.a.$ === 'Red')) {
-			var clr = dict.a;
-			var k = dict.b;
-			var v = dict.c;
-			var _n1 = dict.d;
-			var lClr = _n1.a;
-			var lK = _n1.b;
-			var lV = _n1.c;
-			var _n2 = _n1.d;
-			var _n3 = _n2.a;
-			var llK = _n2.b;
-			var llV = _n2.c;
-			var llLeft = _n2.d;
-			var llRight = _n2.e;
-			var lRight = _n1.e;
-			var _n4 = dict.e;
-			var rClr = _n4.a;
-			var rK = _n4.b;
-			var rV = _n4.c;
-			var rLeft = _n4.d;
-			var rRight = _n4.e;
-			return A5(
-				elm$core$Dict$RBNode_elm_builtin,
-				elm$core$Dict$Red,
-				lK,
-				lV,
-				A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, llK, llV, llLeft, llRight),
-				A5(
-					elm$core$Dict$RBNode_elm_builtin,
-					elm$core$Dict$Black,
-					k,
-					v,
-					lRight,
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, rK, rV, rLeft, rRight)));
-		} else {
-			var clr = dict.a;
-			var k = dict.b;
-			var v = dict.c;
-			var _n5 = dict.d;
-			var lClr = _n5.a;
-			var lK = _n5.b;
-			var lV = _n5.c;
-			var lLeft = _n5.d;
-			var lRight = _n5.e;
-			var _n6 = dict.e;
-			var rClr = _n6.a;
-			var rK = _n6.b;
-			var rV = _n6.c;
-			var rLeft = _n6.d;
-			var rRight = _n6.e;
-			if (clr.$ === 'Black') {
-				return A5(
-					elm$core$Dict$RBNode_elm_builtin,
-					elm$core$Dict$Black,
-					k,
-					v,
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, lK, lV, lLeft, lRight),
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, rK, rV, rLeft, rRight));
-			} else {
-				return A5(
-					elm$core$Dict$RBNode_elm_builtin,
-					elm$core$Dict$Black,
-					k,
-					v,
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, lK, lV, lLeft, lRight),
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, rK, rV, rLeft, rRight));
-			}
-		}
-	} else {
-		return dict;
-	}
-};
-var elm$core$Dict$removeHelpPrepEQGT = F7(
-	function (targetKey, dict, color, key, value, left, right) {
-		if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
-			var _n1 = left.a;
-			var lK = left.b;
-			var lV = left.c;
-			var lLeft = left.d;
-			var lRight = left.e;
-			return A5(
-				elm$core$Dict$RBNode_elm_builtin,
-				color,
-				lK,
-				lV,
-				lLeft,
-				A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, key, value, lRight, right));
-		} else {
-			_n2$2:
-			while (true) {
-				if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Black')) {
-					if (right.d.$ === 'RBNode_elm_builtin') {
-						if (right.d.a.$ === 'Black') {
-							var _n3 = right.a;
-							var _n4 = right.d;
-							var _n5 = _n4.a;
-							return elm$core$Dict$moveRedRight(dict);
-						} else {
-							break _n2$2;
-						}
-					} else {
-						var _n6 = right.a;
-						var _n7 = right.d;
-						return elm$core$Dict$moveRedRight(dict);
-					}
-				} else {
-					break _n2$2;
-				}
-			}
-			return dict;
-		}
-	});
-var elm$core$Dict$removeMin = function (dict) {
-	if ((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) {
-		var color = dict.a;
-		var key = dict.b;
-		var value = dict.c;
-		var left = dict.d;
-		var lColor = left.a;
-		var lLeft = left.d;
-		var right = dict.e;
-		if (lColor.$ === 'Black') {
-			if ((lLeft.$ === 'RBNode_elm_builtin') && (lLeft.a.$ === 'Red')) {
-				var _n3 = lLeft.a;
-				return A5(
-					elm$core$Dict$RBNode_elm_builtin,
-					color,
-					key,
-					value,
-					elm$core$Dict$removeMin(left),
-					right);
-			} else {
-				var _n4 = elm$core$Dict$moveRedLeft(dict);
-				if (_n4.$ === 'RBNode_elm_builtin') {
-					var nColor = _n4.a;
-					var nKey = _n4.b;
-					var nValue = _n4.c;
-					var nLeft = _n4.d;
-					var nRight = _n4.e;
-					return A5(
-						elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						elm$core$Dict$removeMin(nLeft),
-						nRight);
-				} else {
-					return elm$core$Dict$RBEmpty_elm_builtin;
-				}
-			}
-		} else {
-			return A5(
-				elm$core$Dict$RBNode_elm_builtin,
-				color,
-				key,
-				value,
-				elm$core$Dict$removeMin(left),
-				right);
-		}
-	} else {
-		return elm$core$Dict$RBEmpty_elm_builtin;
-	}
-};
-var elm$core$Dict$removeHelp = F2(
-	function (targetKey, dict) {
-		if (dict.$ === 'RBEmpty_elm_builtin') {
-			return elm$core$Dict$RBEmpty_elm_builtin;
-		} else {
-			var color = dict.a;
-			var key = dict.b;
-			var value = dict.c;
-			var left = dict.d;
-			var right = dict.e;
-			if (_Utils_cmp(targetKey, key) < 0) {
-				if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Black')) {
-					var _n4 = left.a;
-					var lLeft = left.d;
-					if ((lLeft.$ === 'RBNode_elm_builtin') && (lLeft.a.$ === 'Red')) {
-						var _n6 = lLeft.a;
-						return A5(
-							elm$core$Dict$RBNode_elm_builtin,
-							color,
-							key,
-							value,
-							A2(elm$core$Dict$removeHelp, targetKey, left),
-							right);
-					} else {
-						var _n7 = elm$core$Dict$moveRedLeft(dict);
-						if (_n7.$ === 'RBNode_elm_builtin') {
-							var nColor = _n7.a;
-							var nKey = _n7.b;
-							var nValue = _n7.c;
-							var nLeft = _n7.d;
-							var nRight = _n7.e;
-							return A5(
-								elm$core$Dict$balance,
-								nColor,
-								nKey,
-								nValue,
-								A2(elm$core$Dict$removeHelp, targetKey, nLeft),
-								nRight);
-						} else {
-							return elm$core$Dict$RBEmpty_elm_builtin;
-						}
-					}
-				} else {
-					return A5(
-						elm$core$Dict$RBNode_elm_builtin,
-						color,
-						key,
-						value,
-						A2(elm$core$Dict$removeHelp, targetKey, left),
-						right);
-				}
-			} else {
-				return A2(
-					elm$core$Dict$removeHelpEQGT,
-					targetKey,
-					A7(elm$core$Dict$removeHelpPrepEQGT, targetKey, dict, color, key, value, left, right));
-			}
-		}
-	});
-var elm$core$Dict$removeHelpEQGT = F2(
-	function (targetKey, dict) {
-		if (dict.$ === 'RBNode_elm_builtin') {
-			var color = dict.a;
-			var key = dict.b;
-			var value = dict.c;
-			var left = dict.d;
-			var right = dict.e;
-			if (_Utils_eq(targetKey, key)) {
-				var _n1 = elm$core$Dict$getMin(right);
-				if (_n1.$ === 'RBNode_elm_builtin') {
-					var minKey = _n1.b;
-					var minValue = _n1.c;
-					return A5(
-						elm$core$Dict$balance,
-						color,
-						minKey,
-						minValue,
-						left,
-						elm$core$Dict$removeMin(right));
-				} else {
-					return elm$core$Dict$RBEmpty_elm_builtin;
-				}
-			} else {
-				return A5(
-					elm$core$Dict$balance,
-					color,
-					key,
-					value,
-					left,
-					A2(elm$core$Dict$removeHelp, targetKey, right));
-			}
-		} else {
-			return elm$core$Dict$RBEmpty_elm_builtin;
-		}
-	});
-var elm$core$Dict$remove = F2(
-	function (key, dict) {
-		var _n0 = A2(elm$core$Dict$removeHelp, key, dict);
-		if ((_n0.$ === 'RBNode_elm_builtin') && (_n0.a.$ === 'Red')) {
-			var _n1 = _n0.a;
-			var k = _n0.b;
-			var v = _n0.c;
-			var l = _n0.d;
-			var r = _n0.e;
-			return A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, k, v, l, r);
-		} else {
-			var x = _n0;
-			return x;
-		}
-	});
-var elm$core$Dict$update = F3(
-	function (targetKey, alter, dictionary) {
-		var _n0 = alter(
-			A2(elm$core$Dict$get, targetKey, dictionary));
-		if (_n0.$ === 'Just') {
-			var value = _n0.a;
-			return A3(elm$core$Dict$insert, targetKey, value, dictionary);
-		} else {
-			return A2(elm$core$Dict$remove, targetKey, dictionary);
-		}
-	});
-var elm$core$Maybe$map = F2(
-	function (f, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return elm$core$Maybe$Just(
-				f(value));
-		} else {
-			return elm$core$Maybe$Nothing;
-		}
-	});
-var author$project$Helpers$updateUniqueAnimState = F2(
-	function (dict, _n0) {
-		var key = _n0.a;
-		var newValue = _n0.b;
-		return A3(
-			elm$core$Dict$update,
-			key,
-			elm$core$Maybe$map(
-				function (a) {
-					return newValue;
-				}),
-			dict);
-	});
-var author$project$Main$cache = _Platform_outgoingPort('cache', elm$core$Basics$identity);
-var elm$json$Json$Encode$int = _Json_wrap;
-var elm$json$Json$Encode$object = function (pairs) {
-	return _Json_wrap(
-		A3(
-			elm$core$List$foldl,
-			F2(
-				function (_n0, obj) {
-					var k = _n0.a;
-					var v = _n0.b;
-					return A3(_Json_addField, k, v, obj);
-				}),
-			_Json_emptyObject(_Utils_Tuple0),
-			pairs));
-};
-var author$project$Main$convertScoreToJSON = function (session) {
-	return elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'correctNoteMidi',
-				elm$json$Json$Encode$int(session.correctNote.midi)),
-				_Utils_Tuple2(
-				'answerSpeed',
-				elm$json$Json$Encode$int(session.answerSpeed)),
-				_Utils_Tuple2(
-				'incorrectTries',
-				elm$json$Json$Encode$int(session.incorrectTries))
-			]));
-};
-var author$project$Main$getNewAnswerSpeed = F2(
-	function (startTime, currentTime) {
-		if (startTime.$ === 'Nothing') {
-			return 0;
-		} else {
-			var t = startTime.a;
-			return elm$time$Time$posixToMillis(currentTime) - elm$time$Time$posixToMillis(t);
-		}
-	});
-var author$project$Main$getIsCorrect = F2(
-	function (correctNote, currentNote) {
-		if (currentNote.$ === 'Nothing') {
-			return false;
-		} else {
-			var n = currentNote.a;
-			return _Utils_eq(n.midi, correctNote.midi) ? true : false;
-		}
-	});
-var author$project$Main$getNextTargetNote = F2(
-	function (index, targetNotesArray) {
-		var next = A2(elm$core$Array$get, index, targetNotesArray);
-		if (next.$ === 'Nothing') {
-			return author$project$Note$createNote(60);
-		} else {
-			var n = next.a;
-			return n;
-		}
-	});
-var author$project$Animations$staticSprite = F3(
-	function (spriteWidth, spriteHeight, spriteIndex) {
-		return mdgriffith$elm_style_animation$Animation$set(
-			_List_fromArray(
-				[
-					A4(mdgriffith$elm_style_animation$Animation$viewBox, spriteWidth * spriteIndex, 0.0, spriteWidth, spriteHeight)
-				]));
-	});
-var author$project$Msg$MoveToCoinDone = {$: 'MoveToCoinDone'};
-var author$project$View$Mario$baseSpriteHeight = 24;
-var author$project$View$Mario$baseSpriteWidth = 17;
-var author$project$Constants$staffLineHeight = author$project$Constants$svgViewHeight / 6;
-var author$project$View$Mario$getNoteHeight = function (midiCode) {
-	switch (midiCode) {
-		case 60:
-			return 11;
-		case 62:
-			return 10;
-		case 64:
-			return 9;
-		case 65:
-			return 8;
-		case 67:
-			return 7;
-		case 69:
-			return 6;
-		case 71:
-			return 5;
-		case 72:
-			return 4;
-		case 74:
-			return 3;
-		case 76:
-			return 2;
-		case 77:
-			return 1;
-		case 79:
-			return 0;
-		default:
-			return 12;
-	}
-};
-var author$project$View$Mario$sizeOffset = 15;
-var author$project$View$Mario$getMarioYPosition = function (midiCode) {
-	var yPosFloat = author$project$View$Mario$getNoteHeight(midiCode);
-	return (((-1) * author$project$View$Mario$sizeOffset) + author$project$Constants$topMargin) + ((yPosFloat * author$project$Constants$staffLineHeight) / 2);
-};
-var mdgriffith$elm_style_animation$Animation$Model$To = function (a) {
-	return {$: 'To', a: a};
-};
-var mdgriffith$elm_style_animation$Animation$to = function (props) {
-	return mdgriffith$elm_style_animation$Animation$Model$To(props);
-};
-var mdgriffith$elm_style_animation$Animation$y = function (y_) {
-	return A3(mdgriffith$elm_style_animation$Animation$custom, 'y', y_, '');
-};
-var author$project$View$Mario$marioFall = function (midiCode) {
-	var yPos = author$project$View$Mario$getMarioYPosition(midiCode);
-	var setSprite = A3(author$project$Animations$staticSprite, author$project$View$Mario$baseSpriteWidth, author$project$View$Mario$baseSpriteHeight, 3);
-	return A2(
-		elm$core$List$cons,
-		setSprite,
-		_List_fromArray(
-			[
-				mdgriffith$elm_style_animation$Animation$to(
-				_List_fromArray(
-					[
-						mdgriffith$elm_style_animation$Animation$y(yPos)
-					])),
-				mdgriffith$elm_style_animation$Animation$Messenger$send(author$project$Msg$MoveToCoinDone)
-			]));
-};
-var author$project$View$Mario$marioJump = function (midiCode) {
-	var yPos = author$project$View$Mario$getMarioYPosition(midiCode);
-	var setSprite = A3(author$project$Animations$staticSprite, author$project$View$Mario$baseSpriteWidth, author$project$View$Mario$baseSpriteHeight, 2);
-	return A2(
-		elm$core$List$cons,
-		setSprite,
-		_List_fromArray(
-			[
-				mdgriffith$elm_style_animation$Animation$to(
-				_List_fromArray(
-					[
-						mdgriffith$elm_style_animation$Animation$y(yPos)
-					])),
-				mdgriffith$elm_style_animation$Animation$Messenger$send(author$project$Msg$MoveToCoinDone)
-			]));
-};
-var author$project$Main$jumpOrFall = F2(
-	function (prevMidi, currentMidi) {
-		return (_Utils_cmp(currentMidi, prevMidi) > 0) ? mdgriffith$elm_style_animation$Animation$interrupt(
-			author$project$View$Mario$marioJump(currentMidi)) : mdgriffith$elm_style_animation$Animation$interrupt(
-			author$project$View$Mario$marioFall(currentMidi));
-	});
-var author$project$View$Mario$marioWalkLoop = A5(author$project$Animations$spriteLoop, 100, author$project$View$Mario$baseSpriteWidth, author$project$View$Mario$baseSpriteHeight, 0, 2);
-var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
-var author$project$Main$updateNotePressed = F2(
-	function (noteCode, model) {
-		var prevMidi = function () {
-			var _n0 = model.prevMidi;
-			if (_n0.$ === 'Nothing') {
-				return noteCode;
-			} else {
-				var m = _n0.a;
-				return m;
-			}
-		}();
-		var nextTargetNote = A2(author$project$Main$getNextTargetNote, model.nextTargetNoteIndex, model.targetNotes);
-		var nextAnimStepsList = A2(author$project$Main$jumpOrFall, prevMidi, noteCode);
-		var newCurrentNote = author$project$Note$createNote(noteCode);
-		var isCorrect = A2(
-			author$project$Main$getIsCorrect,
-			nextTargetNote,
-			elm$core$Maybe$Just(newCurrentNote));
-		var currentMarioSpriteStyle = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, author$project$Constants$currentNoteStyle);
-		var newMarioStyle = isCorrect ? nextAnimStepsList(currentMarioSpriteStyle) : A2(mdgriffith$elm_style_animation$Animation$interrupt, author$project$View$Mario$marioWalkLoop, currentMarioSpriteStyle);
-		var newUniqueAnimStates = A2(
-			author$project$Helpers$updateUniqueAnimState,
-			model.uniqueAnimStates,
-			_Utils_Tuple2(author$project$Constants$currentNoteStyle, newMarioStyle));
-		return _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{
-					currentNote: elm$core$Maybe$Just(newCurrentNote),
-					incorrectTries: isCorrect ? model.incorrectTries : (model.incorrectTries + 1),
-					prevMidi: elm$core$Maybe$Just(noteCode),
-					score: isCorrect ? (model.score + 1) : model.score,
-					uniqueAnimStates: newUniqueAnimStates
-				}),
-			elm$core$Platform$Cmd$none);
-	});
-var author$project$Model$Score = F3(
-	function (correctNote, answerSpeed, incorrectTries) {
-		return {answerSpeed: answerSpeed, correctNote: correctNote, incorrectTries: incorrectTries};
-	});
-var author$project$Msg$RestartTimer = function (a) {
-	return {$: 'RestartTimer', a: a};
-};
-var author$project$View$Mario$getMarioXPosition = function (targetNoteIndex) {
-	var test = A2(elm$core$Debug$log, 'targetNoteIndex ', targetNoteIndex);
-	return (author$project$Constants$leftMargin + (targetNoteIndex * author$project$Constants$noteXInterval)) - 5;
-};
-var elm$core$Elm$JsArray$unsafeSet = _JsArray_unsafeSet;
-var elm$core$Array$setHelp = F4(
-	function (shift, index, value, tree) {
-		var pos = elm$core$Array$bitMask & (index >>> shift);
-		var _n0 = A2(elm$core$Elm$JsArray$unsafeGet, pos, tree);
-		if (_n0.$ === 'SubTree') {
-			var subTree = _n0.a;
-			var newSub = A4(elm$core$Array$setHelp, shift - elm$core$Array$shiftStep, index, value, subTree);
-			return A3(
-				elm$core$Elm$JsArray$unsafeSet,
-				pos,
-				elm$core$Array$SubTree(newSub),
-				tree);
-		} else {
-			var values = _n0.a;
-			var newLeaf = A3(elm$core$Elm$JsArray$unsafeSet, elm$core$Array$bitMask & index, value, values);
-			return A3(
-				elm$core$Elm$JsArray$unsafeSet,
-				pos,
-				elm$core$Array$Leaf(newLeaf),
-				tree);
-		}
-	});
-var elm$core$Array$set = F3(
-	function (index, value, array) {
-		var len = array.a;
-		var startShift = array.b;
-		var tree = array.c;
-		var tail = array.d;
-		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? array : ((_Utils_cmp(
-			index,
-			elm$core$Array$tailIndex(len)) > -1) ? A4(
-			elm$core$Array$Array_elm_builtin,
-			len,
-			startShift,
-			tree,
-			A3(elm$core$Elm$JsArray$unsafeSet, elm$core$Array$bitMask & index, value, tail)) : A4(
-			elm$core$Array$Array_elm_builtin,
-			len,
-			startShift,
-			A4(elm$core$Array$setHelp, startShift, index, value, tree),
-			tail));
-	});
-var elm$core$List$unzip = function (pairs) {
-	var step = F2(
-		function (_n0, _n1) {
-			var x = _n0.a;
-			var y = _n0.b;
-			var xs = _n1.a;
-			var ys = _n1.b;
-			return _Utils_Tuple2(
-				A2(elm$core$List$cons, x, xs),
-				A2(elm$core$List$cons, y, ys));
-		});
-	return A3(
-		elm$core$List$foldr,
-		step,
-		_Utils_Tuple2(_List_Nil, _List_Nil),
-		pairs);
-};
-var elm$json$Json$Encode$list = F2(
-	function (func, entries) {
-		return _Json_wrap(
-			A3(
-				elm$core$List$foldl,
-				_Json_addEntry(func),
-				_Json_emptyArray(_Utils_Tuple0),
-				entries));
-	});
-var author$project$Main$update = F2(
-	function (msg, model) {
-		switch (msg.$) {
-			case 'InitMIDI':
-				var isMIDIConnectedBool = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							isMIDIConnected: elm$core$Maybe$Just(isMIDIConnectedBool),
-							isPlaying: (model.isPlaying && (!isMIDIConnectedBool)) ? false : model.isPlaying
-						}),
-					elm$core$Platform$Cmd$none);
-			case 'StartGame':
-				var currentMarioSpriteStyle = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, author$project$Constants$currentNoteStyle);
-				var newMarioSprite = A2(mdgriffith$elm_style_animation$Animation$interrupt, author$project$View$Mario$marioWalkLoop, currentMarioSpriteStyle);
-				var updatedUniqueAnimStates = A2(
-					author$project$Helpers$updateUniqueAnimState,
-					model.uniqueAnimStates,
-					_Utils_Tuple2(author$project$Constants$currentNoteStyle, newMarioSprite));
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							isPlaying: true,
-							targetNotes: A2(author$project$Helpers$startAnimEveryNote, model.targetNotes, author$project$Animations$coinLoop),
-							uniqueAnimStates: updatedUniqueAnimStates
-						}),
-					A2(elm$core$Task$perform, author$project$Msg$RestartTimer, elm$time$Time$now));
-			case 'GenerateTargetNotes':
-				var midiCodeList = msg.a;
-				var targetNotes = elm$core$Array$fromList(
-					A2(elm$core$List$map, author$project$Note$createNote, midiCodeList));
-				var test = A2(elm$core$Debug$log, 'targetnotes: ', targetNotes);
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{targetNotes: targetNotes}),
-					elm$core$Platform$Cmd$none);
-			case 'RestartTimer':
-				var currentTimestamp = msg.a;
-				var newAnswerSpeed = A2(author$project$Main$getNewAnswerSpeed, model.startTimestamp, currentTimestamp);
-				var newScoreObjectList = (!_Utils_eq(model.startTimestamp, elm$core$Maybe$Nothing)) ? _List_fromArray(
-					[
-						A3(author$project$Model$Score, model.correctNote, newAnswerSpeed, model.incorrectTries)
-					]) : _List_Nil;
-				var nextCommand = (!_Utils_eq(model.startTimestamp, elm$core$Maybe$Nothing)) ? elm$core$Platform$Cmd$batch(
-					_List_fromArray(
-						[
-							author$project$Main$cache(
-							A2(
-								elm$json$Json$Encode$list,
-								author$project$Main$convertScoreToJSON,
-								_Utils_ap(model.scoreList, newScoreObjectList)))
-						])) : elm$core$Platform$Cmd$none;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							answerSpeed: newAnswerSpeed,
-							incorrectTries: 0,
-							scoreList: _Utils_ap(model.scoreList, newScoreObjectList),
-							startTimestamp: elm$core$Maybe$Just(currentTimestamp),
-							testCurrentTimestamp: elm$core$Maybe$Just(currentTimestamp)
-						}),
-					nextCommand);
-			case 'NoteReleased':
-				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
-			case 'NotePressed':
-				var noteCode = msg.a;
-				return A2(author$project$Main$updateNotePressed, noteCode, model);
-			case 'MoveToCoinDone':
-				var maybeTargetNote = A2(elm$core$Array$get, model.nextTargetNoteIndex, model.targetNotes);
-				var nextTargetNote = function () {
-					if (maybeTargetNote.$ === 'Nothing') {
-						return author$project$Note$createNote(60);
-					} else {
-						var n = maybeTargetNote.a;
-						return n;
-					}
-				}();
-				var coinAnimSteps = A2(mdgriffith$elm_style_animation$Animation$interrupt, author$project$Animations$coinDisappear, nextTargetNote.animState);
-				var updatedTargetNote = _Utils_update(
-					nextTargetNote,
-					{animState: coinAnimSteps});
-				var allUpdatedTargetNotes = A3(elm$core$Array$set, model.nextTargetNoteIndex, updatedTargetNote, model.targetNotes);
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{targetNotes: allUpdatedTargetNotes}),
-					elm$core$Platform$Cmd$none);
-			case 'GetCoinDone':
-				var newNextTargetNoteIndex = model.nextTargetNoteIndex + 1;
-				var currentScrollState = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, author$project$Constants$scrollState);
-				var newScrollState = A2(
-					mdgriffith$elm_style_animation$Animation$interrupt,
-					_List_fromArray(
-						[
-							author$project$Animations$scrollGameLevel(model.nextTargetNoteIndex)
-						]),
-					currentScrollState);
-				var currentMarioSpriteStyle = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, author$project$Constants$currentNoteStyle);
-				var newMarioSprite = A2(mdgriffith$elm_style_animation$Animation$interrupt, author$project$View$Mario$marioWalkLoop, currentMarioSpriteStyle);
-				var currentMarioContainerPos = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, author$project$Constants$marioContainer);
-				var newMarioPos = A2(
-					mdgriffith$elm_style_animation$Animation$interrupt,
-					_List_fromArray(
-						[
-							A2(
-							mdgriffith$elm_style_animation$Animation$toWith,
-							author$project$Animations$scrollAndWalkEasing,
-							_List_fromArray(
-								[
-									mdgriffith$elm_style_animation$Animation$x(
-									author$project$View$Mario$getMarioXPosition(newNextTargetNoteIndex))
-								]))
-						]),
-					currentMarioContainerPos);
-				var newMarioPosState = A2(
-					author$project$Helpers$updateUniqueAnimState,
-					model.uniqueAnimStates,
-					_Utils_Tuple2(author$project$Constants$marioContainer, newMarioPos));
-				var newMarioSpriteAndPosState = A2(
-					author$project$Helpers$updateUniqueAnimState,
-					newMarioPosState,
-					_Utils_Tuple2(author$project$Constants$currentNoteStyle, newMarioSprite));
-				var newUniqueAnimStates = A2(
-					author$project$Helpers$updateUniqueAnimState,
-					newMarioSpriteAndPosState,
-					_Utils_Tuple2(author$project$Constants$scrollState, newScrollState));
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{nextTargetNoteIndex: newNextTargetNoteIndex, uniqueAnimStates: newUniqueAnimStates}),
-					elm$core$Platform$Cmd$none);
-			case 'StartScrollGameLevel':
-				var currentScrollState = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, author$project$Constants$scrollState);
-				var newScrollState = A2(
-					mdgriffith$elm_style_animation$Animation$interrupt,
-					_List_fromArray(
-						[
-							author$project$Animations$scrollGameLevel(model.nextTargetNoteIndex)
-						]),
-					currentScrollState);
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							uniqueAnimStates: A2(
-								author$project$Helpers$updateUniqueAnimState,
-								model.uniqueAnimStates,
-								_Utils_Tuple2(author$project$Constants$scrollState, newScrollState))
-						}),
-					elm$core$Platform$Cmd$none);
-			case 'Animate':
-				var timestamp = msg.a;
-				var updatedDict = A2(author$project$Helpers$updateEveryAnimState, model.uniqueAnimStates, timestamp);
-				var uniqueElemAnimCmds = A2(
-					elm$core$List$map,
-					elm$core$Tuple$second,
-					elm$core$Dict$values(updatedDict));
-				var dictStylesOnly = A2(
-					elm$core$Dict$map,
-					F2(
-						function (key, val) {
-							return val.a;
-						}),
-					updatedDict);
-				var _n2 = elm$core$List$unzip(
-					A2(
-						elm$core$List$map,
-						author$project$Helpers$updateNoteWithAnimState(timestamp),
-						elm$core$Array$toList(model.targetNotes)));
-				var newNotes = _n2.a;
-				var noteAnimCmds = _n2.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							targetNotes: elm$core$Array$fromList(newNotes),
-							uniqueAnimStates: dictStylesOnly
-						}),
-					elm$core$Platform$Cmd$batch(
-						_Utils_ap(uniqueElemAnimCmds, noteAnimCmds)));
-			default:
-				var currentTimestamp = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							testCurrentTimestamp: elm$core$Maybe$Just(currentTimestamp)
-						}),
-					elm$core$Platform$Cmd$none);
-		}
-	});
-var author$project$Msg$StartScrollGameLevel = {$: 'StartScrollGameLevel'};
 var elm$core$String$fromFloat = _String_fromNumber;
 var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
 var elm$svg$Svg$line = elm$svg$Svg$trustedNode('line');
@@ -9642,11 +7027,46 @@ var author$project$View$Game$backgroundStatic = F3(
 					A2(author$project$View$Game$trebleClef, 50, 237)
 				]));
 	});
+var author$project$Constants$noteXInterval = 200;
 var elm$svg$Svg$rect = elm$svg$Svg$trustedNode('rect');
 var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
 var elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
 var elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
 var elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
+var elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3(elm$core$List$foldr, elm$core$List$cons, ys, xs);
+		}
+	});
+var elm$core$List$concat = function (lists) {
+	return A3(elm$core$List$foldr, elm$core$List$append, _List_Nil, lists);
+};
+var elm$core$List$concatMap = F2(
+	function (f, list) {
+		return elm$core$List$concat(
+			A2(elm$core$List$map, f, list));
+	});
+var elm$core$List$maybeCons = F3(
+	function (f, mx, xs) {
+		var _n0 = f(mx);
+		if (_n0.$ === 'Just') {
+			var x = _n0.a;
+			return A2(elm$core$List$cons, x, xs);
+		} else {
+			return xs;
+		}
+	});
+var elm$core$List$filterMap = F2(
+	function (f, xs) {
+		return A3(
+			elm$core$List$foldr,
+			elm$core$List$maybeCons(f),
+			_List_Nil,
+			xs);
+	});
 var elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
 var mdgriffith$elm_style_animation$Animation$Render$iePrefix = '-ms-';
@@ -9710,6 +7130,7 @@ var elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
 var elm$svg$Svg$Attributes$rx = _VirtualDom_attribute('rx');
 var elm$svg$Svg$Attributes$ry = _VirtualDom_attribute('ry');
 var elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
+var elm$core$Basics$round = _Basics_round;
 var elm$core$Basics$cos = _Basics_cos;
 var elm$core$Basics$degrees = function (angleInDegrees) {
 	return (angleInDegrees * elm$core$Basics$pi) / 180;
@@ -10048,6 +7469,24 @@ var elm$core$List$isEmpty = function (xs) {
 		return false;
 	}
 };
+var elm$core$List$partition = F2(
+	function (pred, list) {
+		var step = F2(
+			function (x, _n0) {
+				var trues = _n0.a;
+				var falses = _n0.b;
+				return pred(x) ? _Utils_Tuple2(
+					A2(elm$core$List$cons, x, trues),
+					falses) : _Utils_Tuple2(
+					trues,
+					A2(elm$core$List$cons, x, falses));
+			});
+		return A3(
+			elm$core$List$foldr,
+			step,
+			_Utils_Tuple2(_List_Nil, _List_Nil),
+			list);
+	});
 var mdgriffith$elm_style_animation$Animation$Render$isAttr = function (prop) {
 	return A2(
 		elm$core$String$startsWith,
@@ -15915,6 +13354,7 @@ var author$project$View$Note$drawAllTargetNotes = F4(
 			A2(author$project$View$Note$drawTargetNote, lineHeight, margins),
 			noteList);
 	});
+var author$project$View$Mario$sizeOffset = 15;
 var author$project$View$Mario$spriteHeight = author$project$View$Mario$sizeOffset + author$project$Constants$staffLineHeight;
 var author$project$View$Mario$widthToHeightRatio = 17 / 24;
 var author$project$View$Mario$spriteWidth = (author$project$View$Mario$sizeOffset + author$project$Constants$staffLineHeight) * author$project$View$Mario$widthToHeightRatio;
@@ -47628,7 +45068,2592 @@ var author$project$Main$view = function (model) {
 					]))
 			]));
 };
+var mdgriffith$elm_style_animation$Animation$spring = function (settings) {
+	return mdgriffith$elm_style_animation$Animation$Model$Spring(settings);
+};
+var author$project$Animations$scrollAndWalkEasing = mdgriffith$elm_style_animation$Animation$spring(
+	{damping: 50, stiffness: 50});
+var elm$core$Debug$log = _Debug_log;
+var mdgriffith$elm_style_animation$Animation$Model$ToWith = function (a) {
+	return {$: 'ToWith', a: a};
+};
+var mdgriffith$elm_style_animation$Animation$toWith = F2(
+	function (interp, props) {
+		return mdgriffith$elm_style_animation$Animation$Model$ToWith(
+			A2(
+				elm$core$List$map,
+				mdgriffith$elm_style_animation$Animation$Model$mapToMotion(
+					function (m) {
+						return _Utils_update(
+							m,
+							{interpolation: interp});
+					}),
+				props));
+	});
+var author$project$Animations$scrollGameLevel = function (nextNoteIndex) {
+	var nextViewBoxStartPos = nextNoteIndex * author$project$Constants$noteXInterval;
+	var test = A2(elm$core$Debug$log, 'next xPos: ', nextViewBoxStartPos);
+	return A2(
+		mdgriffith$elm_style_animation$Animation$toWith,
+		author$project$Animations$scrollAndWalkEasing,
+		_List_fromArray(
+			[
+				A4(mdgriffith$elm_style_animation$Animation$viewBox, nextViewBoxStartPos, 0, author$project$Constants$svgViewTotalWidth, author$project$Constants$svgViewTotalHeight)
+			]));
+};
+var elm$core$Dict$getMin = function (dict) {
+	getMin:
+	while (true) {
+		if ((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) {
+			var left = dict.d;
+			var $temp$dict = left;
+			dict = $temp$dict;
+			continue getMin;
+		} else {
+			return dict;
+		}
+	}
+};
+var elm$core$Dict$moveRedLeft = function (dict) {
+	if (((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) && (dict.e.$ === 'RBNode_elm_builtin')) {
+		if ((dict.e.d.$ === 'RBNode_elm_builtin') && (dict.e.d.a.$ === 'Red')) {
+			var clr = dict.a;
+			var k = dict.b;
+			var v = dict.c;
+			var _n1 = dict.d;
+			var lClr = _n1.a;
+			var lK = _n1.b;
+			var lV = _n1.c;
+			var lLeft = _n1.d;
+			var lRight = _n1.e;
+			var _n2 = dict.e;
+			var rClr = _n2.a;
+			var rK = _n2.b;
+			var rV = _n2.c;
+			var rLeft = _n2.d;
+			var _n3 = rLeft.a;
+			var rlK = rLeft.b;
+			var rlV = rLeft.c;
+			var rlL = rLeft.d;
+			var rlR = rLeft.e;
+			var rRight = _n2.e;
+			return A5(
+				elm$core$Dict$RBNode_elm_builtin,
+				elm$core$Dict$Red,
+				rlK,
+				rlV,
+				A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					elm$core$Dict$Black,
+					k,
+					v,
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					rlL),
+				A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, rK, rV, rlR, rRight));
+		} else {
+			var clr = dict.a;
+			var k = dict.b;
+			var v = dict.c;
+			var _n4 = dict.d;
+			var lClr = _n4.a;
+			var lK = _n4.b;
+			var lV = _n4.c;
+			var lLeft = _n4.d;
+			var lRight = _n4.e;
+			var _n5 = dict.e;
+			var rClr = _n5.a;
+			var rK = _n5.b;
+			var rV = _n5.c;
+			var rLeft = _n5.d;
+			var rRight = _n5.e;
+			if (clr.$ === 'Black') {
+				return A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					elm$core$Dict$Black,
+					k,
+					v,
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, rK, rV, rLeft, rRight));
+			} else {
+				return A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					elm$core$Dict$Black,
+					k,
+					v,
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, rK, rV, rLeft, rRight));
+			}
+		}
+	} else {
+		return dict;
+	}
+};
+var elm$core$Dict$moveRedRight = function (dict) {
+	if (((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) && (dict.e.$ === 'RBNode_elm_builtin')) {
+		if ((dict.d.d.$ === 'RBNode_elm_builtin') && (dict.d.d.a.$ === 'Red')) {
+			var clr = dict.a;
+			var k = dict.b;
+			var v = dict.c;
+			var _n1 = dict.d;
+			var lClr = _n1.a;
+			var lK = _n1.b;
+			var lV = _n1.c;
+			var _n2 = _n1.d;
+			var _n3 = _n2.a;
+			var llK = _n2.b;
+			var llV = _n2.c;
+			var llLeft = _n2.d;
+			var llRight = _n2.e;
+			var lRight = _n1.e;
+			var _n4 = dict.e;
+			var rClr = _n4.a;
+			var rK = _n4.b;
+			var rV = _n4.c;
+			var rLeft = _n4.d;
+			var rRight = _n4.e;
+			return A5(
+				elm$core$Dict$RBNode_elm_builtin,
+				elm$core$Dict$Red,
+				lK,
+				lV,
+				A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, llK, llV, llLeft, llRight),
+				A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					elm$core$Dict$Black,
+					k,
+					v,
+					lRight,
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, rK, rV, rLeft, rRight)));
+		} else {
+			var clr = dict.a;
+			var k = dict.b;
+			var v = dict.c;
+			var _n5 = dict.d;
+			var lClr = _n5.a;
+			var lK = _n5.b;
+			var lV = _n5.c;
+			var lLeft = _n5.d;
+			var lRight = _n5.e;
+			var _n6 = dict.e;
+			var rClr = _n6.a;
+			var rK = _n6.b;
+			var rV = _n6.c;
+			var rLeft = _n6.d;
+			var rRight = _n6.e;
+			if (clr.$ === 'Black') {
+				return A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					elm$core$Dict$Black,
+					k,
+					v,
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, rK, rV, rLeft, rRight));
+			} else {
+				return A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					elm$core$Dict$Black,
+					k,
+					v,
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, rK, rV, rLeft, rRight));
+			}
+		}
+	} else {
+		return dict;
+	}
+};
+var elm$core$Dict$removeHelpPrepEQGT = F7(
+	function (targetKey, dict, color, key, value, left, right) {
+		if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
+			var _n1 = left.a;
+			var lK = left.b;
+			var lV = left.c;
+			var lLeft = left.d;
+			var lRight = left.e;
+			return A5(
+				elm$core$Dict$RBNode_elm_builtin,
+				color,
+				lK,
+				lV,
+				lLeft,
+				A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, key, value, lRight, right));
+		} else {
+			_n2$2:
+			while (true) {
+				if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Black')) {
+					if (right.d.$ === 'RBNode_elm_builtin') {
+						if (right.d.a.$ === 'Black') {
+							var _n3 = right.a;
+							var _n4 = right.d;
+							var _n5 = _n4.a;
+							return elm$core$Dict$moveRedRight(dict);
+						} else {
+							break _n2$2;
+						}
+					} else {
+						var _n6 = right.a;
+						var _n7 = right.d;
+						return elm$core$Dict$moveRedRight(dict);
+					}
+				} else {
+					break _n2$2;
+				}
+			}
+			return dict;
+		}
+	});
+var elm$core$Dict$removeMin = function (dict) {
+	if ((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) {
+		var color = dict.a;
+		var key = dict.b;
+		var value = dict.c;
+		var left = dict.d;
+		var lColor = left.a;
+		var lLeft = left.d;
+		var right = dict.e;
+		if (lColor.$ === 'Black') {
+			if ((lLeft.$ === 'RBNode_elm_builtin') && (lLeft.a.$ === 'Red')) {
+				var _n3 = lLeft.a;
+				return A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					color,
+					key,
+					value,
+					elm$core$Dict$removeMin(left),
+					right);
+			} else {
+				var _n4 = elm$core$Dict$moveRedLeft(dict);
+				if (_n4.$ === 'RBNode_elm_builtin') {
+					var nColor = _n4.a;
+					var nKey = _n4.b;
+					var nValue = _n4.c;
+					var nLeft = _n4.d;
+					var nRight = _n4.e;
+					return A5(
+						elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						elm$core$Dict$removeMin(nLeft),
+						nRight);
+				} else {
+					return elm$core$Dict$RBEmpty_elm_builtin;
+				}
+			}
+		} else {
+			return A5(
+				elm$core$Dict$RBNode_elm_builtin,
+				color,
+				key,
+				value,
+				elm$core$Dict$removeMin(left),
+				right);
+		}
+	} else {
+		return elm$core$Dict$RBEmpty_elm_builtin;
+	}
+};
+var elm$core$Dict$removeHelp = F2(
+	function (targetKey, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return elm$core$Dict$RBEmpty_elm_builtin;
+		} else {
+			var color = dict.a;
+			var key = dict.b;
+			var value = dict.c;
+			var left = dict.d;
+			var right = dict.e;
+			if (_Utils_cmp(targetKey, key) < 0) {
+				if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Black')) {
+					var _n4 = left.a;
+					var lLeft = left.d;
+					if ((lLeft.$ === 'RBNode_elm_builtin') && (lLeft.a.$ === 'Red')) {
+						var _n6 = lLeft.a;
+						return A5(
+							elm$core$Dict$RBNode_elm_builtin,
+							color,
+							key,
+							value,
+							A2(elm$core$Dict$removeHelp, targetKey, left),
+							right);
+					} else {
+						var _n7 = elm$core$Dict$moveRedLeft(dict);
+						if (_n7.$ === 'RBNode_elm_builtin') {
+							var nColor = _n7.a;
+							var nKey = _n7.b;
+							var nValue = _n7.c;
+							var nLeft = _n7.d;
+							var nRight = _n7.e;
+							return A5(
+								elm$core$Dict$balance,
+								nColor,
+								nKey,
+								nValue,
+								A2(elm$core$Dict$removeHelp, targetKey, nLeft),
+								nRight);
+						} else {
+							return elm$core$Dict$RBEmpty_elm_builtin;
+						}
+					}
+				} else {
+					return A5(
+						elm$core$Dict$RBNode_elm_builtin,
+						color,
+						key,
+						value,
+						A2(elm$core$Dict$removeHelp, targetKey, left),
+						right);
+				}
+			} else {
+				return A2(
+					elm$core$Dict$removeHelpEQGT,
+					targetKey,
+					A7(elm$core$Dict$removeHelpPrepEQGT, targetKey, dict, color, key, value, left, right));
+			}
+		}
+	});
+var elm$core$Dict$removeHelpEQGT = F2(
+	function (targetKey, dict) {
+		if (dict.$ === 'RBNode_elm_builtin') {
+			var color = dict.a;
+			var key = dict.b;
+			var value = dict.c;
+			var left = dict.d;
+			var right = dict.e;
+			if (_Utils_eq(targetKey, key)) {
+				var _n1 = elm$core$Dict$getMin(right);
+				if (_n1.$ === 'RBNode_elm_builtin') {
+					var minKey = _n1.b;
+					var minValue = _n1.c;
+					return A5(
+						elm$core$Dict$balance,
+						color,
+						minKey,
+						minValue,
+						left,
+						elm$core$Dict$removeMin(right));
+				} else {
+					return elm$core$Dict$RBEmpty_elm_builtin;
+				}
+			} else {
+				return A5(
+					elm$core$Dict$balance,
+					color,
+					key,
+					value,
+					left,
+					A2(elm$core$Dict$removeHelp, targetKey, right));
+			}
+		} else {
+			return elm$core$Dict$RBEmpty_elm_builtin;
+		}
+	});
+var elm$core$Dict$remove = F2(
+	function (key, dict) {
+		var _n0 = A2(elm$core$Dict$removeHelp, key, dict);
+		if ((_n0.$ === 'RBNode_elm_builtin') && (_n0.a.$ === 'Red')) {
+			var _n1 = _n0.a;
+			var k = _n0.b;
+			var v = _n0.c;
+			var l = _n0.d;
+			var r = _n0.e;
+			return A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, k, v, l, r);
+		} else {
+			var x = _n0;
+			return x;
+		}
+	});
+var elm$core$Dict$update = F3(
+	function (targetKey, alter, dictionary) {
+		var _n0 = alter(
+			A2(elm$core$Dict$get, targetKey, dictionary));
+		if (_n0.$ === 'Just') {
+			var value = _n0.a;
+			return A3(elm$core$Dict$insert, targetKey, value, dictionary);
+		} else {
+			return A2(elm$core$Dict$remove, targetKey, dictionary);
+		}
+	});
+var elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return elm$core$Maybe$Nothing;
+		}
+	});
+var author$project$Helpers$updateUniqueAnimState = F2(
+	function (dict, _n0) {
+		var key = _n0.a;
+		var newValue = _n0.b;
+		return A3(
+			elm$core$Dict$update,
+			key,
+			elm$core$Maybe$map(
+				function (a) {
+					return newValue;
+				}),
+			dict);
+	});
+var elm$core$Dict$map = F2(
+	function (func, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return elm$core$Dict$RBEmpty_elm_builtin;
+		} else {
+			var color = dict.a;
+			var key = dict.b;
+			var value = dict.c;
+			var left = dict.d;
+			var right = dict.e;
+			return A5(
+				elm$core$Dict$RBNode_elm_builtin,
+				color,
+				key,
+				A2(func, key, value),
+				A2(elm$core$Dict$map, func, left),
+				A2(elm$core$Dict$map, func, right));
+		}
+	});
+var elm$core$Basics$neq = _Utils_notEqual;
+var elm$core$Platform$Cmd$batch = _Platform_batch;
+var mdgriffith$elm_style_animation$Animation$Model$refreshTiming = F2(
+	function (now, timing) {
+		var dt = elm$time$Time$posixToMillis(now) - elm$time$Time$posixToMillis(timing.current);
+		return {
+			current: now,
+			dt: ((dt > 34) || (!elm$time$Time$posixToMillis(timing.current))) ? elm$time$Time$millisToPosix(
+				elm$core$Basics$round(16.666)) : elm$time$Time$millisToPosix(dt)
+		};
+	});
+var elm$core$List$all = F2(
+	function (isOkay, list) {
+		return !A2(
+			elm$core$List$any,
+			A2(elm$core$Basics$composeL, elm$core$Basics$not, isOkay),
+			list);
+	});
+var elm$core$List$drop = F2(
+	function (n, list) {
+		drop:
+		while (true) {
+			if (n <= 0) {
+				return list;
+			} else {
+				if (!list.b) {
+					return list;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs;
+					n = $temp$n;
+					list = $temp$list;
+					continue drop;
+				}
+			}
+		}
+	});
+var mdgriffith$elm_style_animation$Animation$Model$Loop = function (a) {
+	return {$: 'Loop', a: a};
+};
+var mdgriffith$elm_style_animation$Animation$Model$Repeat = F2(
+	function (a, b) {
+		return {$: 'Repeat', a: a, b: b};
+	});
+var mdgriffith$elm_style_animation$Animation$Model$Step = {$: 'Step'};
+var mdgriffith$elm_style_animation$Animation$Model$Wait = function (a) {
+	return {$: 'Wait', a: a};
+};
+var mdgriffith$elm_style_animation$Animation$Model$isCmdDone = function (cmd) {
+	var motionDone = function (motion) {
+		return (!motion.velocity) && _Utils_eq(motion.position, motion.target);
+	};
+	switch (cmd.$) {
+		case 'Move':
+			var m1 = cmd.a;
+			var m2 = cmd.b;
+			return motionDone(m1) && motionDone(m2);
+		case 'MoveTo':
+			var m1 = cmd.a;
+			var m2 = cmd.b;
+			return motionDone(m1) && motionDone(m2);
+		case 'Line':
+			var m1 = cmd.a;
+			var m2 = cmd.b;
+			return motionDone(m1) && motionDone(m2);
+		case 'LineTo':
+			var m1 = cmd.a;
+			var m2 = cmd.b;
+			return motionDone(m1) && motionDone(m2);
+		case 'Horizontal':
+			var motion = cmd.a;
+			return motionDone(motion);
+		case 'HorizontalTo':
+			var motion = cmd.a;
+			return motionDone(motion);
+		case 'Vertical':
+			var motion = cmd.a;
+			return motionDone(motion);
+		case 'VerticalTo':
+			var motion = cmd.a;
+			return motionDone(motion);
+		case 'Curve':
+			var control1 = cmd.a.control1;
+			var control2 = cmd.a.control2;
+			var point = cmd.a.point;
+			return motionDone(control1.a) && (motionDone(control1.b) && (motionDone(control2.a) && (motionDone(control2.b) && (motionDone(point.a) && motionDone(point.b)))));
+		case 'CurveTo':
+			var control1 = cmd.a.control1;
+			var control2 = cmd.a.control2;
+			var point = cmd.a.point;
+			return motionDone(control1.a) && (motionDone(control1.b) && (motionDone(control2.a) && (motionDone(control2.b) && (motionDone(point.a) && motionDone(point.b)))));
+		case 'Quadratic':
+			var control = cmd.a.control;
+			var point = cmd.a.point;
+			return motionDone(control.a) && (motionDone(control.b) && (motionDone(point.a) && motionDone(point.b)));
+		case 'QuadraticTo':
+			var control = cmd.a.control;
+			var point = cmd.a.point;
+			return motionDone(control.a) && (motionDone(control.b) && (motionDone(point.a) && motionDone(point.b)));
+		case 'SmoothQuadratic':
+			var coords = cmd.a;
+			return A2(
+				elm$core$List$all,
+				function (_n1) {
+					var x = _n1.a;
+					var y = _n1.b;
+					return motionDone(x) && motionDone(y);
+				},
+				coords);
+		case 'SmoothQuadraticTo':
+			var coords = cmd.a;
+			return A2(
+				elm$core$List$all,
+				function (_n2) {
+					var x = _n2.a;
+					var y = _n2.b;
+					return motionDone(x) && motionDone(y);
+				},
+				coords);
+		case 'Smooth':
+			var coords = cmd.a;
+			return A2(
+				elm$core$List$all,
+				function (_n3) {
+					var x = _n3.a;
+					var y = _n3.b;
+					return motionDone(x) && motionDone(y);
+				},
+				coords);
+		case 'SmoothTo':
+			var coords = cmd.a;
+			return A2(
+				elm$core$List$all,
+				function (_n4) {
+					var x = _n4.a;
+					var y = _n4.b;
+					return motionDone(x) && motionDone(y);
+				},
+				coords);
+		case 'ClockwiseArc':
+			var arc = cmd.a;
+			return motionDone(arc.x) && (motionDone(arc.y) && (motionDone(arc.radius) && (motionDone(arc.startAngle) && motionDone(arc.endAngle))));
+		case 'AntiClockwiseArc':
+			var arc = cmd.a;
+			return motionDone(arc.x) && (motionDone(arc.y) && (motionDone(arc.radius) && (motionDone(arc.startAngle) && motionDone(arc.endAngle))));
+		default:
+			return true;
+	}
+};
+var mdgriffith$elm_style_animation$Animation$Model$isDone = function (property) {
+	var motionDone = function (motion) {
+		var runningInterpolation = A2(elm$core$Maybe$withDefault, motion.interpolation, motion.interpolationOverride);
+		switch (runningInterpolation.$) {
+			case 'Spring':
+				return (!motion.velocity) && _Utils_eq(motion.position, motion.target);
+			case 'Easing':
+				var eased = runningInterpolation.a;
+				return (eased.progress === 1) || ((!eased.progress) && _Utils_eq(motion.position, motion.target));
+			default:
+				var speed = runningInterpolation.a;
+				return _Utils_eq(motion.position, motion.target);
+		}
+	};
+	switch (property.$) {
+		case 'ExactProperty':
+			return true;
+		case 'ColorProperty':
+			var m1 = property.b;
+			var m2 = property.c;
+			var m3 = property.d;
+			var m4 = property.e;
+			return A2(
+				elm$core$List$all,
+				motionDone,
+				_List_fromArray(
+					[m1, m2, m3, m4]));
+		case 'ShadowProperty':
+			var shadow = property.c;
+			return A2(
+				elm$core$List$all,
+				motionDone,
+				_List_fromArray(
+					[shadow.offsetX, shadow.offsetY, shadow.size, shadow.blur, shadow.red, shadow.green, shadow.blue, shadow.alpha]));
+		case 'Property':
+			var m1 = property.b;
+			return motionDone(m1);
+		case 'Property2':
+			var m1 = property.b;
+			var m2 = property.c;
+			return motionDone(m1) && motionDone(m2);
+		case 'Property3':
+			var m1 = property.b;
+			var m2 = property.c;
+			var m3 = property.d;
+			return A2(
+				elm$core$List$all,
+				motionDone,
+				_List_fromArray(
+					[m1, m2, m3]));
+		case 'Property4':
+			var m1 = property.b;
+			var m2 = property.c;
+			var m3 = property.d;
+			var m4 = property.e;
+			return A2(
+				elm$core$List$all,
+				motionDone,
+				_List_fromArray(
+					[m1, m2, m3, m4]));
+		case 'AngleProperty':
+			var m1 = property.b;
+			return motionDone(m1);
+		case 'Points':
+			var ms = property.a;
+			return A2(
+				elm$core$List$all,
+				function (_n1) {
+					var x = _n1.a;
+					var y = _n1.b;
+					return motionDone(x) && motionDone(y);
+				},
+				ms);
+		default:
+			var cmds = property.a;
+			return A2(elm$core$List$all, mdgriffith$elm_style_animation$Animation$Model$isCmdDone, cmds);
+	}
+};
+var elm$core$List$repeatHelp = F3(
+	function (result, n, value) {
+		repeatHelp:
+		while (true) {
+			if (n <= 0) {
+				return result;
+			} else {
+				var $temp$result = A2(elm$core$List$cons, value, result),
+					$temp$n = n - 1,
+					$temp$value = value;
+				result = $temp$result;
+				n = $temp$n;
+				value = $temp$value;
+				continue repeatHelp;
+			}
+		}
+	});
+var elm$core$List$repeat = F2(
+	function (n, value) {
+		return A3(elm$core$List$repeatHelp, _List_Nil, n, value);
+	});
+var mdgriffith$elm_style_animation$Animation$Model$matchPoints = F2(
+	function (points1, points2) {
+		var diff = elm$core$List$length(points1) - elm$core$List$length(points2);
+		if (diff > 0) {
+			var _n0 = elm$core$List$head(
+				elm$core$List$reverse(points2));
+			if (_n0.$ === 'Nothing') {
+				return _Utils_Tuple2(points1, points2);
+			} else {
+				var last2 = _n0.a;
+				return _Utils_Tuple2(
+					points1,
+					_Utils_ap(
+						points2,
+						A2(
+							elm$core$List$repeat,
+							elm$core$Basics$abs(diff),
+							last2)));
+			}
+		} else {
+			if (diff < 0) {
+				var _n1 = elm$core$List$head(
+					elm$core$List$reverse(points1));
+				if (_n1.$ === 'Nothing') {
+					return _Utils_Tuple2(points1, points2);
+				} else {
+					var last1 = _n1.a;
+					return _Utils_Tuple2(
+						_Utils_ap(
+							points1,
+							A2(
+								elm$core$List$repeat,
+								elm$core$Basics$abs(diff),
+								last1)),
+						points2);
+				}
+			} else {
+				return _Utils_Tuple2(points1, points2);
+			}
+		}
+	});
+var mdgriffith$elm_style_animation$Animation$Model$setPathTarget = F2(
+	function (cmd, targetCmd) {
+		var setMotionTarget = F2(
+			function (motion, targetMotion) {
+				var _n27 = motion.interpolation;
+				if (_n27.$ === 'Easing') {
+					var ease = _n27.a;
+					return _Utils_update(
+						motion,
+						{
+							interpolation: mdgriffith$elm_style_animation$Animation$Model$Easing(
+								_Utils_update(
+									ease,
+									{start: motion.position})),
+							target: targetMotion.position
+						});
+				} else {
+					return _Utils_update(
+						motion,
+						{target: targetMotion.position});
+				}
+			});
+		switch (cmd.$) {
+			case 'Move':
+				var m1 = cmd.a;
+				var m2 = cmd.b;
+				if (targetCmd.$ === 'Move') {
+					var t1 = targetCmd.a;
+					var t2 = targetCmd.b;
+					return A2(
+						mdgriffith$elm_style_animation$Animation$Model$Move,
+						A2(setMotionTarget, m1, t1),
+						A2(setMotionTarget, m2, t2));
+				} else {
+					return cmd;
+				}
+			case 'MoveTo':
+				var m1 = cmd.a;
+				var m2 = cmd.b;
+				if (targetCmd.$ === 'MoveTo') {
+					var t1 = targetCmd.a;
+					var t2 = targetCmd.b;
+					return A2(
+						mdgriffith$elm_style_animation$Animation$Model$MoveTo,
+						A2(setMotionTarget, m1, t1),
+						A2(setMotionTarget, m2, t2));
+				} else {
+					return cmd;
+				}
+			case 'Line':
+				var m1 = cmd.a;
+				var m2 = cmd.b;
+				if (targetCmd.$ === 'Line') {
+					var t1 = targetCmd.a;
+					var t2 = targetCmd.b;
+					return A2(
+						mdgriffith$elm_style_animation$Animation$Model$Line,
+						A2(setMotionTarget, m1, t1),
+						A2(setMotionTarget, m2, t2));
+				} else {
+					return cmd;
+				}
+			case 'LineTo':
+				var m1 = cmd.a;
+				var m2 = cmd.b;
+				if (targetCmd.$ === 'LineTo') {
+					var t1 = targetCmd.a;
+					var t2 = targetCmd.b;
+					return A2(
+						mdgriffith$elm_style_animation$Animation$Model$LineTo,
+						A2(setMotionTarget, m1, t1),
+						A2(setMotionTarget, m2, t2));
+				} else {
+					return cmd;
+				}
+			case 'Horizontal':
+				var m1 = cmd.a;
+				if (targetCmd.$ === 'Horizontal') {
+					var t1 = targetCmd.a;
+					return mdgriffith$elm_style_animation$Animation$Model$Horizontal(
+						A2(setMotionTarget, m1, t1));
+				} else {
+					return cmd;
+				}
+			case 'HorizontalTo':
+				var m1 = cmd.a;
+				if (targetCmd.$ === 'HorizontalTo') {
+					var t1 = targetCmd.a;
+					return mdgriffith$elm_style_animation$Animation$Model$HorizontalTo(
+						A2(setMotionTarget, m1, t1));
+				} else {
+					return cmd;
+				}
+			case 'Vertical':
+				var m1 = cmd.a;
+				if (targetCmd.$ === 'Vertical') {
+					var t1 = targetCmd.a;
+					return mdgriffith$elm_style_animation$Animation$Model$Vertical(
+						A2(setMotionTarget, m1, t1));
+				} else {
+					return cmd;
+				}
+			case 'VerticalTo':
+				var m1 = cmd.a;
+				if (targetCmd.$ === 'VerticalTo') {
+					var t1 = targetCmd.a;
+					return mdgriffith$elm_style_animation$Animation$Model$VerticalTo(
+						A2(setMotionTarget, m1, t1));
+				} else {
+					return cmd;
+				}
+			case 'Curve':
+				var points = cmd.a;
+				if (targetCmd.$ === 'Curve') {
+					var targets = targetCmd.a;
+					return mdgriffith$elm_style_animation$Animation$Model$Curve(
+						{
+							control1: _Utils_Tuple2(
+								A2(setMotionTarget, points.control1.a, targets.control1.a),
+								A2(setMotionTarget, points.control1.b, targets.control1.b)),
+							control2: _Utils_Tuple2(
+								A2(setMotionTarget, points.control2.a, targets.control2.a),
+								A2(setMotionTarget, points.control2.b, targets.control2.b)),
+							point: _Utils_Tuple2(
+								A2(setMotionTarget, points.point.a, targets.point.a),
+								A2(setMotionTarget, points.point.b, targets.point.b))
+						});
+				} else {
+					return cmd;
+				}
+			case 'CurveTo':
+				var points = cmd.a;
+				if (targetCmd.$ === 'CurveTo') {
+					var targets = targetCmd.a;
+					return mdgriffith$elm_style_animation$Animation$Model$CurveTo(
+						{
+							control1: _Utils_Tuple2(
+								A2(setMotionTarget, points.control1.a, targets.control1.a),
+								A2(setMotionTarget, points.control1.b, targets.control1.b)),
+							control2: _Utils_Tuple2(
+								A2(setMotionTarget, points.control2.a, targets.control2.a),
+								A2(setMotionTarget, points.control2.b, targets.control2.b)),
+							point: _Utils_Tuple2(
+								A2(setMotionTarget, points.point.a, targets.point.a),
+								A2(setMotionTarget, points.point.b, targets.point.b))
+						});
+				} else {
+					return cmd;
+				}
+			case 'Quadratic':
+				var points = cmd.a;
+				if (targetCmd.$ === 'Quadratic') {
+					var targets = targetCmd.a;
+					return mdgriffith$elm_style_animation$Animation$Model$Quadratic(
+						{
+							control: _Utils_Tuple2(
+								A2(setMotionTarget, points.control.a, targets.control.a),
+								A2(setMotionTarget, points.control.b, targets.control.b)),
+							point: _Utils_Tuple2(
+								A2(setMotionTarget, points.point.a, targets.point.a),
+								A2(setMotionTarget, points.point.b, targets.point.b))
+						});
+				} else {
+					return cmd;
+				}
+			case 'QuadraticTo':
+				var points = cmd.a;
+				if (targetCmd.$ === 'QuadraticTo') {
+					var targets = targetCmd.a;
+					return mdgriffith$elm_style_animation$Animation$Model$QuadraticTo(
+						{
+							control: _Utils_Tuple2(
+								A2(setMotionTarget, points.control.a, targets.control.a),
+								A2(setMotionTarget, points.control.b, targets.control.b)),
+							point: _Utils_Tuple2(
+								A2(setMotionTarget, points.point.a, targets.point.a),
+								A2(setMotionTarget, points.point.b, targets.point.b))
+						});
+				} else {
+					return cmd;
+				}
+			case 'SmoothQuadratic':
+				var coords = cmd.a;
+				if (targetCmd.$ === 'SmoothQuadratic') {
+					var targetCoords = targetCmd.a;
+					return mdgriffith$elm_style_animation$Animation$Model$SmoothQuadratic(
+						A3(
+							elm$core$List$map2,
+							F2(
+								function (_n14, _n15) {
+									var x1 = _n14.a;
+									var y1 = _n14.b;
+									var x2 = _n15.a;
+									var y2 = _n15.b;
+									return _Utils_Tuple2(
+										A2(setMotionTarget, x1, x2),
+										A2(setMotionTarget, y1, y2));
+								}),
+							coords,
+							targetCoords));
+				} else {
+					return cmd;
+				}
+			case 'SmoothQuadraticTo':
+				var coords = cmd.a;
+				if (targetCmd.$ === 'SmoothQuadraticTo') {
+					var targetCoords = targetCmd.a;
+					return mdgriffith$elm_style_animation$Animation$Model$SmoothQuadraticTo(
+						A3(
+							elm$core$List$map2,
+							F2(
+								function (_n17, _n18) {
+									var x1 = _n17.a;
+									var y1 = _n17.b;
+									var x2 = _n18.a;
+									var y2 = _n18.b;
+									return _Utils_Tuple2(
+										A2(setMotionTarget, x1, x2),
+										A2(setMotionTarget, y1, y2));
+								}),
+							coords,
+							targetCoords));
+				} else {
+					return cmd;
+				}
+			case 'Smooth':
+				var coords = cmd.a;
+				if (targetCmd.$ === 'Smooth') {
+					var targetCoords = targetCmd.a;
+					return mdgriffith$elm_style_animation$Animation$Model$Smooth(
+						A3(
+							elm$core$List$map2,
+							F2(
+								function (_n20, _n21) {
+									var x1 = _n20.a;
+									var y1 = _n20.b;
+									var x2 = _n21.a;
+									var y2 = _n21.b;
+									return _Utils_Tuple2(
+										A2(setMotionTarget, x1, x2),
+										A2(setMotionTarget, y1, y2));
+								}),
+							coords,
+							targetCoords));
+				} else {
+					return cmd;
+				}
+			case 'SmoothTo':
+				var coords = cmd.a;
+				if (targetCmd.$ === 'SmoothTo') {
+					var targetCoords = targetCmd.a;
+					return mdgriffith$elm_style_animation$Animation$Model$SmoothTo(
+						A3(
+							elm$core$List$map2,
+							F2(
+								function (_n23, _n24) {
+									var x1 = _n23.a;
+									var y1 = _n23.b;
+									var x2 = _n24.a;
+									var y2 = _n24.b;
+									return _Utils_Tuple2(
+										A2(setMotionTarget, x1, x2),
+										A2(setMotionTarget, y1, y2));
+								}),
+							coords,
+							targetCoords));
+				} else {
+					return cmd;
+				}
+			case 'ClockwiseArc':
+				var arc = cmd.a;
+				if (targetCmd.$ === 'ClockwiseArc') {
+					var target = targetCmd.a;
+					return mdgriffith$elm_style_animation$Animation$Model$ClockwiseArc(
+						function () {
+							var y = arc.y;
+							var x = arc.x;
+							var startAngle = arc.startAngle;
+							var radius = arc.radius;
+							var endAngle = arc.endAngle;
+							return _Utils_update(
+								arc,
+								{
+									endAngle: A2(setMotionTarget, endAngle, target.endAngle),
+									radius: A2(setMotionTarget, radius, target.radius),
+									startAngle: A2(setMotionTarget, startAngle, target.startAngle),
+									x: A2(setMotionTarget, x, target.x),
+									y: A2(setMotionTarget, y, target.y)
+								});
+						}());
+				} else {
+					return cmd;
+				}
+			case 'AntiClockwiseArc':
+				var arc = cmd.a;
+				if (targetCmd.$ === 'AntiClockwiseArc') {
+					var target = targetCmd.a;
+					return mdgriffith$elm_style_animation$Animation$Model$AntiClockwiseArc(
+						function () {
+							var y = arc.y;
+							var x = arc.x;
+							var startAngle = arc.startAngle;
+							var radius = arc.radius;
+							var endAngle = arc.endAngle;
+							return _Utils_update(
+								arc,
+								{
+									endAngle: A2(setMotionTarget, endAngle, target.endAngle),
+									radius: A2(setMotionTarget, radius, target.radius),
+									startAngle: A2(setMotionTarget, startAngle, target.startAngle),
+									x: A2(setMotionTarget, x, target.x),
+									y: A2(setMotionTarget, y, target.y)
+								});
+						}());
+				} else {
+					return cmd;
+				}
+			default:
+				return mdgriffith$elm_style_animation$Animation$Model$Close;
+		}
+	});
+var mdgriffith$elm_style_animation$Animation$Model$setTarget = F3(
+	function (overrideInterpolation, current, newTarget) {
+		var setMotionTarget = F2(
+			function (motion, targetMotion) {
+				var newMotion = overrideInterpolation ? _Utils_update(
+					motion,
+					{
+						interpolationOverride: elm$core$Maybe$Just(targetMotion.interpolation)
+					}) : motion;
+				var _n13 = newMotion.interpolationOverride;
+				if (_n13.$ === 'Nothing') {
+					var _n14 = newMotion.interpolation;
+					if (_n14.$ === 'Easing') {
+						var ease = _n14.a;
+						return _Utils_update(
+							newMotion,
+							{
+								interpolation: mdgriffith$elm_style_animation$Animation$Model$Easing(
+									_Utils_update(
+										ease,
+										{progress: 0, start: motion.position})),
+								target: targetMotion.position
+							});
+					} else {
+						return _Utils_update(
+							newMotion,
+							{target: targetMotion.position});
+					}
+				} else {
+					var override = _n13.a;
+					if (override.$ === 'Easing') {
+						var ease = override.a;
+						return _Utils_update(
+							newMotion,
+							{
+								interpolationOverride: elm$core$Maybe$Just(
+									mdgriffith$elm_style_animation$Animation$Model$Easing(
+										_Utils_update(
+											ease,
+											{progress: 0, start: motion.position}))),
+								target: targetMotion.position
+							});
+					} else {
+						return _Utils_update(
+							newMotion,
+							{target: targetMotion.position});
+					}
+				}
+			});
+		switch (current.$) {
+			case 'ExactProperty':
+				var name = current.a;
+				var value = current.b;
+				return A2(mdgriffith$elm_style_animation$Animation$Model$ExactProperty, name, value);
+			case 'ColorProperty':
+				var name = current.a;
+				var m1 = current.b;
+				var m2 = current.c;
+				var m3 = current.d;
+				var m4 = current.e;
+				if (newTarget.$ === 'ColorProperty') {
+					var t1 = newTarget.b;
+					var t2 = newTarget.c;
+					var t3 = newTarget.d;
+					var t4 = newTarget.e;
+					return A5(
+						mdgriffith$elm_style_animation$Animation$Model$ColorProperty,
+						name,
+						A2(setMotionTarget, m1, t1),
+						A2(setMotionTarget, m2, t2),
+						A2(setMotionTarget, m3, t3),
+						A2(setMotionTarget, m4, t4));
+				} else {
+					return current;
+				}
+			case 'ShadowProperty':
+				var name = current.a;
+				var inset = current.b;
+				var shadow = current.c;
+				if (newTarget.$ === 'ShadowProperty') {
+					var targetShadow = newTarget.c;
+					return A3(
+						mdgriffith$elm_style_animation$Animation$Model$ShadowProperty,
+						name,
+						inset,
+						{
+							alpha: A2(setMotionTarget, shadow.alpha, targetShadow.alpha),
+							blue: A2(setMotionTarget, shadow.blue, targetShadow.blue),
+							blur: A2(setMotionTarget, shadow.blur, targetShadow.blur),
+							green: A2(setMotionTarget, shadow.green, targetShadow.green),
+							offsetX: A2(setMotionTarget, shadow.offsetX, targetShadow.offsetX),
+							offsetY: A2(setMotionTarget, shadow.offsetY, targetShadow.offsetY),
+							red: A2(setMotionTarget, shadow.red, targetShadow.red),
+							size: A2(setMotionTarget, shadow.size, targetShadow.size)
+						});
+				} else {
+					return current;
+				}
+			case 'Property':
+				var name = current.a;
+				var m1 = current.b;
+				if (newTarget.$ === 'Property') {
+					var t1 = newTarget.b;
+					return A2(
+						mdgriffith$elm_style_animation$Animation$Model$Property,
+						name,
+						A2(setMotionTarget, m1, t1));
+				} else {
+					return current;
+				}
+			case 'Property2':
+				var name = current.a;
+				var m1 = current.b;
+				var m2 = current.c;
+				if (newTarget.$ === 'Property2') {
+					var t1 = newTarget.b;
+					var t2 = newTarget.c;
+					return A3(
+						mdgriffith$elm_style_animation$Animation$Model$Property2,
+						name,
+						A2(setMotionTarget, m1, t1),
+						A2(setMotionTarget, m2, t2));
+				} else {
+					return current;
+				}
+			case 'Property3':
+				var name = current.a;
+				var m1 = current.b;
+				var m2 = current.c;
+				var m3 = current.d;
+				if (newTarget.$ === 'Property3') {
+					var t1 = newTarget.b;
+					var t2 = newTarget.c;
+					var t3 = newTarget.d;
+					return A4(
+						mdgriffith$elm_style_animation$Animation$Model$Property3,
+						name,
+						A2(setMotionTarget, m1, t1),
+						A2(setMotionTarget, m2, t2),
+						A2(setMotionTarget, m3, t3));
+				} else {
+					return current;
+				}
+			case 'Property4':
+				var name = current.a;
+				var m1 = current.b;
+				var m2 = current.c;
+				var m3 = current.d;
+				var m4 = current.e;
+				if (newTarget.$ === 'Property4') {
+					var t1 = newTarget.b;
+					var t2 = newTarget.c;
+					var t3 = newTarget.d;
+					var t4 = newTarget.e;
+					return A5(
+						mdgriffith$elm_style_animation$Animation$Model$Property4,
+						name,
+						A2(setMotionTarget, m1, t1),
+						A2(setMotionTarget, m2, t2),
+						A2(setMotionTarget, m3, t3),
+						A2(setMotionTarget, m4, t4));
+				} else {
+					return current;
+				}
+			case 'AngleProperty':
+				var name = current.a;
+				var m1 = current.b;
+				if (newTarget.$ === 'AngleProperty') {
+					var t1 = newTarget.b;
+					return A2(
+						mdgriffith$elm_style_animation$Animation$Model$AngleProperty,
+						name,
+						A2(setMotionTarget, m1, t1));
+				} else {
+					return current;
+				}
+			case 'Points':
+				var currentPts = current.a;
+				if (newTarget.$ === 'Points') {
+					var targetPts = newTarget.a;
+					var _n9 = A2(mdgriffith$elm_style_animation$Animation$Model$matchPoints, currentPts, targetPts);
+					var m1s = _n9.a;
+					var m2s = _n9.b;
+					return mdgriffith$elm_style_animation$Animation$Model$Points(
+						A3(
+							elm$core$List$map2,
+							F2(
+								function (_n10, _n11) {
+									var x1 = _n10.a;
+									var y1 = _n10.b;
+									var x2 = _n11.a;
+									var y2 = _n11.b;
+									return _Utils_Tuple2(
+										A2(setMotionTarget, x1, x2),
+										A2(setMotionTarget, y1, y2));
+								}),
+							m1s,
+							m2s));
+				} else {
+					return current;
+				}
+			default:
+				var cmds = current.a;
+				if (newTarget.$ === 'Path') {
+					var targets = newTarget.a;
+					return mdgriffith$elm_style_animation$Animation$Model$Path(
+						A3(elm$core$List$map2, mdgriffith$elm_style_animation$Animation$Model$setPathTarget, cmds, targets));
+				} else {
+					return current;
+				}
+		}
+	});
+var mdgriffith$elm_style_animation$Animation$Model$zipPropertiesGreedy = F2(
+	function (initialProps, newTargetProps) {
+		var propertyMatch = F2(
+			function (prop1, prop2) {
+				return _Utils_eq(
+					mdgriffith$elm_style_animation$Animation$Model$propertyName(prop1),
+					mdgriffith$elm_style_animation$Animation$Model$propertyName(prop2));
+			});
+		var _n0 = A3(
+			elm$core$List$foldl,
+			F2(
+				function (_n1, _n2) {
+					var stackA = _n2.a;
+					var stackB = _n2.b;
+					var result = _n2.c;
+					var _n3 = elm$core$List$head(stackA);
+					if (_n3.$ === 'Nothing') {
+						return _Utils_Tuple3(stackA, stackB, result);
+					} else {
+						var a = _n3.a;
+						var _n4 = A2(
+							elm$core$List$partition,
+							propertyMatch(a),
+							stackB);
+						var matchingBs = _n4.a;
+						var nonMatchingBs = _n4.b;
+						return _Utils_Tuple3(
+							A2(elm$core$List$drop, 1, stackA),
+							function () {
+								if (!matchingBs.b) {
+									return nonMatchingBs;
+								} else {
+									var b = matchingBs.a;
+									var remainingBs = matchingBs.b;
+									return _Utils_ap(remainingBs, nonMatchingBs);
+								}
+							}(),
+							A2(
+								elm$core$List$cons,
+								_Utils_Tuple2(
+									a,
+									elm$core$List$head(matchingBs)),
+								result));
+					}
+				}),
+			_Utils_Tuple3(initialProps, newTargetProps, _List_Nil),
+			A2(
+				elm$core$List$repeat,
+				elm$core$List$length(initialProps),
+				0));
+		var warnings = _n0.b;
+		var props = _n0.c;
+		var _n6 = warnings;
+		return elm$core$List$reverse(props);
+	});
+var mdgriffith$elm_style_animation$Animation$Model$startTowards = F3(
+	function (overrideInterpolation, current, target) {
+		return A2(
+			elm$core$List$filterMap,
+			function (propPair) {
+				if (propPair.b.$ === 'Just') {
+					var cur = propPair.a;
+					var to = propPair.b.a;
+					return elm$core$Maybe$Just(
+						A3(mdgriffith$elm_style_animation$Animation$Model$setTarget, overrideInterpolation, cur, to));
+				} else {
+					var prop = propPair.a;
+					var _n1 = propPair.b;
+					return elm$core$Maybe$Just(prop);
+				}
+			},
+			A2(mdgriffith$elm_style_animation$Animation$Model$zipPropertiesGreedy, current, target));
+	});
+var elm$core$Basics$truncate = _Basics_truncate;
+var mdgriffith$elm_style_animation$Animation$Model$tolerance = 1.0e-2;
+var mdgriffith$elm_style_animation$Animation$Model$vTolerance = 0.1;
+var mdgriffith$elm_style_animation$Animation$Model$stepInterpolation = F2(
+	function (posix, motion) {
+		var interpolationToUse = A2(elm$core$Maybe$withDefault, motion.interpolation, motion.interpolationOverride);
+		var dtms = elm$time$Time$posixToMillis(posix);
+		switch (interpolationToUse.$) {
+			case 'AtSpeed':
+				var perSecond = interpolationToUse.a.perSecond;
+				var _n1 = function () {
+					if (_Utils_cmp(motion.position, motion.target) < 0) {
+						var _new = motion.position + (perSecond * (dtms / 1000));
+						return _Utils_Tuple2(
+							_new,
+							_Utils_cmp(_new, motion.target) > -1);
+					} else {
+						var _new = motion.position - (perSecond * (dtms / 1000));
+						return _Utils_Tuple2(
+							_new,
+							_Utils_cmp(_new, motion.target) < 1);
+					}
+				}();
+				var newPos = _n1.a;
+				var finished = _n1.b;
+				return finished ? _Utils_update(
+					motion,
+					{position: motion.target, velocity: 0.0}) : _Utils_update(
+					motion,
+					{position: newPos, velocity: perSecond * 1000});
+			case 'Spring':
+				var stiffness = interpolationToUse.a.stiffness;
+				var damping = interpolationToUse.a.damping;
+				var fspring = stiffness * (motion.target - motion.position);
+				var fdamper = ((-1) * damping) * motion.velocity;
+				var dt = dtms / 1000;
+				var a = fspring + fdamper;
+				var newVelocity = motion.velocity + (a * dt);
+				var newPos = motion.position + (newVelocity * dt);
+				var dx = elm$core$Basics$abs(motion.target - newPos);
+				return ((_Utils_cmp(dx, mdgriffith$elm_style_animation$Animation$Model$tolerance) < 0) && (_Utils_cmp(
+					elm$core$Basics$abs(newVelocity),
+					mdgriffith$elm_style_animation$Animation$Model$vTolerance) < 0)) ? _Utils_update(
+					motion,
+					{position: motion.target, velocity: 0.0}) : _Utils_update(
+					motion,
+					{position: newPos, velocity: newVelocity});
+			default:
+				var progress = interpolationToUse.a.progress;
+				var duration = interpolationToUse.a.duration;
+				var ease = interpolationToUse.a.ease;
+				var start = interpolationToUse.a.start;
+				var durationMs = elm$time$Time$posixToMillis(duration);
+				var newProgress = (((dtms / durationMs) + progress) < 1) ? ((dtms / durationMs) + progress) : 1;
+				var eased = ease(newProgress);
+				var distance = motion.target - start;
+				var newPos = ((((eased * distance) + start) * 10000) | 0) / 10000;
+				var newVelocity = (newProgress === 1) ? 0 : ((newPos - motion.position) / dtms);
+				var _n2 = motion.interpolationOverride;
+				if (_n2.$ === 'Nothing') {
+					return _Utils_update(
+						motion,
+						{
+							interpolation: mdgriffith$elm_style_animation$Animation$Model$Easing(
+								{duration: duration, ease: ease, progress: newProgress, start: start}),
+							position: newPos,
+							velocity: newVelocity
+						});
+				} else {
+					var override = _n2.a;
+					return _Utils_update(
+						motion,
+						{
+							interpolationOverride: elm$core$Maybe$Just(
+								mdgriffith$elm_style_animation$Animation$Model$Easing(
+									{duration: duration, ease: ease, progress: newProgress, start: start})),
+							position: newPos,
+							velocity: newVelocity
+						});
+				}
+		}
+	});
+var mdgriffith$elm_style_animation$Animation$Model$stepPath = F2(
+	function (dt, cmd) {
+		var stepCoords = function (coords) {
+			return A2(
+				elm$core$List$map,
+				function (_n1) {
+					var x = _n1.a;
+					var y = _n1.b;
+					return _Utils_Tuple2(
+						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, x),
+						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, y));
+				},
+				coords);
+		};
+		switch (cmd.$) {
+			case 'Move':
+				var m1 = cmd.a;
+				var m2 = cmd.b;
+				return A2(
+					mdgriffith$elm_style_animation$Animation$Model$Move,
+					A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, m1),
+					A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, m2));
+			case 'MoveTo':
+				var m1 = cmd.a;
+				var m2 = cmd.b;
+				return A2(
+					mdgriffith$elm_style_animation$Animation$Model$MoveTo,
+					A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, m1),
+					A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, m2));
+			case 'Line':
+				var m1 = cmd.a;
+				var m2 = cmd.b;
+				return A2(
+					mdgriffith$elm_style_animation$Animation$Model$Line,
+					A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, m1),
+					A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, m2));
+			case 'LineTo':
+				var m1 = cmd.a;
+				var m2 = cmd.b;
+				return A2(
+					mdgriffith$elm_style_animation$Animation$Model$LineTo,
+					A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, m1),
+					A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, m2));
+			case 'Horizontal':
+				var motion = cmd.a;
+				return mdgriffith$elm_style_animation$Animation$Model$Horizontal(
+					A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion));
+			case 'HorizontalTo':
+				var motion = cmd.a;
+				return mdgriffith$elm_style_animation$Animation$Model$HorizontalTo(
+					A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion));
+			case 'Vertical':
+				var motion = cmd.a;
+				return mdgriffith$elm_style_animation$Animation$Model$Vertical(
+					A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion));
+			case 'VerticalTo':
+				var motion = cmd.a;
+				return mdgriffith$elm_style_animation$Animation$Model$VerticalTo(
+					A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion));
+			case 'Curve':
+				var control1 = cmd.a.control1;
+				var control2 = cmd.a.control2;
+				var point = cmd.a.point;
+				return mdgriffith$elm_style_animation$Animation$Model$Curve(
+					{
+						control1: _Utils_Tuple2(
+							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, control1.a),
+							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, control1.b)),
+						control2: _Utils_Tuple2(
+							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, control2.a),
+							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, control2.b)),
+						point: _Utils_Tuple2(
+							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, point.a),
+							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, point.b))
+					});
+			case 'CurveTo':
+				var control1 = cmd.a.control1;
+				var control2 = cmd.a.control2;
+				var point = cmd.a.point;
+				return mdgriffith$elm_style_animation$Animation$Model$CurveTo(
+					{
+						control1: _Utils_Tuple2(
+							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, control1.a),
+							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, control1.b)),
+						control2: _Utils_Tuple2(
+							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, control2.a),
+							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, control2.b)),
+						point: _Utils_Tuple2(
+							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, point.a),
+							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, point.b))
+					});
+			case 'Quadratic':
+				var control = cmd.a.control;
+				var point = cmd.a.point;
+				return mdgriffith$elm_style_animation$Animation$Model$Quadratic(
+					{
+						control: _Utils_Tuple2(
+							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, control.a),
+							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, control.b)),
+						point: _Utils_Tuple2(
+							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, point.a),
+							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, point.b))
+					});
+			case 'QuadraticTo':
+				var control = cmd.a.control;
+				var point = cmd.a.point;
+				return mdgriffith$elm_style_animation$Animation$Model$QuadraticTo(
+					{
+						control: _Utils_Tuple2(
+							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, control.a),
+							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, control.b)),
+						point: _Utils_Tuple2(
+							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, point.a),
+							A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, point.b))
+					});
+			case 'SmoothQuadratic':
+				var coords = cmd.a;
+				return mdgriffith$elm_style_animation$Animation$Model$SmoothQuadratic(
+					stepCoords(coords));
+			case 'SmoothQuadraticTo':
+				var coords = cmd.a;
+				return mdgriffith$elm_style_animation$Animation$Model$SmoothQuadraticTo(
+					stepCoords(coords));
+			case 'Smooth':
+				var coords = cmd.a;
+				return mdgriffith$elm_style_animation$Animation$Model$Smooth(
+					stepCoords(coords));
+			case 'SmoothTo':
+				var coords = cmd.a;
+				return mdgriffith$elm_style_animation$Animation$Model$SmoothTo(
+					stepCoords(coords));
+			case 'ClockwiseArc':
+				var arc = cmd.a;
+				return mdgriffith$elm_style_animation$Animation$Model$ClockwiseArc(
+					_Utils_update(
+						arc,
+						{
+							endAngle: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, arc.endAngle),
+							radius: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, arc.radius),
+							startAngle: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, arc.startAngle),
+							x: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, arc.x),
+							y: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, arc.y)
+						}));
+			case 'AntiClockwiseArc':
+				var arc = cmd.a;
+				return mdgriffith$elm_style_animation$Animation$Model$AntiClockwiseArc(
+					_Utils_update(
+						arc,
+						{
+							endAngle: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, arc.endAngle),
+							radius: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, arc.radius),
+							startAngle: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, arc.startAngle),
+							x: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, arc.x),
+							y: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, arc.y)
+						}));
+			default:
+				return mdgriffith$elm_style_animation$Animation$Model$Close;
+		}
+	});
+var mdgriffith$elm_style_animation$Animation$Model$step = F2(
+	function (dt, props) {
+		var stepProp = function (property) {
+			switch (property.$) {
+				case 'ExactProperty':
+					var name = property.a;
+					var value = property.b;
+					return A2(mdgriffith$elm_style_animation$Animation$Model$ExactProperty, name, value);
+				case 'Property':
+					var name = property.a;
+					var motion = property.b;
+					return A2(
+						mdgriffith$elm_style_animation$Animation$Model$Property,
+						name,
+						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion));
+				case 'Property2':
+					var name = property.a;
+					var motion1 = property.b;
+					var motion2 = property.c;
+					return A3(
+						mdgriffith$elm_style_animation$Animation$Model$Property2,
+						name,
+						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion1),
+						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion2));
+				case 'Property3':
+					var name = property.a;
+					var motion1 = property.b;
+					var motion2 = property.c;
+					var motion3 = property.d;
+					return A4(
+						mdgriffith$elm_style_animation$Animation$Model$Property3,
+						name,
+						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion1),
+						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion2),
+						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion3));
+				case 'Property4':
+					var name = property.a;
+					var motion1 = property.b;
+					var motion2 = property.c;
+					var motion3 = property.d;
+					var motion4 = property.e;
+					return A5(
+						mdgriffith$elm_style_animation$Animation$Model$Property4,
+						name,
+						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion1),
+						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion2),
+						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion3),
+						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion4));
+				case 'AngleProperty':
+					var name = property.a;
+					var motion = property.b;
+					return A2(
+						mdgriffith$elm_style_animation$Animation$Model$AngleProperty,
+						name,
+						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, motion));
+				case 'ColorProperty':
+					var name = property.a;
+					var red = property.b;
+					var green = property.c;
+					var blue = property.d;
+					var alpha = property.e;
+					return A5(
+						mdgriffith$elm_style_animation$Animation$Model$ColorProperty,
+						name,
+						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, red),
+						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, green),
+						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, blue),
+						A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, alpha));
+				case 'ShadowProperty':
+					var name = property.a;
+					var inset = property.b;
+					var shadow = property.c;
+					return A3(
+						mdgriffith$elm_style_animation$Animation$Model$ShadowProperty,
+						name,
+						inset,
+						{
+							alpha: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, shadow.alpha),
+							blue: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, shadow.blue),
+							blur: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, shadow.blur),
+							green: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, shadow.green),
+							offsetX: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, shadow.offsetX),
+							offsetY: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, shadow.offsetY),
+							red: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, shadow.red),
+							size: A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, shadow.size)
+						});
+				case 'Points':
+					var points = property.a;
+					return mdgriffith$elm_style_animation$Animation$Model$Points(
+						A2(
+							elm$core$List$map,
+							function (_n1) {
+								var x = _n1.a;
+								var y = _n1.b;
+								return _Utils_Tuple2(
+									A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, x),
+									A2(mdgriffith$elm_style_animation$Animation$Model$stepInterpolation, dt, y));
+							},
+							points));
+				default:
+					var cmds = property.a;
+					return mdgriffith$elm_style_animation$Animation$Model$Path(
+						A2(
+							elm$core$List$map,
+							mdgriffith$elm_style_animation$Animation$Model$stepPath(dt),
+							cmds));
+			}
+		};
+		return A2(elm$core$List$map, stepProp, props);
+	});
+var mdgriffith$elm_style_animation$Animation$Model$alreadyThere = F2(
+	function (current, target) {
+		return A2(
+			elm$core$List$all,
+			mdgriffith$elm_style_animation$Animation$Model$isDone,
+			A2(
+				mdgriffith$elm_style_animation$Animation$Model$step,
+				elm$time$Time$millisToPosix(0),
+				A3(mdgriffith$elm_style_animation$Animation$Model$startTowards, false, current, target)));
+	});
+var mdgriffith$elm_style_animation$Animation$Model$replaceProps = F2(
+	function (props, replacements) {
+		var replacementNames = A2(elm$core$List$map, mdgriffith$elm_style_animation$Animation$Model$propertyName, replacements);
+		var removed = A2(
+			elm$core$List$filter,
+			function (prop) {
+				return !A2(
+					elm$core$List$member,
+					mdgriffith$elm_style_animation$Animation$Model$propertyName(prop),
+					replacementNames);
+			},
+			props);
+		return _Utils_ap(removed, replacements);
+	});
+var mdgriffith$elm_style_animation$Animation$Model$resolveSteps = F3(
+	function (currentStyle, steps, dt) {
+		resolveSteps:
+		while (true) {
+			var _n0 = elm$core$List$head(steps);
+			if (_n0.$ === 'Nothing') {
+				return _Utils_Tuple3(currentStyle, _List_Nil, _List_Nil);
+			} else {
+				var currentStep = _n0.a;
+				switch (currentStep.$) {
+					case 'Wait':
+						var n = currentStep.a;
+						if (elm$time$Time$posixToMillis(n) <= 0) {
+							var $temp$currentStyle = currentStyle,
+								$temp$steps = A2(elm$core$List$drop, 1, steps),
+								$temp$dt = dt;
+							currentStyle = $temp$currentStyle;
+							steps = $temp$steps;
+							dt = $temp$dt;
+							continue resolveSteps;
+						} else {
+							return _Utils_Tuple3(
+								currentStyle,
+								_List_Nil,
+								A2(
+									elm$core$List$cons,
+									mdgriffith$elm_style_animation$Animation$Model$Wait(
+										elm$time$Time$millisToPosix(
+											elm$time$Time$posixToMillis(n) - elm$time$Time$posixToMillis(dt))),
+									A2(elm$core$List$drop, 1, steps)));
+						}
+					case 'Send':
+						var msg = currentStep.a;
+						var _n2 = A3(
+							mdgriffith$elm_style_animation$Animation$Model$resolveSteps,
+							currentStyle,
+							A2(elm$core$List$drop, 1, steps),
+							dt);
+						var newStyle = _n2.a;
+						var msgs = _n2.b;
+						var remainingSteps = _n2.c;
+						return _Utils_Tuple3(
+							newStyle,
+							A2(elm$core$List$cons, msg, msgs),
+							remainingSteps);
+					case 'To':
+						var target = currentStep.a;
+						if (A2(mdgriffith$elm_style_animation$Animation$Model$alreadyThere, currentStyle, target)) {
+							return _Utils_Tuple3(
+								currentStyle,
+								_List_Nil,
+								A2(elm$core$List$drop, 1, steps));
+						} else {
+							var $temp$currentStyle = A3(mdgriffith$elm_style_animation$Animation$Model$startTowards, false, currentStyle, target),
+								$temp$steps = A2(
+								elm$core$List$cons,
+								mdgriffith$elm_style_animation$Animation$Model$Step,
+								A2(elm$core$List$drop, 1, steps)),
+								$temp$dt = dt;
+							currentStyle = $temp$currentStyle;
+							steps = $temp$steps;
+							dt = $temp$dt;
+							continue resolveSteps;
+						}
+					case 'ToWith':
+						var target = currentStep.a;
+						if (A2(mdgriffith$elm_style_animation$Animation$Model$alreadyThere, currentStyle, target)) {
+							return _Utils_Tuple3(
+								currentStyle,
+								_List_Nil,
+								A2(elm$core$List$drop, 1, steps));
+						} else {
+							var $temp$currentStyle = A3(mdgriffith$elm_style_animation$Animation$Model$startTowards, true, currentStyle, target),
+								$temp$steps = A2(
+								elm$core$List$cons,
+								mdgriffith$elm_style_animation$Animation$Model$Step,
+								A2(elm$core$List$drop, 1, steps)),
+								$temp$dt = dt;
+							currentStyle = $temp$currentStyle;
+							steps = $temp$steps;
+							dt = $temp$dt;
+							continue resolveSteps;
+						}
+					case 'Set':
+						var props = currentStep.a;
+						var $temp$currentStyle = A2(mdgriffith$elm_style_animation$Animation$Model$replaceProps, currentStyle, props),
+							$temp$steps = A2(elm$core$List$drop, 1, steps),
+							$temp$dt = dt;
+						currentStyle = $temp$currentStyle;
+						steps = $temp$steps;
+						dt = $temp$dt;
+						continue resolveSteps;
+					case 'Step':
+						var stepped = A2(mdgriffith$elm_style_animation$Animation$Model$step, dt, currentStyle);
+						return A2(elm$core$List$all, mdgriffith$elm_style_animation$Animation$Model$isDone, stepped) ? _Utils_Tuple3(
+							A2(
+								elm$core$List$map,
+								mdgriffith$elm_style_animation$Animation$Model$mapToMotion(
+									function (m) {
+										return _Utils_update(
+											m,
+											{interpolationOverride: elm$core$Maybe$Nothing});
+									}),
+								stepped),
+							_List_Nil,
+							A2(elm$core$List$drop, 1, steps)) : _Utils_Tuple3(stepped, _List_Nil, steps);
+					case 'Loop':
+						var substeps = currentStep.a;
+						var $temp$currentStyle = currentStyle,
+							$temp$steps = _Utils_ap(
+							substeps,
+							_List_fromArray(
+								[
+									mdgriffith$elm_style_animation$Animation$Model$Loop(substeps)
+								])),
+							$temp$dt = dt;
+						currentStyle = $temp$currentStyle;
+						steps = $temp$steps;
+						dt = $temp$dt;
+						continue resolveSteps;
+					default:
+						var n = currentStep.a;
+						var substeps = currentStep.b;
+						if (n <= 0) {
+							var $temp$currentStyle = currentStyle,
+								$temp$steps = A2(elm$core$List$drop, 1, steps),
+								$temp$dt = dt;
+							currentStyle = $temp$currentStyle;
+							steps = $temp$steps;
+							dt = $temp$dt;
+							continue resolveSteps;
+						} else {
+							var $temp$currentStyle = currentStyle,
+								$temp$steps = _Utils_ap(
+								substeps,
+								_Utils_ap(
+									_List_fromArray(
+										[
+											A2(mdgriffith$elm_style_animation$Animation$Model$Repeat, n - 1, substeps)
+										]),
+									A2(elm$core$List$drop, 1, steps))),
+								$temp$dt = dt;
+							currentStyle = $temp$currentStyle;
+							steps = $temp$steps;
+							dt = $temp$dt;
+							continue resolveSteps;
+						}
+				}
+			}
+		}
+	});
+var mdgriffith$elm_style_animation$Animation$Model$updateAnimation = F2(
+	function (_n0, _n1) {
+		var now = _n0.a;
+		var model = _n1.a;
+		var timing = A2(mdgriffith$elm_style_animation$Animation$Model$refreshTiming, now, model.timing);
+		var _n2 = A2(
+			elm$core$List$partition,
+			function (_n4) {
+				var wait = _n4.a;
+				var mySteps = _n4.b;
+				return elm$time$Time$posixToMillis(wait) <= 0;
+			},
+			A2(
+				elm$core$List$map,
+				function (_n3) {
+					var wait = _n3.a;
+					var mySteps = _n3.b;
+					return _Utils_Tuple2(
+						elm$time$Time$millisToPosix(
+							elm$time$Time$posixToMillis(wait) - elm$time$Time$posixToMillis(timing.dt)),
+						mySteps);
+				},
+				model.interruption));
+		var readyInterruption = _n2.a;
+		var queuedInterruptions = _n2.b;
+		var _n5 = function () {
+			var _n6 = elm$core$List$head(readyInterruption);
+			if (_n6.$ === 'Just') {
+				var _n7 = _n6.a;
+				var wait = _n7.a;
+				var interrupt = _n7.b;
+				return _Utils_Tuple2(
+					interrupt,
+					A2(
+						elm$core$List$map,
+						mdgriffith$elm_style_animation$Animation$Model$mapToMotion(
+							function (m) {
+								return _Utils_update(
+									m,
+									{interpolationOverride: elm$core$Maybe$Nothing});
+							}),
+						model.style));
+			} else {
+				return _Utils_Tuple2(model.steps, model.style);
+			}
+		}();
+		var steps = _n5.a;
+		var style = _n5.b;
+		var _n8 = A3(mdgriffith$elm_style_animation$Animation$Model$resolveSteps, style, steps, timing.dt);
+		var revisedStyle = _n8.a;
+		var sentMessages = _n8.b;
+		var revisedSteps = _n8.c;
+		return _Utils_Tuple2(
+			mdgriffith$elm_style_animation$Animation$Model$Animation(
+				_Utils_update(
+					model,
+					{
+						interruption: queuedInterruptions,
+						running: elm$core$List$length(revisedSteps) || elm$core$List$length(queuedInterruptions),
+						steps: revisedSteps,
+						style: revisedStyle,
+						timing: timing
+					})),
+			elm$core$Platform$Cmd$batch(
+				A2(
+					elm$core$List$map,
+					function (m) {
+						return A2(
+							elm$core$Task$perform,
+							elm$core$Basics$identity,
+							elm$core$Task$succeed(m));
+					},
+					sentMessages)));
+	});
+var mdgriffith$elm_style_animation$Animation$Messenger$update = F2(
+	function (tick, animation) {
+		return A2(mdgriffith$elm_style_animation$Animation$Model$updateAnimation, tick, animation);
+	});
+var author$project$Helpers$updateEveryAnimState = F2(
+	function (dict, timestamp) {
+		var animEach = F2(
+			function (key, val) {
+				return A2(mdgriffith$elm_style_animation$Animation$Messenger$update, timestamp, val);
+			});
+		return A2(elm$core$Dict$map, animEach, dict);
+	});
+var author$project$Helpers$updateNoteWithAnimState = F2(
+	function (timestamp, note) {
+		var _n0 = A2(mdgriffith$elm_style_animation$Animation$Messenger$update, timestamp, note.animState);
+		var newAnimState = _n0.a;
+		var cmd = _n0.b;
+		var newNote = _Utils_update(
+			note,
+			{animState: newAnimState});
+		return _Utils_Tuple2(newNote, cmd);
+	});
+var elm$core$List$unzip = function (pairs) {
+	var step = F2(
+		function (_n0, _n1) {
+			var x = _n0.a;
+			var y = _n0.b;
+			var xs = _n1.a;
+			var ys = _n1.b;
+			return _Utils_Tuple2(
+				A2(elm$core$List$cons, x, xs),
+				A2(elm$core$List$cons, y, ys));
+		});
+	return A3(
+		elm$core$List$foldr,
+		step,
+		_Utils_Tuple2(_List_Nil, _List_Nil),
+		pairs);
+};
+var author$project$Update$animate = F2(
+	function (model, timestamp) {
+		var updatedDict = A2(author$project$Helpers$updateEveryAnimState, model.uniqueAnimStates, timestamp);
+		var uniqueElemAnimCmds = A2(
+			elm$core$List$map,
+			elm$core$Tuple$second,
+			elm$core$Dict$values(updatedDict));
+		var dictStylesOnly = A2(
+			elm$core$Dict$map,
+			F2(
+				function (key, val) {
+					return val.a;
+				}),
+			updatedDict);
+		var _n0 = elm$core$List$unzip(
+			A2(
+				elm$core$List$map,
+				author$project$Helpers$updateNoteWithAnimState(timestamp),
+				elm$core$Array$toList(model.targetNotes)));
+		var newNotes = _n0.a;
+		var noteAnimCmds = _n0.b;
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{
+					targetNotes: elm$core$Array$fromList(newNotes),
+					uniqueAnimStates: dictStylesOnly
+				}),
+			elm$core$Platform$Cmd$batch(
+				_Utils_ap(uniqueElemAnimCmds, noteAnimCmds)));
+	});
+var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
+var author$project$Update$generateTargetNotes = F2(
+	function (model, midiCodeList) {
+		var targetNotes = elm$core$Array$fromList(
+			A2(elm$core$List$map, author$project$Note$createNote, midiCodeList));
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{targetNotes: targetNotes}),
+			elm$core$Platform$Cmd$none);
+	});
+var author$project$View$Mario$getMarioXPosition = function (targetNoteIndex) {
+	var test = A2(elm$core$Debug$log, 'targetNoteIndex ', targetNoteIndex);
+	return (author$project$Constants$leftMargin + (targetNoteIndex * author$project$Constants$noteXInterval)) - 5;
+};
+var mdgriffith$elm_style_animation$Animation$loop = function (steps) {
+	return mdgriffith$elm_style_animation$Animation$Model$Loop(steps);
+};
+var mdgriffith$elm_style_animation$Animation$Model$Set = function (a) {
+	return {$: 'Set', a: a};
+};
+var mdgriffith$elm_style_animation$Animation$set = function (props) {
+	return mdgriffith$elm_style_animation$Animation$Model$Set(props);
+};
+var mdgriffith$elm_style_animation$Animation$wait = function (till) {
+	return mdgriffith$elm_style_animation$Animation$Model$Wait(till);
+};
+var author$project$Animations$spriteLoop = F5(
+	function (delayMillis, spriteWidth, spriteHeight, firstSpriteIndex, numSprites) {
+		var loopForwardHalf = A2(
+			elm$core$List$concatMap,
+			function (i) {
+				return _List_fromArray(
+					[
+						mdgriffith$elm_style_animation$Animation$set(
+						_List_fromArray(
+							[
+								A4(mdgriffith$elm_style_animation$Animation$viewBox, spriteWidth * i, 0.0, spriteWidth, spriteHeight)
+							])),
+						mdgriffith$elm_style_animation$Animation$wait(
+						elm$time$Time$millisToPosix(delayMillis))
+					]);
+			},
+			A2(
+				elm$core$List$map,
+				elm$core$Basics$toFloat,
+				A2(elm$core$List$range, firstSpriteIndex, numSprites - 1)));
+		return _List_fromArray(
+			[
+				mdgriffith$elm_style_animation$Animation$loop(loopForwardHalf)
+			]);
+	});
+var author$project$View$Mario$baseSpriteHeight = 24;
+var author$project$View$Mario$baseSpriteWidth = 17;
+var author$project$View$Mario$marioWalkLoop = A5(author$project$Animations$spriteLoop, 100, author$project$View$Mario$baseSpriteWidth, author$project$View$Mario$baseSpriteHeight, 0, 2);
+var mdgriffith$elm_style_animation$Animation$extractInitialWait = function (steps) {
+	var _n0 = elm$core$List$head(steps);
+	if (_n0.$ === 'Nothing') {
+		return _Utils_Tuple2(
+			elm$time$Time$millisToPosix(0),
+			_List_Nil);
+	} else {
+		var step = _n0.a;
+		if (step.$ === 'Wait') {
+			var till = step.a;
+			var _n2 = mdgriffith$elm_style_animation$Animation$extractInitialWait(
+				A2(elm$core$List$drop, 1, steps));
+			var additionalTime = _n2.a;
+			var remainingSteps = _n2.b;
+			return _Utils_Tuple2(
+				elm$time$Time$millisToPosix(
+					elm$time$Time$posixToMillis(till) + elm$time$Time$posixToMillis(additionalTime)),
+				remainingSteps);
+		} else {
+			return _Utils_Tuple2(
+				elm$time$Time$millisToPosix(0),
+				steps);
+		}
+	}
+};
+var mdgriffith$elm_style_animation$Animation$interrupt = F2(
+	function (steps, _n0) {
+		var model = _n0.a;
+		return mdgriffith$elm_style_animation$Animation$Model$Animation(
+			_Utils_update(
+				model,
+				{
+					interruption: A2(
+						elm$core$List$cons,
+						mdgriffith$elm_style_animation$Animation$extractInitialWait(steps),
+						model.interruption),
+					running: true
+				}));
+	});
+var author$project$Update$getCoinDone = function (model) {
+	var newNextTargetNoteIndex = model.nextTargetNoteIndex + 1;
+	var currentScrollState = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, author$project$Constants$scrollState);
+	var newScrollState = A2(
+		mdgriffith$elm_style_animation$Animation$interrupt,
+		_List_fromArray(
+			[
+				author$project$Animations$scrollGameLevel(model.nextTargetNoteIndex)
+			]),
+		currentScrollState);
+	var currentMarioSpriteStyle = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, author$project$Constants$currentNoteStyle);
+	var newMarioSprite = A2(mdgriffith$elm_style_animation$Animation$interrupt, author$project$View$Mario$marioWalkLoop, currentMarioSpriteStyle);
+	var currentMarioContainerPos = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, author$project$Constants$marioContainer);
+	var newMarioPos = A2(
+		mdgriffith$elm_style_animation$Animation$interrupt,
+		_List_fromArray(
+			[
+				A2(
+				mdgriffith$elm_style_animation$Animation$toWith,
+				author$project$Animations$scrollAndWalkEasing,
+				_List_fromArray(
+					[
+						mdgriffith$elm_style_animation$Animation$x(
+						author$project$View$Mario$getMarioXPosition(newNextTargetNoteIndex))
+					]))
+			]),
+		currentMarioContainerPos);
+	var newMarioPosState = A2(
+		author$project$Helpers$updateUniqueAnimState,
+		model.uniqueAnimStates,
+		_Utils_Tuple2(author$project$Constants$marioContainer, newMarioPos));
+	var newMarioSpriteAndPosState = A2(
+		author$project$Helpers$updateUniqueAnimState,
+		newMarioPosState,
+		_Utils_Tuple2(author$project$Constants$currentNoteStyle, newMarioSprite));
+	var newUniqueAnimStates = A2(
+		author$project$Helpers$updateUniqueAnimState,
+		newMarioSpriteAndPosState,
+		_Utils_Tuple2(author$project$Constants$scrollState, newScrollState));
+	return _Utils_Tuple2(
+		_Utils_update(
+			model,
+			{nextTargetNoteIndex: newNextTargetNoteIndex, uniqueAnimStates: newUniqueAnimStates}),
+		elm$core$Platform$Cmd$none);
+};
+var author$project$Update$initMidi = F2(
+	function (model, isMIDIConnectedBool) {
+		var isPlaying = (model.isPlaying && (!isMIDIConnectedBool)) ? false : model.isPlaying;
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{
+					isMIDIConnected: elm$core$Maybe$Just(isMIDIConnectedBool),
+					isPlaying: isPlaying
+				}),
+			elm$core$Platform$Cmd$none);
+	});
+var author$project$Msg$GetCoinDone = {$: 'GetCoinDone'};
+var mdgriffith$elm_style_animation$Animation$easing = function (_n0) {
+	var duration = _n0.duration;
+	var ease = _n0.ease;
+	return mdgriffith$elm_style_animation$Animation$Model$Easing(
+		{
+			duration: elm$time$Time$millisToPosix(
+				elm$core$Basics$round(duration)),
+			ease: ease,
+			progress: 1,
+			start: 0
+		});
+};
+var mdgriffith$elm_style_animation$Animation$Model$Send = function (a) {
+	return {$: 'Send', a: a};
+};
+var mdgriffith$elm_style_animation$Animation$Messenger$send = function (msg) {
+	return mdgriffith$elm_style_animation$Animation$Model$Send(msg);
+};
+var author$project$Animations$coinDisappear = _List_fromArray(
+	[
+		A2(
+		mdgriffith$elm_style_animation$Animation$toWith,
+		mdgriffith$elm_style_animation$Animation$easing(
+			{
+				duration: 300,
+				ease: function (x) {
+					return A2(elm$core$Basics$pow, x, 2);
+				}
+			}),
+		_List_fromArray(
+			[
+				mdgriffith$elm_style_animation$Animation$opacity(0)
+			])),
+		mdgriffith$elm_style_animation$Animation$Messenger$send(author$project$Msg$GetCoinDone)
+	]);
+var elm$core$Elm$JsArray$unsafeSet = _JsArray_unsafeSet;
+var elm$core$Array$setHelp = F4(
+	function (shift, index, value, tree) {
+		var pos = elm$core$Array$bitMask & (index >>> shift);
+		var _n0 = A2(elm$core$Elm$JsArray$unsafeGet, pos, tree);
+		if (_n0.$ === 'SubTree') {
+			var subTree = _n0.a;
+			var newSub = A4(elm$core$Array$setHelp, shift - elm$core$Array$shiftStep, index, value, subTree);
+			return A3(
+				elm$core$Elm$JsArray$unsafeSet,
+				pos,
+				elm$core$Array$SubTree(newSub),
+				tree);
+		} else {
+			var values = _n0.a;
+			var newLeaf = A3(elm$core$Elm$JsArray$unsafeSet, elm$core$Array$bitMask & index, value, values);
+			return A3(
+				elm$core$Elm$JsArray$unsafeSet,
+				pos,
+				elm$core$Array$Leaf(newLeaf),
+				tree);
+		}
+	});
+var elm$core$Array$set = F3(
+	function (index, value, array) {
+		var len = array.a;
+		var startShift = array.b;
+		var tree = array.c;
+		var tail = array.d;
+		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? array : ((_Utils_cmp(
+			index,
+			elm$core$Array$tailIndex(len)) > -1) ? A4(
+			elm$core$Array$Array_elm_builtin,
+			len,
+			startShift,
+			tree,
+			A3(elm$core$Elm$JsArray$unsafeSet, elm$core$Array$bitMask & index, value, tail)) : A4(
+			elm$core$Array$Array_elm_builtin,
+			len,
+			startShift,
+			A4(elm$core$Array$setHelp, startShift, index, value, tree),
+			tail));
+	});
+var author$project$Update$moveToCoinDone = function (model) {
+	var maybeTargetNote = A2(elm$core$Array$get, model.nextTargetNoteIndex, model.targetNotes);
+	var nextTargetNote = function () {
+		if (maybeTargetNote.$ === 'Nothing') {
+			return author$project$Note$createNote(60);
+		} else {
+			var n = maybeTargetNote.a;
+			return n;
+		}
+	}();
+	var coinAnimSteps = A2(mdgriffith$elm_style_animation$Animation$interrupt, author$project$Animations$coinDisappear, nextTargetNote.animState);
+	var updatedTargetNote = _Utils_update(
+		nextTargetNote,
+		{animState: coinAnimSteps});
+	var allUpdatedTargetNotes = A3(elm$core$Array$set, model.nextTargetNoteIndex, updatedTargetNote, model.targetNotes);
+	return _Utils_Tuple2(
+		_Utils_update(
+			model,
+			{targetNotes: allUpdatedTargetNotes}),
+		elm$core$Platform$Cmd$none);
+};
+var author$project$Model$Score = F3(
+	function (correctNote, answerSpeed, incorrectTries) {
+		return {answerSpeed: answerSpeed, correctNote: correctNote, incorrectTries: incorrectTries};
+	});
+var author$project$Ports$saveLocalData = _Platform_outgoingPort('saveLocalData', elm$core$Basics$identity);
+var elm$json$Json$Encode$int = _Json_wrap;
+var elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			elm$core$List$foldl,
+			F2(
+				function (_n0, obj) {
+					var k = _n0.a;
+					var v = _n0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
+var author$project$Update$convertScoreToJSON = function (session) {
+	return elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'correctNoteMidi',
+				elm$json$Json$Encode$int(session.correctNote.midi)),
+				_Utils_Tuple2(
+				'answerSpeed',
+				elm$json$Json$Encode$int(session.answerSpeed)),
+				_Utils_Tuple2(
+				'incorrectTries',
+				elm$json$Json$Encode$int(session.incorrectTries))
+			]));
+};
+var author$project$Update$getNewAnswerSpeed = F2(
+	function (startTime, currentTime) {
+		if (startTime.$ === 'Nothing') {
+			return 0;
+		} else {
+			var t = startTime.a;
+			return elm$time$Time$posixToMillis(currentTime) - elm$time$Time$posixToMillis(t);
+		}
+	});
+var elm$json$Json$Encode$list = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				elm$core$List$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
+var author$project$Update$restartTimer = F2(
+	function (model, currentTimestamp) {
+		var newAnswerSpeed = A2(author$project$Update$getNewAnswerSpeed, model.startTimestamp, currentTimestamp);
+		var newScoreObjectList = (!_Utils_eq(model.startTimestamp, elm$core$Maybe$Nothing)) ? _List_fromArray(
+			[
+				A3(author$project$Model$Score, model.correctNote, newAnswerSpeed, model.incorrectTries)
+			]) : _List_Nil;
+		var nextCommand = (!_Utils_eq(model.startTimestamp, elm$core$Maybe$Nothing)) ? elm$core$Platform$Cmd$batch(
+			_List_fromArray(
+				[
+					author$project$Ports$saveLocalData(
+					A2(
+						elm$json$Json$Encode$list,
+						author$project$Update$convertScoreToJSON,
+						_Utils_ap(model.scoreList, newScoreObjectList)))
+				])) : elm$core$Platform$Cmd$none;
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{
+					answerSpeed: newAnswerSpeed,
+					incorrectTries: 0,
+					scoreList: _Utils_ap(model.scoreList, newScoreObjectList),
+					startTimestamp: elm$core$Maybe$Just(currentTimestamp),
+					testCurrentTimestamp: elm$core$Maybe$Just(currentTimestamp)
+				}),
+			nextCommand);
+	});
+var author$project$Animations$coinLoop = A5(author$project$Animations$spriteLoop, 100, 16, 16, 0, 4);
+var author$project$Helpers$updateNoteWithAnimSteps = F2(
+	function (animStepsList, note) {
+		return _Utils_update(
+			note,
+			{
+				animState: A2(mdgriffith$elm_style_animation$Animation$interrupt, animStepsList, note.animState)
+			});
+	});
+var author$project$Helpers$startAnimEveryNote = F2(
+	function (noteList, animStepsList) {
+		var notes = elm$core$Array$toList(noteList);
+		return elm$core$Array$fromList(
+			A2(
+				elm$core$List$map,
+				author$project$Helpers$updateNoteWithAnimSteps(animStepsList),
+				notes));
+	});
+var author$project$Msg$RestartTimer = function (a) {
+	return {$: 'RestartTimer', a: a};
+};
+var author$project$Update$startGame = function (model) {
+	var currentMarioSpriteStyle = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, author$project$Constants$currentNoteStyle);
+	var newMarioSprite = A2(mdgriffith$elm_style_animation$Animation$interrupt, author$project$View$Mario$marioWalkLoop, currentMarioSpriteStyle);
+	var updatedUniqueAnimStates = A2(
+		author$project$Helpers$updateUniqueAnimState,
+		model.uniqueAnimStates,
+		_Utils_Tuple2(author$project$Constants$currentNoteStyle, newMarioSprite));
+	return _Utils_Tuple2(
+		_Utils_update(
+			model,
+			{
+				isPlaying: true,
+				targetNotes: A2(author$project$Helpers$startAnimEveryNote, model.targetNotes, author$project$Animations$coinLoop),
+				uniqueAnimStates: updatedUniqueAnimStates
+			}),
+		A2(elm$core$Task$perform, author$project$Msg$RestartTimer, elm$time$Time$now));
+};
+var author$project$Update$getIsCorrect = F2(
+	function (correctNote, currentNote) {
+		if (currentNote.$ === 'Nothing') {
+			return false;
+		} else {
+			var n = currentNote.a;
+			return _Utils_eq(n.midi, correctNote.midi) ? true : false;
+		}
+	});
+var author$project$Update$getNextTargetNote = F2(
+	function (index, targetNotesArray) {
+		var next = A2(elm$core$Array$get, index, targetNotesArray);
+		if (next.$ === 'Nothing') {
+			return author$project$Note$createNote(60);
+		} else {
+			var n = next.a;
+			return n;
+		}
+	});
+var author$project$Animations$staticSprite = F3(
+	function (spriteWidth, spriteHeight, spriteIndex) {
+		return mdgriffith$elm_style_animation$Animation$set(
+			_List_fromArray(
+				[
+					A4(mdgriffith$elm_style_animation$Animation$viewBox, spriteWidth * spriteIndex, 0.0, spriteWidth, spriteHeight)
+				]));
+	});
+var author$project$Msg$MoveToCoinDone = {$: 'MoveToCoinDone'};
+var author$project$View$Mario$getNoteHeight = function (midiCode) {
+	switch (midiCode) {
+		case 60:
+			return 11;
+		case 62:
+			return 10;
+		case 64:
+			return 9;
+		case 65:
+			return 8;
+		case 67:
+			return 7;
+		case 69:
+			return 6;
+		case 71:
+			return 5;
+		case 72:
+			return 4;
+		case 74:
+			return 3;
+		case 76:
+			return 2;
+		case 77:
+			return 1;
+		case 79:
+			return 0;
+		default:
+			return 12;
+	}
+};
+var author$project$View$Mario$getMarioYPosition = function (midiCode) {
+	var yPosFloat = author$project$View$Mario$getNoteHeight(midiCode);
+	return (((-1) * author$project$View$Mario$sizeOffset) + author$project$Constants$topMargin) + ((yPosFloat * author$project$Constants$staffLineHeight) / 2);
+};
+var mdgriffith$elm_style_animation$Animation$Model$To = function (a) {
+	return {$: 'To', a: a};
+};
+var mdgriffith$elm_style_animation$Animation$to = function (props) {
+	return mdgriffith$elm_style_animation$Animation$Model$To(props);
+};
+var mdgriffith$elm_style_animation$Animation$y = function (y_) {
+	return A3(mdgriffith$elm_style_animation$Animation$custom, 'y', y_, '');
+};
+var author$project$View$Mario$marioFall = function (midiCode) {
+	var yPos = author$project$View$Mario$getMarioYPosition(midiCode);
+	var setSprite = A3(author$project$Animations$staticSprite, author$project$View$Mario$baseSpriteWidth, author$project$View$Mario$baseSpriteHeight, 3);
+	return A2(
+		elm$core$List$cons,
+		setSprite,
+		_List_fromArray(
+			[
+				mdgriffith$elm_style_animation$Animation$to(
+				_List_fromArray(
+					[
+						mdgriffith$elm_style_animation$Animation$y(yPos)
+					])),
+				mdgriffith$elm_style_animation$Animation$Messenger$send(author$project$Msg$MoveToCoinDone)
+			]));
+};
+var author$project$View$Mario$marioJump = function (midiCode) {
+	var yPos = author$project$View$Mario$getMarioYPosition(midiCode);
+	var setSprite = A3(author$project$Animations$staticSprite, author$project$View$Mario$baseSpriteWidth, author$project$View$Mario$baseSpriteHeight, 2);
+	return A2(
+		elm$core$List$cons,
+		setSprite,
+		_List_fromArray(
+			[
+				mdgriffith$elm_style_animation$Animation$to(
+				_List_fromArray(
+					[
+						mdgriffith$elm_style_animation$Animation$y(yPos)
+					])),
+				mdgriffith$elm_style_animation$Animation$Messenger$send(author$project$Msg$MoveToCoinDone)
+			]));
+};
+var author$project$Update$jumpOrFall = F2(
+	function (prevMidi, currentMidi) {
+		return (_Utils_cmp(currentMidi, prevMidi) > 0) ? mdgriffith$elm_style_animation$Animation$interrupt(
+			author$project$View$Mario$marioJump(currentMidi)) : mdgriffith$elm_style_animation$Animation$interrupt(
+			author$project$View$Mario$marioFall(currentMidi));
+	});
+var author$project$Update$updateNotePressed = F2(
+	function (model, noteCode) {
+		var prevMidi = function () {
+			var _n0 = model.prevMidi;
+			if (_n0.$ === 'Nothing') {
+				return noteCode;
+			} else {
+				var m = _n0.a;
+				return m;
+			}
+		}();
+		var nextTargetNote = A2(author$project$Update$getNextTargetNote, model.nextTargetNoteIndex, model.targetNotes);
+		var nextAnimStepsList = A2(author$project$Update$jumpOrFall, prevMidi, noteCode);
+		var newCurrentNote = author$project$Note$createNote(noteCode);
+		var isCorrect = A2(
+			author$project$Update$getIsCorrect,
+			nextTargetNote,
+			elm$core$Maybe$Just(newCurrentNote));
+		var currentMarioSpriteStyle = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, author$project$Constants$currentNoteStyle);
+		var newMarioStyle = isCorrect ? nextAnimStepsList(currentMarioSpriteStyle) : A2(mdgriffith$elm_style_animation$Animation$interrupt, author$project$View$Mario$marioWalkLoop, currentMarioSpriteStyle);
+		var newUniqueAnimStates = A2(
+			author$project$Helpers$updateUniqueAnimState,
+			model.uniqueAnimStates,
+			_Utils_Tuple2(author$project$Constants$currentNoteStyle, newMarioStyle));
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{
+					currentNote: elm$core$Maybe$Just(newCurrentNote),
+					incorrectTries: isCorrect ? model.incorrectTries : (model.incorrectTries + 1),
+					prevMidi: elm$core$Maybe$Just(noteCode),
+					score: isCorrect ? (model.score + 1) : model.score,
+					uniqueAnimStates: newUniqueAnimStates
+				}),
+			elm$core$Platform$Cmd$none);
+	});
+var author$project$Update$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'InitMIDI':
+				var isMIDIConnectedBool = msg.a;
+				return A2(author$project$Update$initMidi, model, isMIDIConnectedBool);
+			case 'StartGame':
+				return author$project$Update$startGame(model);
+			case 'GenerateTargetNotes':
+				var midiCodeList = msg.a;
+				return A2(author$project$Update$generateTargetNotes, model, midiCodeList);
+			case 'RestartTimer':
+				var currentTimestamp = msg.a;
+				return A2(author$project$Update$restartTimer, model, currentTimestamp);
+			case 'NoteReleased':
+				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+			case 'NotePressed':
+				var noteCode = msg.a;
+				return A2(author$project$Update$updateNotePressed, model, noteCode);
+			case 'MoveToCoinDone':
+				return author$project$Update$moveToCoinDone(model);
+			case 'GetCoinDone':
+				return author$project$Update$getCoinDone(model);
+			case 'Animate':
+				var timestamp = msg.a;
+				return A2(author$project$Update$animate, model, timestamp);
+			case 'StartScrollGameLevel':
+				var currentScrollState = A2(author$project$Helpers$getUniqueAnimState, model.uniqueAnimStates, author$project$Constants$scrollState);
+				var newScrollState = A2(
+					mdgriffith$elm_style_animation$Animation$interrupt,
+					_List_fromArray(
+						[
+							author$project$Animations$scrollGameLevel(model.nextTargetNoteIndex)
+						]),
+					currentScrollState);
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							uniqueAnimStates: A2(
+								author$project$Helpers$updateUniqueAnimState,
+								model.uniqueAnimStates,
+								_Utils_Tuple2(author$project$Constants$scrollState, newScrollState))
+						}),
+					elm$core$Platform$Cmd$none);
+			default:
+				var currentTimestamp = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							testCurrentTimestamp: elm$core$Maybe$Just(currentTimestamp)
+						}),
+					elm$core$Platform$Cmd$none);
+		}
+	});
 var elm$browser$Browser$element = _Browser_element;
 var author$project$Main$main = elm$browser$Browser$element(
-	{init: author$project$Main$init, subscriptions: author$project$Main$subscriptions, update: author$project$Main$update, view: author$project$Main$view});
+	{init: author$project$Main$init, subscriptions: author$project$Main$subscriptions, update: author$project$Update$update, view: author$project$Main$view});
 _Platform_export({'Main':{'init':author$project$Main$main(elm$json$Json$Decode$int)(0)}});}(this));
