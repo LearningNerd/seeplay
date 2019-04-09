@@ -1,13 +1,13 @@
 module View.MidiStatus exposing (view)
 
-import Model exposing (Model, Margins)
-import Msg exposing (..)
 import Html as HTML exposing (..)
 import Html.Attributes as A exposing (..)
 import Html.Events exposing (..)
 import Svg exposing (..)
 import Svg.Attributes as S exposing (..)
 
+import Model exposing (Model, Margins)
+import Msg exposing (..)
 
 view : Model -> Html Msg
 view model = 

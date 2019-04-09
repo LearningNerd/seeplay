@@ -2,10 +2,12 @@ module View.Coin exposing (view)
 
 import Animation
 import Animation.Messenger
-import Model exposing (Model, Margins)
-import Msg exposing (..)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
+
+import Model exposing (Model, Margins)
+import Msg exposing (..)
+
 
 view animState xS yS heightS =
   let

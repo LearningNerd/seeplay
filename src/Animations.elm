@@ -1,12 +1,13 @@
 module Animations exposing (..)
 
-import Msg exposing (..)
-import Constants
 import Animation
 import Animation.Messenger
-import Color
 import Time
 import Dict exposing (Dict)
+
+import Msg exposing (..)
+import Constants
+import Color
 
 
 ----- refactor this!!! =P

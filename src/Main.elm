@@ -31,19 +31,20 @@ import View.Game
 import View.Coin
 import View.Mario
 
+
 port handleInitMIDI : (Bool -> msg) -> Sub msg
 port handleNotePressed : (Int -> msg) -> Sub msg
 port handleNoteReleased : (Bool -> msg) -> Sub msg
 
-
 port cache : E.Value -> Cmd msg
-
 
 -- Fake data from fakemidi.js (manual testing in browser)
 port fakeHandleInitMIDI : (Bool -> msg) -> Sub msg
 port fakeHandleNotePressed : (Int -> msg) -> Sub msg
 port fakeHandleNoteReleased : (Bool -> msg) -> Sub msg
 
+
+-- INITIAL MODEL
 
 
 

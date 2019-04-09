@@ -7062,7 +7062,7 @@ var mdgriffith$elm_style_animation$Animation$spring = function (settings) {
 	return mdgriffith$elm_style_animation$Animation$Model$Spring(settings);
 };
 var author$project$Animations$scrollAndWalkEasing = mdgriffith$elm_style_animation$Animation$spring(
-	{damping: 80, stiffness: 100});
+	{damping: 50, stiffness: 50});
 var author$project$Constants$noteXInterval = 200;
 var elm$core$Debug$log = _Debug_log;
 var author$project$Animations$scrollGameLevel = function (nextNoteIndex) {

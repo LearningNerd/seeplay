@@ -25,6 +25,7 @@ updateEveryAnimState dict timestamp =
   in
     Dict.map animEach dict
 
+
 -- example: "correctNoteStyle" [Animation.to [Animation.opacity 1.0]]
 -- return updated model!
 updateModelForUniqueAnim model animKey newAnimSteps = 
@@ -33,7 +34,6 @@ updateModelForUniqueAnim model animKey newAnimSteps =
     newStyle = Animation.interrupt newAnimSteps currentStyle
   in
     { model | uniqueAnimStates = updateUniqueAnimState model.uniqueAnimStates (animKey, newStyle) }
-
 
 
 -- returns (newNote, cmd)
@@ -51,6 +51,7 @@ updateNoteWithAnimState timestamp note =
 
 updateNoteWithAnimSteps animStepsList note =
   { note | animState = Animation.interrupt animStepsList note.animState }
+
 
 startAnimEveryNote noteList animStepsList =
   let

@@ -3,13 +3,14 @@ module Model exposing (..)
 import Dict exposing (Dict)
 import Array exposing (..)
 import Time
+import Animation
+import Animation.Messenger
+
 import Msg exposing (..)
 import Constants
 import Note exposing (Note)
 import Color
 import Animations
-import Animation
-import Animation.Messenger
 
 
 type alias Model =

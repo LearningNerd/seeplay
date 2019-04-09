@@ -1,9 +1,5 @@
 module View.Game exposing (view)
 
-import Helpers exposing (..)
-import Constants
-import Model exposing (Model, Margins)
-import Msg exposing (..)
 import Html as HTML exposing (..)
 import Html.Attributes as A exposing (..)
 import Html.Events exposing (..)
@@ -12,7 +8,12 @@ import Svg.Attributes as S exposing (..)
 import Animation
 import Animation.Messenger
 
+import Constants
+import Helpers exposing (..)
+import Model exposing (Model, Margins)
+import Msg exposing (..)
 import View.Note
+
 
 view : Model -> Html Msg
 view model =

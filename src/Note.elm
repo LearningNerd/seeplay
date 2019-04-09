@@ -5,6 +5,7 @@ import Array exposing (..)
 import Random
 import Animation
 import Animation.Messenger
+
 import Msg exposing (Msg)
 import Animations
 

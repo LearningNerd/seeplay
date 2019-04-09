@@ -1,8 +1,5 @@
 module View.Note exposing (..)
 
-import Constants
-import Model exposing (Model, Margins)
-import Msg exposing (..)
 import Html as HTML exposing (..)
 import Html.Attributes as A exposing (..)
 import Html.Events exposing (..)
@@ -12,10 +9,12 @@ import Animation
 import Animation.Messenger
 import Array exposing (Array)
 
+import Constants
+import Model exposing (Model, Margins)
+import Msg exposing (..)
 import Note exposing (Note)
 import View.Coin exposing (view)
 import View.Mario exposing (view)
-
 
 
 drawTargetNote : Float -> Margins -> Int -> Note -> Svg msg
