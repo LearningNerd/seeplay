@@ -7704,47 +7704,32 @@ var author$project$View$Mario$sizeOffset = 15;
 var author$project$View$Mario$spriteHeight = author$project$View$Mario$sizeOffset + author$project$Constants$staffLineHeight;
 var author$project$View$Mario$widthToHeightRatio = 17 / 24;
 var author$project$View$Mario$spriteWidth = (author$project$View$Mario$sizeOffset + author$project$Constants$staffLineHeight) * author$project$View$Mario$widthToHeightRatio;
-var author$project$View$Mario$spriteView = function (animStyleSprite) {
-	return A2(
-		elm$svg$Svg$svg,
-		_Utils_ap(
-			mdgriffith$elm_style_animation$Animation$render(animStyleSprite),
-			_List_fromArray(
-				[
-					elm$svg$Svg$Attributes$width(
-					elm$core$String$fromFloat(author$project$View$Mario$spriteWidth)),
-					elm$svg$Svg$Attributes$height(
-					elm$core$String$fromFloat(author$project$View$Mario$spriteHeight)),
-					elm$svg$Svg$Attributes$class('sprite')
-				])),
-		_List_fromArray(
-			[
-				A2(
-				elm$svg$Svg$image,
-				_List_fromArray(
-					[
-						elm$svg$Svg$Attributes$xlinkHref('img/mariosmall.png')
-					]),
-				_List_Nil)
-			]));
-};
 var author$project$View$Mario$view = F3(
 	function (animStyleSprite, animStylePos, yS) {
 		return A2(
 			elm$svg$Svg$svg,
 			_Utils_ap(
 				mdgriffith$elm_style_animation$Animation$render(animStylePos),
-				_List_fromArray(
-					[
-						elm$svg$Svg$Attributes$width(
-						elm$core$String$fromFloat(author$project$View$Mario$spriteWidth)),
-						elm$svg$Svg$Attributes$height(
-						elm$core$String$fromFloat(author$project$View$Mario$spriteHeight)),
-						elm$svg$Svg$Attributes$y(yS)
-					])),
+				_Utils_ap(
+					mdgriffith$elm_style_animation$Animation$render(animStyleSprite),
+					_List_fromArray(
+						[
+							elm$svg$Svg$Attributes$width(
+							elm$core$String$fromFloat(author$project$View$Mario$spriteWidth)),
+							elm$svg$Svg$Attributes$height(
+							elm$core$String$fromFloat(author$project$View$Mario$spriteHeight)),
+							elm$svg$Svg$Attributes$y(yS),
+							elm$svg$Svg$Attributes$class('sprite')
+						]))),
 			_List_fromArray(
 				[
-					author$project$View$Mario$spriteView(animStyleSprite)
+					A2(
+					elm$svg$Svg$image,
+					_List_fromArray(
+						[
+							elm$svg$Svg$Attributes$xlinkHref('img/mariosmall.png')
+						]),
+					_List_Nil)
 				]));
 	});
 var author$project$View$Note$getMarioYPosition = function (midiCode) {

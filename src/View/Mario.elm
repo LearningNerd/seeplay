@@ -81,27 +81,12 @@ getNoteHeight midiCode =
     _ -> 12
 ------------------------------------
 
--- for now, no viewbox .... will it still work????
 view animStyleSprite animStylePos yS =
-    svg (Animation.render animStylePos ++ 
+    svg ( Animation.render animStylePos ++ Animation.render animStyleSprite ++
     [ -- viewBox "0 0 " ++ String.fromFloat spriteWidth ++ " " ++ String.fromFloat spriteHeight
     width (String.fromFloat spriteWidth)
     , height (String.fromFloat spriteHeight)
     , y yS
-    ])
-    [spriteView animStyleSprite]
-
-spriteView animStyleSprite =
---  let
-    -- spriteWidth = heightNum * widthToHeightRatio
-    -- spriteWidth = 17
-    -- spriteHeight = 24 -- make sprite bigger based on lineheight????
---  in
-    svg (Animation.render animStyleSprite ++ 
-    [ width (String.fromFloat spriteWidth)
-    , height (String.fromFloat spriteHeight)
-    -- , x xS -- this is animated!!!
-    -- , y yS -- this is animated!!!
     , class "sprite"
     ])
     [ image [xlinkHref "img/mariosmall.png"] [] ]
