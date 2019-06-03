@@ -81,6 +81,7 @@ getNoteHeight midiCode =
     _ -> 12
 ------------------------------------
 
+-- for now, no viewbox .... will it still work????
 view animStyleSprite animStylePos yS =
     svg ( Animation.render animStylePos ++ Animation.render animStyleSprite ++
     [ -- viewBox "0 0 " ++ String.fromFloat spriteWidth ++ " " ++ String.fromFloat spriteHeight

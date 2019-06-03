@@ -7649,7 +7649,11 @@ var author$project$View$Coin$view = F4(
 					elm$svg$Svg$image,
 					_List_fromArray(
 						[
-							elm$svg$Svg$Attributes$xlinkHref('img/coin.png')
+							elm$svg$Svg$Attributes$xlinkHref('img/coin.png'),
+							elm$svg$Svg$Attributes$width(
+							elm$core$String$fromFloat(spriteWidth)),
+							elm$svg$Svg$Attributes$height(
+							elm$core$String$fromFloat(spriteHeight))
 						]),
 					_List_Nil)
 				]));
