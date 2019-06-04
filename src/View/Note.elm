@@ -5,8 +5,6 @@ import Html.Attributes as A exposing (..)
 import Html.Events exposing (..)
 import Svg exposing (..)
 import Svg.Attributes as S exposing (..)
-import Animation
-import Animation.Messenger
 import Array exposing (Array)
 
 import Constants
@@ -31,29 +29,15 @@ drawTargetNote lineHeight margins xPosIndex note =
         
         heightString = (String.fromFloat lineHeight)
     in
-      View.Coin.view note.animState cxString cyString heightString
-
-{--
-    circle
-      ( [ S.cx cxString
-        , S.cy cyString
-        , S.r (String.fromFloat (lineHeight / 2))
-        ] ++ (Animation.render animStyle)
-      )
-        []
---}
+      View.Coin.view cxString cyString heightString
 
 
-drawCurrentNote : Float -> Margins -> (Animation.Messenger.State Msg) -> (Animation.Messenger.State Msg) -> Int -> Note -> Svg msg
-drawCurrentNote lineHeight margins animStyleSprite animStylePos xPosIndex note =
+drawCurrentNote : Float -> Margins -> Int -> Note -> Svg msg
+drawCurrentNote lineHeight margins xPosIndex note =
     let
-    
-        -- cxString =
-            -- String.fromFloat (margins.left + ((toFloat xPosIndex) * (toFloat Constants.noteXInterval) ) + 12 )
-
         cyString = String.fromFloat (getMarioYPosition note.midi)
     in
-      View.Mario.view animStyleSprite animStylePos cyString
+      View.Mario.view cyString
 
 
 getMarioYPosition midiCode =

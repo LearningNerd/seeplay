@@ -5,11 +5,8 @@ import Html.Attributes as A exposing (..)
 import Html.Events exposing (..)
 import Svg exposing (..)
 import Svg.Attributes as S exposing (..)
-import Animation
-import Animation.Messenger
 
 import Constants
-import Helpers exposing (..)
 import Model exposing (Model, Margins)
 import Msg exposing (..)
 import View.Note
@@ -23,9 +20,6 @@ view model =
 svgView : Model -> Float -> Float -> Margins -> Svg Msg
 svgView model width height margins =
     let
-        marioSpriteStyle = getUniqueAnimState model.uniqueAnimStates Constants.currentNoteStyle
-        marioContainerStyle = getUniqueAnimState model.uniqueAnimStates Constants.marioContainer
-        gameLevelScrollState = getUniqueAnimState model.uniqueAnimStates Constants.scrollState
 
         svgWidth =
             Constants.svgViewTotalWidth
@@ -35,18 +29,17 @@ svgView model width height margins =
         heightS =
             String.fromFloat Constants.svgViewTotalHeight
         
-        drawTargetNoteFunc = View.Note.drawTargetNote Constants.staffLineHeight margins
         drawCurrentNoteFunc = View.Note.drawCurrentNote Constants.staffLineHeight margins
 
         svgListAllNotes = View.Note.drawAllTargetNotes width Constants.staffLineHeight margins model.targetNotes
 
         currentNoteDrawing = case model.currentNote of
                                  Nothing -> []
-                                 Just n -> [ drawCurrentNoteFunc marioSpriteStyle marioContainerStyle model.nextTargetNoteIndex n ]
+                                 Just n -> [ drawCurrentNoteFunc model.nextTargetNoteIndex n ]
 
         -- animate viewBox to scroll game level with all notes drawn inside
         -- updated: draw the current note inside the game level?
-        gameLevelSvg = svg ( [S.width widthS, S.height heightS, S.x "150", S.y "0"] ++ Animation.render gameLevelScrollState) (currentNoteDrawing ++ svgListAllNotes)
+        gameLevelSvg = svg [S.width widthS, S.height heightS, S.x "150", S.y "0"] (currentNoteDrawing ++ svgListAllNotes)
     
     in
     svg

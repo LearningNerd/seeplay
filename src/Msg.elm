@@ -1,6 +1,5 @@
 module Msg exposing (Msg(..))
 
-import Animation
 import Time
 
 type Msg
@@ -11,15 +10,4 @@ type Msg
     | GenerateTargetNotes (List Int)
     | StartGame
     | RestartTimer Time.Posix
-   
-    | Animate Animation.Msg
-
-    | StartScrollGameLevel
-
-    | MoveToCoinDone
-    | GetCoinDone
---    | ResumeWalkingDone
-
-    -- test: delete this!
-    | TestTick Time.Posix
-
+ 

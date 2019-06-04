@@ -17,11 +17,4 @@ rightMargin = 0
 svgViewTotalWidth = svgViewWidth + leftMargin + rightMargin
 svgViewTotalHeight = svgViewHeight + topMargin + bottomMargin
 
--- ---------- Constants for animated elem states --------------
-coinStyle = "coinStyle"
-scrollState = "gameLevelScrollState"
-currentNoteStyle = "currentNoteStyle" -- Mario sprite style
-marioContainer = "marioContainer" -- Mario sprite style
-correctNoteStyle = "correctNoteStyle"
-
 

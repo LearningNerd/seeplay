@@ -9,13 +9,9 @@ import Tuple exposing (..)
 import Task
 import Time
 import Json.Encode as E
-import Animation
-import Animation.Messenger
 
-import Helpers exposing (..)
 import Constants
 import Model exposing (Model, Score)
-import Animations
 import Msg exposing (..)
 import Note exposing (Note)
 import Ports
@@ -47,35 +43,6 @@ update msg model =
         NotePressed noteCode -> 
           updateNotePressed model noteCode
 
-        MoveToCoinDone ->
-          moveToCoinDone model
-
-        GetCoinDone ->
-          getCoinDone model
-
-        Animate timestamp -> 
-          animate model timestamp
-
---------------------- NOT BEING USED RIGHT NOW -------------
-        StartScrollGameLevel ->
-          let
-              currentScrollState = getUniqueAnimState model.uniqueAnimStates Constants.scrollState
-              newScrollState = Animation.interrupt [Animations.scrollGameLevel model.nextTargetNoteIndex] currentScrollState
-          in
-            -- ( { model | gameLevelScrollState = Animation.interrupt [Animations.scrollGameLevel model.nextTargetNoteIndex] model.gameLevelScrollState }
-            (
-            { model | uniqueAnimStates = Helpers.updateUniqueAnimState model.uniqueAnimStates (Constants.scrollState, newScrollState) }
-            , Cmd.none
-            )
-
-
-        TestTick currentTimestamp ->
-          ( { model | testCurrentTimestamp = Just currentTimestamp }
-          , Cmd.none
-          )
-------------------------------------------------------------
-
-
 
 -- Update model based on MIDI event from JS
 -- and update state to show game can now be played, if so
@@ -95,26 +62,11 @@ initMidi model isMIDIConnectedBool =
     )
 
 
--- Start Mario walk anim sprite
--- Start animating every note sprite
 -- Initiate timer!
 startGame : Model -> ( Model, Cmd Msg )
 startGame model =
-  let
-    currentMarioSpriteStyle =
-      getUniqueAnimState model.uniqueAnimStates Constants.currentNoteStyle
-      
-    newMarioSprite =
-      Animation.interrupt View.Mario.marioWalkLoop currentMarioSpriteStyle
-     
-    updatedUniqueAnimStates =
-      Helpers.updateUniqueAnimState model.uniqueAnimStates (Constants.currentNoteStyle, newMarioSprite)
-
-  in
      ( { model |
        isPlaying = True
-       , targetNotes = Helpers.startAnimEveryNote model.targetNotes Animations.coinLoop
-       , uniqueAnimStates = updatedUniqueAnimStates
        }
      , Task.perform RestartTimer Time.now 
      )
@@ -126,7 +78,6 @@ generateTargetNotes : Model -> List Int -> ( Model, Cmd Msg )
 generateTargetNotes model midiCodeList =
   let
       targetNotes = Array.fromList (List.map Note.createNote midiCodeList)
-      -- test = Debug.log "targetnotes: " targetNotes
   in
      ( { model | targetNotes = targetNotes }
      , Cmd.none
@@ -188,13 +139,10 @@ convertScoreToJSON session =
 
 
 
-
-
 -- Update state for previously played note,
 -- for currently pressed note,
 -- for next target note
 -- Check if note is correct!
--- Update animation with jump/fall (or continue walking) as needed
 -- Update score and num of incorrect guesses
 updateNotePressed : Model -> Int -> ( Model, Cmd Msg )
 updateNotePressed model noteCode =
@@ -208,20 +156,6 @@ updateNotePressed model noteCode =
     nextTargetNote = getNextTargetNote model.nextTargetNoteIndex model.targetNotes
 
     isCorrect = getIsCorrect nextTargetNote (Just newCurrentNote)
-    
-    nextAnimStepsList = jumpOrFall prevMidi noteCode
-
-    currentMarioSpriteStyle = getUniqueAnimState model.uniqueAnimStates Constants.currentNoteStyle
-    
-    -- for now, only use jump/fall sprites when getting correct note. but this isn't what I actually want =P let's test this first!
-    newMarioStyle = if isCorrect
-        then
-            nextAnimStepsList currentMarioSpriteStyle
-        else
-            Animation.interrupt View.Mario.marioWalkLoop currentMarioSpriteStyle
-    
-    newUniqueAnimStates = Helpers.updateUniqueAnimState model.uniqueAnimStates (Constants.currentNoteStyle, newMarioStyle)
-
   in
     ( { model | currentNote = Just newCurrentNote
       , prevMidi = Just noteCode
@@ -229,18 +163,10 @@ updateNotePressed model noteCode =
             if isCorrect then model.score + 1 else model.score
       , incorrectTries =
             if isCorrect then model.incorrectTries else model.incorrectTries + 1
-      , uniqueAnimStates = newUniqueAnimStates
       }
-    -- , nextCommand
     , Cmd.none
     )
 
--- HELPERS FOR THE ABOVE FUNCTION:
-    -- need to handle case where note is at same level ... stay a bit in front of note, not directly on it? or just never have two same notes in a row?
-jumpOrFall prevMidi currentMidi =
-  if currentMidi > prevMidi
-     then Animation.interrupt ( View.Mario.marioJump currentMidi )
-     else Animation.interrupt ( View.Mario.marioFall currentMidi )
 
 getNextTargetNote index targetNotesArray = 
   let 
@@ -249,6 +175,7 @@ getNextTargetNote index targetNotesArray =
     case next of
       Nothing -> Note.createNote 60 -- temporary fix =P last note is always C4 ?
       Just n -> n
+
 
 getIsCorrect : Note -> Maybe Note -> Bool
 getIsCorrect correctNote currentNote = 
@@ -259,103 +186,4 @@ getIsCorrect correctNote currentNote =
           True
         else
           False
-
-
------ TRIGGERED BY ANIMATIONS ENDING ------
-
--- Make coin disappear after Mario has reached a coin.
--- TRIGGERS GetCoinDone ...
-moveToCoinDone : Model -> ( Model, Cmd Msg )
-moveToCoinDone model =
-  let
-    maybeTargetNote = Array.get model.nextTargetNoteIndex model.targetNotes
-
-    nextTargetNote = case maybeTargetNote of
-        Nothing -> Note.createNote 60 -- ...not sure what other fallback =P
-        Just n -> n
-
-    coinAnimSteps =
-      Animation.interrupt Animations.coinDisappear nextTargetNote.animState
-
-    updatedTargetNote =
-      { nextTargetNote | animState = coinAnimSteps }
-
-    allUpdatedTargetNotes =
-      Array.set model.nextTargetNoteIndex updatedTargetNote model.targetNotes
-
-  in
-     ( { model | targetNotes = allUpdatedTargetNotes }
-       , Cmd.none 
-     )
-
-
--- ** this only gets triggered if a correct note was just played
--- Resume walk sprite,
--- move mario x pos
--- scroll to next note.
--- Update model with next note index
-getCoinDone : Model -> ( Model, Cmd Msg )
-getCoinDone model =
-  let
-    -- Update next target note in model, scroll game level to next note
-    newNextTargetNoteIndex = model.nextTargetNoteIndex + 1
-
-    -- move mario x pos to the next note!
-    currentMarioContainerPos =
-      getUniqueAnimState model.uniqueAnimStates Constants.marioContainer
-
-    newMarioPos = Animation.interrupt 
-      [ Animation.toWith Animations.scrollAndWalkEasing
-        [ Animation.x (View.Mario.getMarioXPosition newNextTargetNoteIndex)]
-      ] currentMarioContainerPos
-
-    newMarioPosState =
-      Helpers.updateUniqueAnimState model.uniqueAnimStates (Constants.marioContainer, newMarioPos)
-
-    -- update mario to resume walk cycle
-    currentMarioSpriteStyle =
-      getUniqueAnimState model.uniqueAnimStates Constants.currentNoteStyle
-
-    newMarioSprite =
-      Animation.interrupt View.Mario.marioWalkLoop currentMarioSpriteStyle
-
-    newMarioSpriteAndPosState =
-      Helpers.updateUniqueAnimState newMarioPosState  (Constants.currentNoteStyle, newMarioSprite)
-
-    -- update game level scroll anim
-    currentScrollState = getUniqueAnimState model.uniqueAnimStates Constants.scrollState
-
-    newScrollState =
-      Animation.interrupt [ Animations.scrollGameLevel model.nextTargetNoteIndex] currentScrollState
-
-    newUniqueAnimStates =
-      Helpers.updateUniqueAnimState newMarioSpriteAndPosState (Constants.scrollState, newScrollState)
-
-  in
-     ( { model | nextTargetNoteIndex = newNextTargetNoteIndex
-       , uniqueAnimStates = newUniqueAnimStates
-       }
-     , Cmd.none
-     )
-
-
--- Update every animation stored in the model (in a dictionary)
--- and extract all the next commands to run
--- And do the same with the array of notes (each note has an anim style)
-animate model timestamp =
-  let
-    updatedDict = updateEveryAnimState model.uniqueAnimStates timestamp
-
-    uniqueElemAnimCmds = List.map Tuple.second (Dict.values updatedDict)
-
-    dictStylesOnly = Dict.map (\key val -> Tuple.first val) updatedDict
-
-    (newNotes, noteAnimCmds) =
-      List.unzip (List.map (Helpers.updateNoteWithAnimState timestamp) (Array.toList model.targetNotes))
-  in
-     ( { model | uniqueAnimStates = dictStylesOnly
-       , targetNotes = Array.fromList newNotes
-       }
-     , Cmd.batch (uniqueElemAnimCmds ++ noteAnimCmds)
-     )
 

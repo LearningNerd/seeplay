@@ -8,18 +8,14 @@ import Random
 import Tuple exposing (..)
 import Task
 import Time
-import Animation
-import Animation.Messenger
 import Html exposing (..)
 import Html.Attributes as A exposing (..)
 import Html.Events exposing (..)
 
-import Helpers exposing (..)
 import Constants
 import Model exposing (Model, Score, initialModel)
 import Update
 import Color
-import Animations
 import Msg exposing (..)
 import Note exposing (Note)
 import Ports
@@ -53,7 +49,8 @@ view : Model -> Html Msg
 view model =
     div [ ]
         [ View.Header.view model
-        , main_ [A.class "container"] [ Html.p [onClick StartScrollGameLevel ] [ Html.text "....???? test!"] , case model.isMIDIConnected of
+        , main_ [A.class "container"] [ Html.p [] []
+                , case model.isMIDIConnected of
             -- If Nothing or False (waiting to init or no MIDI available), then show the MidiStatus screen (waiting for input)
             Nothing ->
               View.MidiStatus.view model
@@ -81,15 +78,14 @@ subscriptions model =
         [ Ports.handleInitMIDI InitMIDI
         , Ports.handleNotePressed NotePressed
         , Ports.handleNoteReleased NoteReleased
-        , Time.every 10 TestTick -- every 10 ms
         -- ************************************************
         -- Fake data from fakemidi.js for manual testing:
         -- ************************************************
         , Ports.fakeHandleInitMIDI InitMIDI
         , Ports.fakeHandleNotePressed NotePressed
         , Ports.fakeHandleNoteReleased NoteReleased
-        
-        , Animation.subscription Animate ( (Dict.values model.uniqueAnimStates) ++ (List.map .animState (Array.toList model.targetNotes)))
+       
+        --  *** TODO: subscribe to animation frames
         ]
 
 

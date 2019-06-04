@@ -3,14 +3,11 @@ module Model exposing (..)
 import Dict exposing (Dict)
 import Array exposing (..)
 import Time
-import Animation
-import Animation.Messenger
 
 import Msg exposing (..)
 import Constants
 import Note exposing (Note)
 import Color
-import Animations
 
 
 type alias Model =
@@ -28,7 +25,6 @@ type alias Model =
     , scoreList : List Score -- store a list of score records for each practice session ... goes into local storage
     , testCurrentTimestamp : Maybe Time.Posix
     , sessionId : Int
-    , uniqueAnimStates : Dict String (Animation.Messenger.State Msg)
     }
 
 type alias Score =
@@ -58,6 +54,5 @@ initialModel =
     , scoreList = []
     , testCurrentTimestamp = Nothing
     , sessionId = 0
-    , uniqueAnimStates = Animations.initUniqueAnimStates
     }
 
