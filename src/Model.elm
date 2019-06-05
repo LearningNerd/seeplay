@@ -13,17 +13,17 @@ import Color
 type alias Model =
     { isMIDIConnected : Maybe Bool
     , isPlaying : Bool
-    , correctNote : Note
+
     , targetNotes : Array Note
     , nextTargetNoteIndex : Int
     , currentNote : Maybe Note
     , prevMidi : Maybe Int
+    
     , score : Int
     , startTimestamp : Maybe Time.Posix
     , answerSpeed : Int -- result of subtracting two times via posixToMillis
     , incorrectTries : Int
     , scoreList : List Score -- store a list of score records for each practice session ... goes into local storage
-    , testCurrentTimestamp : Maybe Time.Posix
     , sessionId : Int
     }
 
@@ -42,17 +42,17 @@ initialModel : Model
 initialModel =
     { isMIDIConnected = Nothing
     , isPlaying = False
-    , correctNote = Note.createNote 60
+    
     , targetNotes = Array.empty
     , nextTargetNoteIndex = 0
     , currentNote = Just (Note.createNote 65)
     , prevMidi = Nothing
+    
     , score = 0
     , startTimestamp = Nothing
     , answerSpeed = 0
     , incorrectTries = 0
     , scoreList = []
-    , testCurrentTimestamp = Nothing
     , sessionId = 0
     }
 

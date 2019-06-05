@@ -97,10 +97,13 @@ restartTimer model currentTimestamp =
     newAnswerSpeed =
       getNewAnswerSpeed model.startTimestamp currentTimestamp
 
+
+    correctNote = getCurrentCorrectNote model.nextTargetNoteIndex model.targetNotes
+
     -- Append data to scoreList if startTime has been initialized
     newScoreObjectList =
       if model.startTimestamp /= Nothing
-        then [ Score model.correctNote newAnswerSpeed model.incorrectTries ]
+        then [ Score correctNote newAnswerSpeed model.incorrectTries ]
         else []
 
     -- Only save to local storage if this is NOT the very first note displayed
@@ -119,14 +122,25 @@ restartTimer model currentTimestamp =
        , startTimestamp = Just currentTimestamp
        -- RESET after getting it correct (and command below will send OLD value, not the new one):
        , incorrectTries = 0
-       -- Temporary test:
-       , testCurrentTimestamp = Just currentTimestamp
        }
      , nextCommand
      )
 
+
 -- HELPERS FOR FUNCTION ABOVE:
-    -- Edge case: starting the timer when game begins shouldn't update answerSpeed
+ 
+getCurrentCorrectNote index arr =
+  let
+    maybeCorrectNote = Array.get index arr
+  in
+    case maybeCorrectNote of
+      Nothing ->
+        Note.createNote 60 -- temporary fix =P last note is always C4 ?
+      Just correctNote ->
+        correctNote
+
+
+-- Edge case: starting the timer when game begins shouldn't update answerSpeed
 getNewAnswerSpeed startTime currentTime =
   case startTime of
     Nothing ->
