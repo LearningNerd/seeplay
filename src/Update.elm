@@ -26,6 +26,9 @@ update msg model =
 
     case msg of
 
+        AnimFrame elapsedMillis ->
+          ( model, Cmd.none )
+
         InitMIDI isMIDIConnectedBool ->
           initMidi model isMIDIConnectedBool
         
@@ -78,6 +81,7 @@ generateTargetNotes : Model -> List Int -> ( Model, Cmd Msg )
 generateTargetNotes model midiCodeList =
   let
       targetNotes = Array.fromList (List.map Note.createNote midiCodeList)
+      tesssssst = Debug.log "target notes midi code list: " midiCodeList
   in
      ( { model | targetNotes = targetNotes }
      , Cmd.none
@@ -156,6 +160,11 @@ updateNotePressed model noteCode =
     nextTargetNote = getNextTargetNote model.nextTargetNoteIndex model.targetNotes
 
     isCorrect = getIsCorrect nextTargetNote (Just newCurrentNote)
+
+    test = Debug.log "isCorrect" isCorrect
+    ttttest = Debug.log "prev model score " model.score
+    teeeest = Debug.log "prev nextTargetNoteIndex" model.nextTargetNoteIndex
+
   in
     ( { model | currentNote = Just newCurrentNote
       , prevMidi = Just noteCode
@@ -163,6 +172,8 @@ updateNotePressed model noteCode =
             if isCorrect then model.score + 1 else model.score
       , incorrectTries =
             if isCorrect then model.incorrectTries else model.incorrectTries + 1
+      , nextTargetNoteIndex =
+            if isCorrect then model.nextTargetNoteIndex + 1 else model.nextTargetNoteIndex
       }
     , Cmd.none
     )

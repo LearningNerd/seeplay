@@ -4,6 +4,7 @@ module Main exposing (..)
 import Dict exposing (Dict)
 import Array exposing (..)
 import Browser
+import Browser.Events exposing (onAnimationFrameDelta) -- todo: onKeyDown
 import Random
 import Tuple exposing (..)
 import Task
@@ -84,8 +85,7 @@ subscriptions model =
         , Ports.fakeHandleInitMIDI InitMIDI
         , Ports.fakeHandleNotePressed NotePressed
         , Ports.fakeHandleNoteReleased NoteReleased
-       
-        --  *** TODO: subscribe to animation frames
+        , Browser.Events.onAnimationFrame AnimFrame
         ]
 
 
