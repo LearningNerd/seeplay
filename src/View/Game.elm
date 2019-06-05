@@ -39,7 +39,12 @@ svgView model width height margins =
 
         -- animate viewBox to scroll game level with all notes drawn inside
         -- updated: draw the current note inside the game level?
-        gameLevelSvg = svg [S.width widthS, S.height heightS, S.x "150", S.y "0"] (currentNoteDrawing ++ svgListAllNotes)
+        gameLevelSvg = svg [
+            S.viewBox (String.fromFloat (model.scrollPosition + Constants.scrollOffset) ++ " 0 " ++ widthS ++ " " ++ heightS)
+            , S.width widthS
+            , S.height heightS
+            , S.x "150", S.y "0"
+          ] (currentNoteDrawing ++ svgListAllNotes)
     
     in
     svg

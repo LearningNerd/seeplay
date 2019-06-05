@@ -19,6 +19,8 @@ import Ports
 import View.Mario
 
 
+
+
 -- UPDATE
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -27,7 +29,7 @@ update msg model =
     case msg of
 
         AnimFrame elapsedMillis ->
-          ( model, Cmd.none )
+          updateAnimationValues model elapsedMillis
 
         InitMIDI isMIDIConnectedBool ->
           initMidi model isMIDIConnectedBool
@@ -45,6 +47,31 @@ update msg model =
 
         NotePressed noteCode -> 
           updateNotePressed model noteCode
+
+
+
+-- Animate (this runs roughly every 60 ms
+updateAnimationValues : Model -> Time.Posix -> ( Model, Cmd Msg )
+updateAnimationValues model elapsedMillis =
+     ( { model |
+        scrollPosition = scrollTo model.scrollPosition model.nextTargetNoteIndex
+       }
+     , Cmd.none
+     )
+
+-- Animation helpers for above...
+
+-- Exponential easing curve; Penner's "standard exponention slide"; Zeno's Paradox for animation :)
+scrollTo currentPosition nextTargetNoteIndex =
+  let
+    targetPosition = Constants.leftMargin + ((toFloat nextTargetNoteIndex) * (toFloat Constants.noteXInterval))
+
+    remainingDistance = targetPosition - currentPosition
+  in
+    currentPosition + (remainingDistance * Constants.scrollAnimMultiplier)
+
+
+
 
 
 -- Update model based on MIDI event from JS
@@ -161,6 +188,7 @@ convertScoreToJSON session =
 -- for currently pressed note,
 -- for next target note
 -- Check if note is correct!
+    -- if so, scroll anim
 -- Update score and num of incorrect guesses
 updateNotePressed : Model -> Int -> ( Model, Cmd Msg )
 updateNotePressed model noteCode =
@@ -173,11 +201,14 @@ updateNotePressed model noteCode =
 
     nextTargetNote = getNextTargetNote model.nextTargetNoteIndex model.targetNotes
 
+    scrollTarget = scrollTo model.scrollPosition model.nextTargetNoteIndex
+
     isCorrect = getIsCorrect nextTargetNote (Just newCurrentNote)
 
-    test = Debug.log "isCorrect" isCorrect
-    ttttest = Debug.log "prev model score " model.score
-    teeeest = Debug.log "prev nextTargetNoteIndex" model.nextTargetNoteIndex
+    testt = Debug.log "scrolltarget" scrollTarget
+    -- test = Debug.log "isCorrect" isCorrect
+    -- ttttest = Debug.log "prev model score " model.score
+    -- teeeest = Debug.log "prev nextTargetNoteIndex" model.nextTargetNoteIndex
 
   in
     ( { model | currentNote = Just newCurrentNote
@@ -191,6 +222,7 @@ updateNotePressed model noteCode =
       }
     , Cmd.none
     )
+
 
 
 getNextTargetNote index targetNotesArray = 

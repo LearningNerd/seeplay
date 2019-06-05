@@ -25,6 +25,8 @@ type alias Model =
     , incorrectTries : Int
     , scoreList : List Score -- store a list of score records for each practice session ... goes into local storage
     , sessionId : Int
+
+    , scrollPosition: Float
     }
 
 type alias Score =
@@ -54,5 +56,8 @@ initialModel =
     , incorrectTries = 0
     , scoreList = []
     , sessionId = 0
+
+    , scrollPosition = 0
     }
+
 

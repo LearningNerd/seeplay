@@ -5258,6 +5258,7 @@ var author$project$Model$initialModel = {
 	prevMidi: elm$core$Maybe$Nothing,
 	score: 0,
 	scoreList: _List_Nil,
+	scrollPosition: 0,
 	sessionId: 0,
 	startTimestamp: elm$core$Maybe$Nothing,
 	targetNotes: elm$core$Array$empty
@@ -10120,11 +10121,12 @@ var author$project$Main$subscriptions = function (model) {
 			]));
 };
 var author$project$Constants$bottomMargin = 50;
-var author$project$Constants$leftMargin = 50;
+var author$project$Constants$leftMargin = 100;
 var author$project$Constants$rightMargin = 0;
 var author$project$Constants$svgViewHeight = 200;
 var author$project$Constants$svgViewWidth = 700;
 var author$project$Constants$topMargin = 50;
+var author$project$Constants$scrollOffset = -150;
 var author$project$Constants$staffLineHeight = author$project$Constants$svgViewHeight / 6;
 var author$project$Constants$svgViewTotalHeight = (author$project$Constants$svgViewHeight + author$project$Constants$topMargin) + author$project$Constants$bottomMargin;
 var author$project$Constants$svgViewTotalWidth = (author$project$Constants$svgViewWidth + author$project$Constants$leftMargin) + author$project$Constants$rightMargin;
@@ -10334,6 +10336,8 @@ var author$project$View$Game$svgView = F4(
 			elm$svg$Svg$svg,
 			_List_fromArray(
 				[
+					elm$svg$Svg$Attributes$viewBox(
+					elm$core$String$fromFloat(model.scrollPosition + author$project$Constants$scrollOffset) + (' 0 ' + (widthS + (' ' + heightS)))),
 					elm$svg$Svg$Attributes$width(widthS),
 					elm$svg$Svg$Attributes$height(heightS),
 					elm$svg$Svg$Attributes$x('150'),
@@ -10599,6 +10603,23 @@ var author$project$Update$startGame = function (model) {
 			{isPlaying: true}),
 		A2(elm$core$Task$perform, author$project$Msg$RestartTimer, elm$time$Time$now));
 };
+var author$project$Constants$scrollAnimMultiplier = 5.0e-2;
+var author$project$Update$scrollTo = F2(
+	function (currentPosition, nextTargetNoteIndex) {
+		var targetPosition = author$project$Constants$leftMargin + (nextTargetNoteIndex * author$project$Constants$noteXInterval);
+		var remainingDistance = targetPosition - currentPosition;
+		return currentPosition + (remainingDistance * author$project$Constants$scrollAnimMultiplier);
+	});
+var author$project$Update$updateAnimationValues = F2(
+	function (model, elapsedMillis) {
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{
+					scrollPosition: A2(author$project$Update$scrollTo, model.scrollPosition, model.nextTargetNoteIndex)
+				}),
+			elm$core$Platform$Cmd$none);
+	});
 var author$project$Update$getIsCorrect = F2(
 	function (correctNote, currentNote) {
 		if (currentNote.$ === 'Nothing') {
@@ -10620,8 +10641,8 @@ var author$project$Update$getNextTargetNote = F2(
 	});
 var author$project$Update$updateNotePressed = F2(
 	function (model, noteCode) {
-		var ttttest = A2(elm$core$Debug$log, 'prev model score ', model.score);
-		var teeeest = A2(elm$core$Debug$log, 'prev nextTargetNoteIndex', model.nextTargetNoteIndex);
+		var scrollTarget = A2(author$project$Update$scrollTo, model.scrollPosition, model.nextTargetNoteIndex);
+		var testt = A2(elm$core$Debug$log, 'scrolltarget', scrollTarget);
 		var prevMidi = function () {
 			var _n0 = model.prevMidi;
 			if (_n0.$ === 'Nothing') {
@@ -10637,7 +10658,6 @@ var author$project$Update$updateNotePressed = F2(
 			author$project$Update$getIsCorrect,
 			nextTargetNote,
 			elm$core$Maybe$Just(newCurrentNote));
-		var test = A2(elm$core$Debug$log, 'isCorrect', isCorrect);
 		return _Utils_Tuple2(
 			_Utils_update(
 				model,
@@ -10655,7 +10675,7 @@ var author$project$Update$update = F2(
 		switch (msg.$) {
 			case 'AnimFrame':
 				var elapsedMillis = msg.a;
-				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+				return A2(author$project$Update$updateAnimationValues, model, elapsedMillis);
 			case 'InitMIDI':
 				var isMIDIConnectedBool = msg.a;
 				return A2(author$project$Update$initMidi, model, isMIDIConnectedBool);
