@@ -4917,6 +4917,8 @@ function _Browser_load(url)
 	}));
 }
 var author$project$Constants$notesPerLevel = 10;
+var author$project$Constants$playerInitialXPosition = 0;
+var author$project$Constants$playerInitialYPosition = 0;
 var elm$core$Basics$EQ = {$: 'EQ'};
 var elm$core$Basics$GT = {$: 'GT'};
 var elm$core$Basics$LT = {$: 'LT'};
@@ -5254,14 +5256,23 @@ var author$project$Model$initialModel = {
 	incorrectTries: 0,
 	isMIDIConnected: elm$core$Maybe$Nothing,
 	isPlaying: false,
+	jumpStartTimestamp: elm$core$Maybe$Nothing,
 	nextTargetNoteIndex: 0,
+	nextTargetXPosition: author$project$Constants$playerInitialXPosition,
+	nextTargetYPosition: author$project$Constants$playerInitialYPosition,
+	playerCurrentXPosition: author$project$Constants$playerInitialXPosition,
+	playerCurrentYPosition: author$project$Constants$playerInitialYPosition,
+	playerJumpStartXPosition: author$project$Constants$playerInitialXPosition,
+	playerJumpStartYPosition: author$project$Constants$playerInitialYPosition,
 	prevMidi: elm$core$Maybe$Nothing,
 	score: 0,
 	scoreList: _List_Nil,
 	scrollPosition: 0,
 	sessionId: 0,
 	startTimestamp: elm$core$Maybe$Nothing,
-	targetNotes: elm$core$Array$empty
+	targetNotes: elm$core$Array$empty,
+	velocityX: 0,
+	velocityY: 0
 };
 var author$project$Msg$GenerateTargetNotes = function (a) {
 	return {$: 'GenerateTargetNotes', a: a};
@@ -10121,7 +10132,7 @@ var author$project$Main$subscriptions = function (model) {
 			]));
 };
 var author$project$Constants$bottomMargin = 50;
-var author$project$Constants$leftMargin = 100;
+var author$project$Constants$leftMargin = 0;
 var author$project$Constants$rightMargin = 0;
 var author$project$Constants$svgViewHeight = 200;
 var author$project$Constants$svgViewWidth = 700;
@@ -10187,6 +10198,36 @@ var author$project$View$Game$trebleClef = F2(
 				]));
 	});
 var author$project$Constants$noteXInterval = 200;
+var author$project$Note$getNoteHeight = function (midiCode) {
+	switch (midiCode) {
+		case 60:
+			return 11;
+		case 62:
+			return 10;
+		case 64:
+			return 9;
+		case 65:
+			return 8;
+		case 67:
+			return 7;
+		case 69:
+			return 6;
+		case 71:
+			return 5;
+		case 72:
+			return 4;
+		case 74:
+			return 3;
+		case 76:
+			return 2;
+		case 77:
+			return 1;
+		case 79:
+			return 0;
+		default:
+			return 12;
+	}
+};
 var elm$svg$Svg$image = elm$svg$Svg$trustedNode('image');
 var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
 var elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
@@ -10223,39 +10264,9 @@ var author$project$View$Coin$view = F3(
 					_List_Nil)
 				]));
 	});
-var author$project$View$Note$getNoteHeight = function (midiCode) {
-	switch (midiCode) {
-		case 60:
-			return 11;
-		case 62:
-			return 10;
-		case 64:
-			return 9;
-		case 65:
-			return 8;
-		case 67:
-			return 7;
-		case 69:
-			return 6;
-		case 71:
-			return 5;
-		case 72:
-			return 4;
-		case 74:
-			return 3;
-		case 76:
-			return 2;
-		case 77:
-			return 1;
-		case 79:
-			return 0;
-		default:
-			return 12;
-	}
-};
 var author$project$View$Note$drawTargetNote = F4(
 	function (lineHeight, margins, xPosIndex, note) {
-		var yPosFloat = author$project$View$Note$getNoteHeight(note.midi);
+		var yPosFloat = author$project$Note$getNoteHeight(note.midi);
 		var heightString = elm$core$String$fromFloat(lineHeight);
 		var cyString = elm$core$String$fromFloat(margins.top + ((yPosFloat * lineHeight) / 2));
 		var cxString = elm$core$String$fromFloat(margins.left + (xPosIndex * author$project$Constants$noteXInterval));
@@ -10273,38 +10284,41 @@ var author$project$View$Mario$sizeOffset = 15;
 var author$project$View$Mario$spriteHeight = author$project$View$Mario$sizeOffset + author$project$Constants$staffLineHeight;
 var author$project$View$Mario$widthToHeightRatio = 17 / 24;
 var author$project$View$Mario$spriteWidth = (author$project$View$Mario$sizeOffset + author$project$Constants$staffLineHeight) * author$project$View$Mario$widthToHeightRatio;
-var author$project$View$Mario$view = function (yS) {
-	return A2(
-		elm$svg$Svg$svg,
-		_List_fromArray(
-			[
-				elm$svg$Svg$Attributes$width(
-				elm$core$String$fromFloat(author$project$View$Mario$spriteWidth)),
-				elm$svg$Svg$Attributes$height(
-				elm$core$String$fromFloat(author$project$View$Mario$spriteHeight)),
-				elm$svg$Svg$Attributes$y(yS),
-				elm$svg$Svg$Attributes$class('sprite')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				elm$svg$Svg$image,
-				_List_fromArray(
-					[
-						elm$svg$Svg$Attributes$xlinkHref('img/mariosmall.png')
-					]),
-				_List_Nil)
-			]));
-};
+var author$project$View$Mario$view = F2(
+	function (xS, yS) {
+		return A2(
+			elm$svg$Svg$svg,
+			_List_fromArray(
+				[
+					elm$svg$Svg$Attributes$width(
+					elm$core$String$fromFloat(author$project$View$Mario$spriteWidth)),
+					elm$svg$Svg$Attributes$height(
+					elm$core$String$fromFloat(author$project$View$Mario$spriteHeight)),
+					elm$svg$Svg$Attributes$x(xS),
+					elm$svg$Svg$Attributes$y(yS),
+					elm$svg$Svg$Attributes$class('sprite')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					elm$svg$Svg$image,
+					_List_fromArray(
+						[
+							elm$svg$Svg$Attributes$xlinkHref('img/mariosmall.png')
+						]),
+					_List_Nil)
+				]));
+	});
 var author$project$View$Note$getMarioYPosition = function (midiCode) {
-	var yPosFloat = author$project$View$Note$getNoteHeight(midiCode);
+	var yPosFloat = author$project$Note$getNoteHeight(midiCode);
 	return (((-1) * author$project$View$Mario$sizeOffset) + author$project$Constants$topMargin) + ((yPosFloat * author$project$Constants$staffLineHeight) / 2);
 };
 var author$project$View$Note$drawCurrentNote = F4(
-	function (lineHeight, margins, xPosIndex, note) {
+	function (lineHeight, margins, xPos, note) {
 		var cyString = elm$core$String$fromFloat(
 			author$project$View$Note$getMarioYPosition(note.midi));
-		return author$project$View$Mario$view(cyString);
+		var cxString = elm$core$String$fromFloat(xPos);
+		return A2(author$project$View$Mario$view, cxString, cyString);
 	});
 var elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
 var author$project$View$Game$svgView = F4(
@@ -10322,7 +10336,7 @@ var author$project$View$Game$svgView = F4(
 				var n = _n0.a;
 				return _List_fromArray(
 					[
-						A2(drawCurrentNoteFunc, model.nextTargetNoteIndex, n)
+						A2(drawCurrentNoteFunc, model.playerCurrentXPosition, n)
 					]);
 			}
 		}();
@@ -10664,6 +10678,7 @@ var author$project$Update$updateNotePressed = F2(
 					currentNote: elm$core$Maybe$Just(newCurrentNote),
 					incorrectTries: isCorrect ? model.incorrectTries : (model.incorrectTries + 1),
 					nextTargetNoteIndex: isCorrect ? (model.nextTargetNoteIndex + 1) : model.nextTargetNoteIndex,
+					playerCurrentXPosition: model.nextTargetNoteIndex * author$project$Constants$noteXInterval,
 					prevMidi: elm$core$Maybe$Just(noteCode),
 					score: isCorrect ? (model.score + 1) : model.score
 				}),

@@ -26,7 +26,22 @@ type alias Model =
     , scoreList : List Score -- store a list of score records for each practice session ... goes into local storage
     , sessionId : Int
 
-    , scrollPosition: Float
+------------- for animation: -------------------
+    , playerJumpStartXPosition : Float
+    , playerJumpStartYPosition : Float
+
+    , playerCurrentXPosition : Float
+    , playerCurrentYPosition : Float
+
+    , nextTargetXPosition : Float
+    , nextTargetYPosition : Float
+    , velocityX : Float
+    , velocityY : Float
+
+    , jumpStartTimestamp : Maybe Time.Posix
+    -- or better to keep track of time myself?
+    -- , millisSinceJumpStarted: Float
+    , scrollPosition : Float
     }
 
 type alias Score =
@@ -57,6 +72,18 @@ initialModel =
     , scoreList = []
     , sessionId = 0
 
+------------- for animation: -------------------
+    , playerJumpStartXPosition = Constants.playerInitialXPosition
+    , playerJumpStartYPosition = Constants.playerInitialYPosition
+
+    , playerCurrentXPosition = Constants.playerInitialXPosition
+    , playerCurrentYPosition = Constants.playerInitialYPosition
+
+    , nextTargetXPosition = Constants.playerInitialXPosition
+    , nextTargetYPosition = Constants.playerInitialYPosition
+    , velocityX = 0
+    , velocityY = 0
+    , jumpStartTimestamp = Nothing
     , scrollPosition = 0
     }
 
