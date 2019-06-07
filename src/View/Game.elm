@@ -43,7 +43,7 @@ svgView model width height margins =
             S.viewBox (String.fromFloat (model.scrollPosition + Constants.scrollOffset) ++ " 0 " ++ widthS ++ " " ++ heightS)
             , S.width widthS
             , S.height heightS
-            , S.x "150", S.y "0"
+            , S.x "0", S.y "0"
           ] (currentNoteDrawing ++ svgListAllNotes)
     
     in
@@ -56,14 +56,14 @@ svgView model width height margins =
         (
           (backgroundStatic width Constants.staffLineHeight margins)
            ++ [gameLevelSvg]
-           -- ++ currentNoteDrawing
+           ++ [ trebleClef 0 237 ]
         ) 
 
 
 -- Treble clef and staff are static, other stuff scrolls on top
 backgroundStatic width lineHeight margins = 
     (drawStaff width Constants.staffLineHeight margins)
-    ++ [ trebleClef 50 237 ]
+
 
 
 trebleClef x y =
@@ -84,9 +84,10 @@ staffLines staffWidth lineHeight margins yPos =
             String.fromFloat (margins.top + (toFloat yPos * Constants.staffLineHeight))
     in
     line
-        [ S.x1 (String.fromFloat margins.left)
+        [ S.x1 "0"
         , S.y1 lineYString
         , S.x2 (String.fromFloat (margins.left + staffWidth))
+--        , S.x2 (String.fromFloat staffWidth)
         , S.y2 lineYString
         , S.stroke "black"
         ]

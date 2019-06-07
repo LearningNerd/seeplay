@@ -26,5 +26,5 @@ svgViewTotalHeight = svgViewHeight + topMargin + bottomMargin
 scrollAnimMultiplier = 0.05
 
 -- To center the player/start of level
-scrollOffset = -150
+scrollOffset = -300
 

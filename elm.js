@@ -10126,7 +10126,7 @@ var author$project$Constants$rightMargin = 0;
 var author$project$Constants$svgViewHeight = 200;
 var author$project$Constants$svgViewWidth = 700;
 var author$project$Constants$topMargin = 50;
-var author$project$Constants$scrollOffset = -150;
+var author$project$Constants$scrollOffset = -300;
 var author$project$Constants$staffLineHeight = author$project$Constants$svgViewHeight / 6;
 var author$project$Constants$svgViewTotalHeight = (author$project$Constants$svgViewHeight + author$project$Constants$topMargin) + author$project$Constants$bottomMargin;
 var author$project$Constants$svgViewTotalWidth = (author$project$Constants$svgViewWidth + author$project$Constants$leftMargin) + author$project$Constants$rightMargin;
@@ -10145,8 +10145,7 @@ var author$project$View$Game$staffLines = F4(
 			elm$svg$Svg$line,
 			_List_fromArray(
 				[
-					elm$svg$Svg$Attributes$x1(
-					elm$core$String$fromFloat(margins.left)),
+					elm$svg$Svg$Attributes$x1('0'),
 					elm$svg$Svg$Attributes$y1(lineYString),
 					elm$svg$Svg$Attributes$x2(
 					elm$core$String$fromFloat(margins.left + staffWidth)),
@@ -10161,6 +10160,10 @@ var author$project$View$Game$drawStaff = F3(
 			elm$core$List$map,
 			A3(author$project$View$Game$staffLines, staffWidth, author$project$Constants$staffLineHeight, margins),
 			A2(elm$core$List$range, 1, 5));
+	});
+var author$project$View$Game$backgroundStatic = F3(
+	function (width, lineHeight, margins) {
+		return A3(author$project$View$Game$drawStaff, width, author$project$Constants$staffLineHeight, margins);
 	});
 var elm$svg$Svg$text_ = elm$svg$Svg$trustedNode('text');
 var elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
@@ -10181,15 +10184,6 @@ var author$project$View$Game$trebleClef = F2(
 			_List_fromArray(
 				[
 					elm$html$Html$text('𝄞')
-				]));
-	});
-var author$project$View$Game$backgroundStatic = F3(
-	function (width, lineHeight, margins) {
-		return _Utils_ap(
-			A3(author$project$View$Game$drawStaff, width, author$project$Constants$staffLineHeight, margins),
-			_List_fromArray(
-				[
-					A2(author$project$View$Game$trebleClef, 50, 237)
 				]));
 	});
 var author$project$Constants$noteXInterval = 200;
@@ -10340,7 +10334,7 @@ var author$project$View$Game$svgView = F4(
 					elm$core$String$fromFloat(model.scrollPosition + author$project$Constants$scrollOffset) + (' 0 ' + (widthS + (' ' + heightS)))),
 					elm$svg$Svg$Attributes$width(widthS),
 					elm$svg$Svg$Attributes$height(heightS),
-					elm$svg$Svg$Attributes$x('150'),
+					elm$svg$Svg$Attributes$x('0'),
 					elm$svg$Svg$Attributes$y('0')
 				]),
 			_Utils_ap(currentNoteDrawing, svgListAllNotes));
@@ -10355,8 +10349,13 @@ var author$project$View$Game$svgView = F4(
 				]),
 			_Utils_ap(
 				A3(author$project$View$Game$backgroundStatic, width, author$project$Constants$staffLineHeight, margins),
-				_List_fromArray(
-					[gameLevelSvg])));
+				_Utils_ap(
+					_List_fromArray(
+						[gameLevelSvg]),
+					_List_fromArray(
+						[
+							A2(author$project$View$Game$trebleClef, 0, 237)
+						]))));
 	});
 var author$project$View$Game$view = function (model) {
 	return A4(
