@@ -28,8 +28,8 @@ update msg model =
 
     case msg of
 
-        AnimFrame elapsedMillis ->
-          updateAnimationValues model elapsedMillis
+        AnimFrame millisSinceLastFrame ->
+          updateAnimationValues model millisSinceLastFrame
 
         InitMIDI isMIDIConnectedBool ->
           initMidi model isMIDIConnectedBool
@@ -51,15 +51,41 @@ update msg model =
 
 
 -- Animate (this runs roughly every 60 ms
-updateAnimationValues : Model -> Time.Posix -> ( Model, Cmd Msg )
-updateAnimationValues model elapsedMillis =
-     ( { model |
-        scrollPosition = scrollTo model.scrollPosition model.nextTargetNoteIndex
-       }
-     , Cmd.none
-     )
+updateAnimationValues : Model -> Float -> ( Model, Cmd Msg )
+updateAnimationValues model millisSinceLastFrame =
+  let
+    newMillisSinceJumpStarted = model.millisSinceJumpStarted + millisSinceLastFrame
+
+    -- Always update time since jump started, and scroll position
+    updatedModelBase =
+        { model | millisSinceJumpStarted = newMillisSinceJumpStarted
+        , scrollPosition = scrollTo model.scrollPosition model.nextTargetNoteIndex
+        }
+
+    -- Only update player position for duration of jump
+    -- (this is so it doesn't animate past the target)
+    updatedModel =
+        if newMillisSinceJumpStarted < ConstantsHelpers.jumpDurationMillis then
+           updateModelPlayerPosition updatedModelBase
+        else
+          updatedModelBase
+  in
+     ( updatedModel, Cmd.none )
+
 
 -- Animation helpers for above...
+
+-- Subtract current timestamp
+
+-- Function to update model with current player position
+updateModelPlayerPosition model =
+  { model | playerCurrentXPosition =
+        ConstantsHelpers.getCurrentJumpXPosition model.playerJumpStartXPosition model.velocityX model.millisSinceJumpStarted
+
+  , playerCurrentYPosition =
+        Debug.log "currentYPos " (ConstantsHelpers.getCurrentJumpYPosition model.playerJumpStartYPosition model.velocityY ConstantsHelpers.accelYMillis model.millisSinceJumpStarted)
+  }
+
 
 -- Exponential easing curve; Penner's "standard exponention slide"; Zeno's Paradox for animation :)
 scrollTo currentPosition nextTargetNoteIndex =
@@ -69,7 +95,6 @@ scrollTo currentPosition nextTargetNoteIndex =
     remainingDistance = targetPosition - currentPosition
   in
     currentPosition + (remainingDistance * ConstantsHelpers.scrollAnimMultiplier)
-
 
 
 
@@ -104,11 +129,11 @@ startGame model =
 
 -- On page load, and triggered by .....:
 -- initialize array from the given list of randomized MIDI code integers
+-- animate player onto the first note ??
 generateTargetNotes : Model -> List Int -> ( Model, Cmd Msg )
 generateTargetNotes model midiCodeList =
   let
       targetNotes = Array.fromList (List.map Note.createNote midiCodeList)
-      tesssssst = Debug.log "target notes midi code list: " midiCodeList
   in
      ( { model | targetNotes = targetNotes }
      , Cmd.none

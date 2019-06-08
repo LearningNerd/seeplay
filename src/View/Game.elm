@@ -24,10 +24,13 @@ view model =
         
         svgListAllNotes = drawAllTargetNotes model.targetNotes
 
+        xS = String.fromFloat model.playerCurrentXPosition
+        yS = String.fromFloat model.playerCurrentYPosition
+
         currentNoteDrawing = case model.currentNote of
                                  Nothing -> []
-                                 Just currentNote -> [ drawCurrentNote model.playerCurrentXPosition currentNote ]
-
+                                 Just currentNote -> 
+                                   [ View.Mario.view xS yS ]
 
         -- animate viewBox to scroll game level with all notes drawn inside
         -- updated: draw the current note inside the game level?
@@ -70,6 +73,7 @@ drawStaffLine yPos =
         []
 
 
+
 trebleClef x y =
     let
         xS =
@@ -81,19 +85,6 @@ trebleClef x y =
     text_ [ S.x xS, S.y yS, S.class "treble" ] [ HTML.text "𝄞" ]
 
 
-drawTargetNote : Int -> Note -> Svg msg
-drawTargetNote xPosIndex note =
-    let
-        cyString = String.fromFloat (ConstantsHelpers.getNoteYPos note.midi)
-
-        cxString =
-            String.fromFloat (ConstantsHelpers.leftMargin + ((toFloat xPosIndex) * ConstantsHelpers.noteXInterval ) )
-
-        heightString = (String.fromFloat ConstantsHelpers.staffLineHeight)
-    in
-      View.Coin.view cxString cyString heightString
-
-
 
 drawAllTargetNotes : Array Note -> List (Svg msg)
 drawAllTargetNotes notes =
@@ -102,12 +93,15 @@ drawAllTargetNotes notes =
     in
       List.indexedMap drawTargetNote noteList 
 
-
-drawCurrentNote : Float -> Note -> Svg msg
-drawCurrentNote xPos note =
+drawTargetNote : Int -> Note -> Svg msg
+drawTargetNote xPosIndex note =
     let
         cyString = String.fromFloat (ConstantsHelpers.getNoteYPos note.midi)
-        cxString = String.fromFloat xPos
+
+        cxString =
+            String.fromFloat (ConstantsHelpers.getNoteXPos xPosIndex)
+
+        heightString = (String.fromFloat ConstantsHelpers.staffLineHeight)
     in
-      View.Mario.view cxString cyString
+      View.Coin.view cxString cyString heightString
 

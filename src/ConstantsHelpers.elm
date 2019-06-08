@@ -18,7 +18,7 @@ staffLineHeight = svgViewHeight / 6
 
 topMargin = 50
 bottomMargin = 50
-leftMargin = 0
+leftMargin = 200 ---- shifts target notes, not player
 rightMargin = 0
 
 svgViewTotalWidth = svgViewWidth + leftMargin + rightMargin
@@ -26,7 +26,7 @@ svgViewTotalHeight = svgViewHeight + topMargin + bottomMargin
 
 -- Player appears here when game is initialized
 playerInitialXPosition = 0 -- currently added to leftMargin
-playerInitialYPosition = 0
+playerInitialNote = 67 -- controls initial y position; start on G
 
 -------------------------------  Animations: ----------------------------------
 
@@ -37,7 +37,7 @@ playerInitialYPosition = 0
 scrollAnimMultiplier = 0.05
 
 -- To center the player/start of level
-scrollOffset = -300
+scrollOffset = -500
 
 -- Frames per second (just makes the numbers nicer for accel, vel, duration etc)
 framesPerSecond = 60
@@ -51,7 +51,7 @@ accelYFrames = 2
 accelYMillis = convertFramesToMillisAccel accelYFrames framesPerSecond
 
 -- Complete each jump in x number of frames
-jumpDurationFrames = 20
+jumpDurationFrames = 17
 jumpDurationMillis = convertFramesToMillisDuration jumpDurationFrames framesPerSecond
 
 

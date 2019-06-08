@@ -68,16 +68,17 @@ initialModel =
 
 ------------- for animation: -------------------
     , playerJumpStartXPosition = ConstantsHelpers.playerInitialXPosition
-    , playerJumpStartYPosition = ConstantsHelpers.playerInitialYPosition
+    , playerJumpStartYPosition = ConstantsHelpers.getNoteYPos ConstantsHelpers.playerInitialNote
 
     , playerCurrentXPosition = ConstantsHelpers.playerInitialXPosition
-    , playerCurrentYPosition = ConstantsHelpers.playerInitialYPosition
+    , playerCurrentYPosition = ConstantsHelpers.getNoteYPos ConstantsHelpers.playerInitialNote
 
     , nextTargetXPosition = ConstantsHelpers.playerInitialXPosition
-    , nextTargetYPosition = ConstantsHelpers.playerInitialYPosition
+    , nextTargetYPosition = ConstantsHelpers.getNoteYPos ConstantsHelpers.playerInitialNote
+
     , velocityX = 0
     , velocityY = 0
-    , millisSinceJumpStarted = 0
+    , millisSinceJumpStarted = ConstantsHelpers.jumpDurationMillis
     , scrollPosition = 0
     }
 
