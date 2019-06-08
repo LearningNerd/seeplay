@@ -38,9 +38,7 @@ type alias Model =
     , velocityX : Float
     , velocityY : Float
 
-    , jumpStartTimestamp : Maybe Time.Posix
-    -- or better to keep track of time myself?
-    -- , millisSinceJumpStarted: Float
+    , millisSinceJumpStarted : Float
     , scrollPosition : Float
     }
 
@@ -79,7 +77,7 @@ initialModel =
     , nextTargetYPosition = Constants.playerInitialYPosition
     , velocityX = 0
     , velocityY = 0
-    , jumpStartTimestamp = Nothing
+    , millisSinceJumpStarted = 0
     , scrollPosition = 0
     }
 
