@@ -13,7 +13,7 @@ import Html exposing (..)
 import Html.Attributes as A exposing (..)
 import Html.Events exposing (..)
 
-import Constants
+import ConstantsHelpers
 import Model exposing (Model, Score, initialModel)
 import Update
 import Color
@@ -106,7 +106,7 @@ init initialSessionId =
     -- Get session ID from JS flag (starts at 0, or incremented from localstorage)
     -- Generate list of random numbers
   ( { initialModel | sessionId = initialSessionId }
-    , Random.generate GenerateTargetNotes (Note.getRandomMidiList Constants.notesPerLevel)
+    , Random.generate GenerateTargetNotes (Note.getRandomMidiList ConstantsHelpers.notesPerLevel)
   )
 
 

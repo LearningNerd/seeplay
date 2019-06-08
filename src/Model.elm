@@ -5,7 +5,7 @@ import Array exposing (..)
 import Time
 
 import Msg exposing (..)
-import Constants
+import ConstantsHelpers
 import Note exposing (Note)
 import Color
 
@@ -67,14 +67,14 @@ initialModel =
     , sessionId = 0
 
 ------------- for animation: -------------------
-    , playerJumpStartXPosition = Constants.playerInitialXPosition
-    , playerJumpStartYPosition = Constants.playerInitialYPosition
+    , playerJumpStartXPosition = ConstantsHelpers.playerInitialXPosition
+    , playerJumpStartYPosition = ConstantsHelpers.playerInitialYPosition
 
-    , playerCurrentXPosition = Constants.playerInitialXPosition
-    , playerCurrentYPosition = Constants.playerInitialYPosition
+    , playerCurrentXPosition = ConstantsHelpers.playerInitialXPosition
+    , playerCurrentYPosition = ConstantsHelpers.playerInitialYPosition
 
-    , nextTargetXPosition = Constants.playerInitialXPosition
-    , nextTargetYPosition = Constants.playerInitialYPosition
+    , nextTargetXPosition = ConstantsHelpers.playerInitialXPosition
+    , nextTargetYPosition = ConstantsHelpers.playerInitialYPosition
     , velocityX = 0
     , velocityY = 0
     , millisSinceJumpStarted = 0

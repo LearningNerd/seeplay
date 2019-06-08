@@ -10,7 +10,7 @@ import Task
 import Time
 import Json.Encode as E
 
-import Constants
+import ConstantsHelpers
 import Model exposing (Model, Score)
 import Msg exposing (..)
 import Note exposing (Note)
@@ -64,11 +64,11 @@ updateAnimationValues model elapsedMillis =
 -- Exponential easing curve; Penner's "standard exponention slide"; Zeno's Paradox for animation :)
 scrollTo currentPosition nextTargetNoteIndex =
   let
-    targetPosition = Constants.leftMargin + ((toFloat nextTargetNoteIndex) * (toFloat Constants.noteXInterval))
+    targetPosition = ConstantsHelpers.leftMargin + ((toFloat nextTargetNoteIndex) * (toFloat ConstantsHelpers.noteXInterval))
 
     remainingDistance = targetPosition - currentPosition
   in
-    currentPosition + (remainingDistance * Constants.scrollAnimMultiplier)
+    currentPosition + (remainingDistance * ConstantsHelpers.scrollAnimMultiplier)
 
 
 
@@ -201,38 +201,50 @@ updateNotePressed model noteCode =
 
     nextTargetNote = getNextTargetNote model.nextTargetNoteIndex model.targetNotes
 
-    scrollTarget = scrollTo model.scrollPosition model.nextTargetNoteIndex
+    updatedModelBase =
+      { model | currentNote = Just newCurrentNote
+      , prevMidi = Just noteCode
+      }
 
     isCorrect = getIsCorrect nextTargetNote (Just newCurrentNote)
 
-    testt = Debug.log "scrolltarget" scrollTarget
-    -- test = Debug.log "isCorrect" isCorrect
-    -- ttttest = Debug.log "prev model score " model.score
-    -- teeeest = Debug.log "prev nextTargetNoteIndex" model.nextTargetNoteIndex
-
+    updatedModel = 
+      if isCorrect then
+        updateForCorrectNote updatedModelBase nextTargetNote.midi
+      else
+        updateForIncorrectNote updatedModelBase
   in
-    ( { model | currentNote = Just newCurrentNote
-      , prevMidi = Just noteCode
-      , score =
-            if isCorrect then model.score + 1 else model.score
-      , incorrectTries =
-            if isCorrect then model.incorrectTries else model.incorrectTries + 1
-      , nextTargetNoteIndex =
-            if isCorrect then model.nextTargetNoteIndex + 1 else model.nextTargetNoteIndex
-
-
-
-      , playerCurrentXPosition = (toFloat model.nextTargetNoteIndex) * Constants.noteXInterval
-
-
---      , playerCurrentYPosition = 
-
---     (Note.getNoteHeight midiCode) * (Constants.staffLineHeight/ 2)
-
-
-      }
+    ( updatedModel
     , Cmd.none
     )
+
+
+updateForIncorrectNote model =
+    { model | incorrectTries = model.incorrectTries + 1 }
+
+
+updateForCorrectNote model nextTargetNoteMidiCode =
+  let
+    newPlayerJumpStartXPosition = model.playerCurrentXPosition
+    newPlayerJumpStartYPosition = model.playerCurrentYPosition
+
+    newNextTargetXPosition = ConstantsHelpers.getNoteXPos model.nextTargetNoteIndex
+    newNextTargetYPosition = ConstantsHelpers.getNoteYPos nextTargetNoteMidiCode
+  in
+      { model | score = model.score + 1
+      , nextTargetNoteIndex = model.nextTargetNoteIndex + 1
+
+      , playerJumpStartXPosition = newPlayerJumpStartXPosition
+      , playerJumpStartYPosition = newPlayerJumpStartYPosition
+
+      , velocityX = 
+          ConstantsHelpers.getRequiredXVelocity newPlayerJumpStartXPosition newNextTargetXPosition ConstantsHelpers.jumpDurationMillis
+
+      , velocityY = 
+          ConstantsHelpers.getRequiredYVelocity newPlayerJumpStartYPosition newNextTargetYPosition ConstantsHelpers.accelYMillis ConstantsHelpers.jumpDurationMillis
+
+      , millisSinceJumpStarted = 0
+      }
 
 
 

@@ -2,7 +2,7 @@ module View.Mario exposing (..)
 
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Constants
+import ConstantsHelpers
 
 
 -- what was this for again...?
@@ -13,8 +13,8 @@ widthToHeightRatio = 17 / 24 -- 17 px wide, 24 px high
 baseSpriteWidth = 17
 baseSpriteHeight = 24
 
-spriteWidth = (sizeOffset + Constants.staffLineHeight) * widthToHeightRatio
-spriteHeight = sizeOffset + Constants.staffLineHeight
+spriteWidth = (sizeOffset + ConstantsHelpers.staffLineHeight) * widthToHeightRatio
+spriteHeight = sizeOffset + ConstantsHelpers.staffLineHeight
 
 view xS yS =
     svg 

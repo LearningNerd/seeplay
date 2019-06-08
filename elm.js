@@ -4916,9 +4916,9 @@ function _Browser_load(url)
 		}
 	}));
 }
-var author$project$Constants$notesPerLevel = 10;
-var author$project$Constants$playerInitialXPosition = 0;
-var author$project$Constants$playerInitialYPosition = 0;
+var author$project$ConstantsHelpers$notesPerLevel = 10;
+var author$project$ConstantsHelpers$playerInitialXPosition = 0;
+var author$project$ConstantsHelpers$playerInitialYPosition = 0;
 var elm$core$Basics$EQ = {$: 'EQ'};
 var elm$core$Basics$GT = {$: 'GT'};
 var elm$core$Basics$LT = {$: 'LT'};
@@ -5256,14 +5256,14 @@ var author$project$Model$initialModel = {
 	incorrectTries: 0,
 	isMIDIConnected: elm$core$Maybe$Nothing,
 	isPlaying: false,
-	jumpStartTimestamp: elm$core$Maybe$Nothing,
+	millisSinceJumpStarted: 0,
 	nextTargetNoteIndex: 0,
-	nextTargetXPosition: author$project$Constants$playerInitialXPosition,
-	nextTargetYPosition: author$project$Constants$playerInitialYPosition,
-	playerCurrentXPosition: author$project$Constants$playerInitialXPosition,
-	playerCurrentYPosition: author$project$Constants$playerInitialYPosition,
-	playerJumpStartXPosition: author$project$Constants$playerInitialXPosition,
-	playerJumpStartYPosition: author$project$Constants$playerInitialYPosition,
+	nextTargetXPosition: author$project$ConstantsHelpers$playerInitialXPosition,
+	nextTargetYPosition: author$project$ConstantsHelpers$playerInitialYPosition,
+	playerCurrentXPosition: author$project$ConstantsHelpers$playerInitialXPosition,
+	playerCurrentYPosition: author$project$ConstantsHelpers$playerInitialYPosition,
+	playerJumpStartXPosition: author$project$ConstantsHelpers$playerInitialXPosition,
+	playerJumpStartYPosition: author$project$ConstantsHelpers$playerInitialYPosition,
 	prevMidi: elm$core$Maybe$Nothing,
 	score: 0,
 	scoreList: _List_Nil,
@@ -5844,7 +5844,7 @@ var author$project$Main$init = function (initialSessionId) {
 		A2(
 			elm$random$Random$generate,
 			author$project$Msg$GenerateTargetNotes,
-			author$project$Note$getRandomMidiList(author$project$Constants$notesPerLevel)));
+			author$project$Note$getRandomMidiList(author$project$ConstantsHelpers$notesPerLevel)));
 };
 var author$project$Msg$AnimFrame = function (a) {
 	return {$: 'AnimFrame', a: a};
@@ -10131,17 +10131,51 @@ var author$project$Main$subscriptions = function (model) {
 				elm$browser$Browser$Events$onAnimationFrame(author$project$Msg$AnimFrame)
 			]));
 };
-var author$project$Constants$scrollOffset = -300;
-var author$project$Constants$bottomMargin = 50;
-var author$project$Constants$svgViewHeight = 200;
-var author$project$Constants$topMargin = 50;
-var author$project$Constants$svgViewTotalHeight = (author$project$Constants$svgViewHeight + author$project$Constants$topMargin) + author$project$Constants$bottomMargin;
-var author$project$Constants$leftMargin = 0;
-var author$project$Constants$rightMargin = 0;
-var author$project$Constants$svgViewWidth = 700;
-var author$project$Constants$svgViewTotalWidth = (author$project$Constants$svgViewWidth + author$project$Constants$leftMargin) + author$project$Constants$rightMargin;
-var author$project$Constants$noteXInterval = 200;
-var author$project$Constants$staffLineHeight = author$project$Constants$svgViewHeight / 6;
+var author$project$ConstantsHelpers$scrollOffset = -300;
+var author$project$ConstantsHelpers$bottomMargin = 50;
+var author$project$ConstantsHelpers$svgViewHeight = 200;
+var author$project$ConstantsHelpers$topMargin = 50;
+var author$project$ConstantsHelpers$svgViewTotalHeight = (author$project$ConstantsHelpers$svgViewHeight + author$project$ConstantsHelpers$topMargin) + author$project$ConstantsHelpers$bottomMargin;
+var author$project$ConstantsHelpers$leftMargin = 0;
+var author$project$ConstantsHelpers$rightMargin = 0;
+var author$project$ConstantsHelpers$svgViewWidth = 700;
+var author$project$ConstantsHelpers$svgViewTotalWidth = (author$project$ConstantsHelpers$svgViewWidth + author$project$ConstantsHelpers$leftMargin) + author$project$ConstantsHelpers$rightMargin;
+var author$project$ConstantsHelpers$staffLineHeight = author$project$ConstantsHelpers$svgViewHeight / 6;
+var author$project$Note$getHeight = function (midiCode) {
+	switch (midiCode) {
+		case 60:
+			return 11;
+		case 62:
+			return 10;
+		case 64:
+			return 9;
+		case 65:
+			return 8;
+		case 67:
+			return 7;
+		case 69:
+			return 6;
+		case 71:
+			return 5;
+		case 72:
+			return 4;
+		case 74:
+			return 3;
+		case 76:
+			return 2;
+		case 77:
+			return 1;
+		case 79:
+			return 0;
+		default:
+			return 12;
+	}
+};
+var author$project$ConstantsHelpers$getNoteYPos = function (midiCode) {
+	var yPosFloat = author$project$Note$getHeight(midiCode);
+	return author$project$ConstantsHelpers$topMargin + ((yPosFloat * author$project$ConstantsHelpers$staffLineHeight) / 2);
+};
+var author$project$ConstantsHelpers$noteXInterval = 200;
 var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
 var elm$svg$Svg$image = elm$svg$Svg$trustedNode('image');
 var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
@@ -10182,46 +10216,13 @@ var author$project$View$Coin$view = F3(
 					_List_Nil)
 				]));
 	});
-var author$project$Note$getHeight = function (midiCode) {
-	switch (midiCode) {
-		case 60:
-			return 11;
-		case 62:
-			return 10;
-		case 64:
-			return 9;
-		case 65:
-			return 8;
-		case 67:
-			return 7;
-		case 69:
-			return 6;
-		case 71:
-			return 5;
-		case 72:
-			return 4;
-		case 74:
-			return 3;
-		case 76:
-			return 2;
-		case 77:
-			return 1;
-		case 79:
-			return 0;
-		default:
-			return 12;
-	}
-};
 var elm$core$String$fromFloat = _String_fromNumber;
-var author$project$View$Game$getNoteYPos = function (midiCode) {
-	var yPosFloat = author$project$Note$getHeight(midiCode);
-	return elm$core$String$fromFloat(author$project$Constants$topMargin + ((yPosFloat * author$project$Constants$staffLineHeight) / 2));
-};
 var author$project$View$Game$drawTargetNote = F2(
 	function (xPosIndex, note) {
-		var heightString = elm$core$String$fromFloat(author$project$Constants$staffLineHeight);
-		var cyString = author$project$View$Game$getNoteYPos(note.midi);
-		var cxString = elm$core$String$fromFloat(author$project$Constants$leftMargin + (xPosIndex * author$project$Constants$noteXInterval));
+		var heightString = elm$core$String$fromFloat(author$project$ConstantsHelpers$staffLineHeight);
+		var cyString = elm$core$String$fromFloat(
+			author$project$ConstantsHelpers$getNoteYPos(note.midi));
+		var cxString = elm$core$String$fromFloat(author$project$ConstantsHelpers$leftMargin + (xPosIndex * author$project$ConstantsHelpers$noteXInterval));
 		return A3(author$project$View$Coin$view, cxString, cyString, heightString);
 	});
 var author$project$View$Game$drawAllTargetNotes = function (notes) {
@@ -10229,9 +10230,9 @@ var author$project$View$Game$drawAllTargetNotes = function (notes) {
 	return A2(elm$core$List$indexedMap, author$project$View$Game$drawTargetNote, noteList);
 };
 var author$project$View$Mario$sizeOffset = 15;
-var author$project$View$Mario$spriteHeight = author$project$View$Mario$sizeOffset + author$project$Constants$staffLineHeight;
+var author$project$View$Mario$spriteHeight = author$project$View$Mario$sizeOffset + author$project$ConstantsHelpers$staffLineHeight;
 var author$project$View$Mario$widthToHeightRatio = 17 / 24;
-var author$project$View$Mario$spriteWidth = (author$project$View$Mario$sizeOffset + author$project$Constants$staffLineHeight) * author$project$View$Mario$widthToHeightRatio;
+var author$project$View$Mario$spriteWidth = (author$project$View$Mario$sizeOffset + author$project$ConstantsHelpers$staffLineHeight) * author$project$View$Mario$widthToHeightRatio;
 var author$project$View$Mario$view = F2(
 	function (xS, yS) {
 		return A2(
@@ -10259,7 +10260,8 @@ var author$project$View$Mario$view = F2(
 	});
 var author$project$View$Game$drawCurrentNote = F2(
 	function (xPos, note) {
-		var cyString = author$project$View$Game$getNoteYPos(note.midi);
+		var cyString = elm$core$String$fromFloat(
+			author$project$ConstantsHelpers$getNoteYPos(note.midi));
 		var cxString = elm$core$String$fromFloat(xPos);
 		return A2(author$project$View$Mario$view, cxString, cyString);
 	});
@@ -10270,7 +10272,7 @@ var elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
 var elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
 var elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
 var author$project$View$Game$drawStaffLine = function (yPos) {
-	var lineYString = elm$core$String$fromFloat(author$project$Constants$topMargin + (yPos * author$project$Constants$staffLineHeight));
+	var lineYString = elm$core$String$fromFloat(author$project$ConstantsHelpers$topMargin + (yPos * author$project$ConstantsHelpers$staffLineHeight));
 	return A2(
 		elm$svg$Svg$line,
 		_List_fromArray(
@@ -10278,7 +10280,7 @@ var author$project$View$Game$drawStaffLine = function (yPos) {
 				elm$svg$Svg$Attributes$x1('0'),
 				elm$svg$Svg$Attributes$y1(lineYString),
 				elm$svg$Svg$Attributes$x2(
-				elm$core$String$fromFloat(author$project$Constants$leftMargin + author$project$Constants$svgViewWidth)),
+				elm$core$String$fromFloat(author$project$ConstantsHelpers$leftMargin + author$project$ConstantsHelpers$svgViewWidth)),
 				elm$svg$Svg$Attributes$y2(lineYString),
 				elm$svg$Svg$Attributes$stroke('black')
 			]),
@@ -10304,9 +10306,9 @@ var author$project$View$Game$trebleClef = F2(
 	});
 var elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
 var author$project$View$Game$view = function (model) {
-	var widthS = elm$core$String$fromFloat(author$project$Constants$svgViewTotalWidth);
+	var widthS = elm$core$String$fromFloat(author$project$ConstantsHelpers$svgViewTotalWidth);
 	var svgListAllNotes = author$project$View$Game$drawAllTargetNotes(model.targetNotes);
-	var heightS = elm$core$String$fromFloat(author$project$Constants$svgViewTotalHeight);
+	var heightS = elm$core$String$fromFloat(author$project$ConstantsHelpers$svgViewTotalHeight);
 	var currentNoteDrawing = function () {
 		var _n0 = model.currentNote;
 		if (_n0.$ === 'Nothing') {
@@ -10324,7 +10326,7 @@ var author$project$View$Game$view = function (model) {
 		_List_fromArray(
 			[
 				elm$svg$Svg$Attributes$viewBox(
-				elm$core$String$fromFloat(model.scrollPosition + author$project$Constants$scrollOffset) + (' 0 ' + (widthS + (' ' + heightS)))),
+				elm$core$String$fromFloat(model.scrollPosition + author$project$ConstantsHelpers$scrollOffset) + (' 0 ' + (widthS + (' ' + heightS)))),
 				elm$svg$Svg$Attributes$width(widthS),
 				elm$svg$Svg$Attributes$height(heightS),
 				elm$svg$Svg$Attributes$x('0'),
@@ -10590,12 +10592,12 @@ var author$project$Update$startGame = function (model) {
 			{isPlaying: true}),
 		A2(elm$core$Task$perform, author$project$Msg$RestartTimer, elm$time$Time$now));
 };
-var author$project$Constants$scrollAnimMultiplier = 5.0e-2;
+var author$project$ConstantsHelpers$scrollAnimMultiplier = 5.0e-2;
 var author$project$Update$scrollTo = F2(
 	function (currentPosition, nextTargetNoteIndex) {
-		var targetPosition = author$project$Constants$leftMargin + (nextTargetNoteIndex * author$project$Constants$noteXInterval);
+		var targetPosition = author$project$ConstantsHelpers$leftMargin + (nextTargetNoteIndex * author$project$ConstantsHelpers$noteXInterval);
 		var remainingDistance = targetPosition - currentPosition;
-		return currentPosition + (remainingDistance * author$project$Constants$scrollAnimMultiplier);
+		return currentPosition + (remainingDistance * author$project$ConstantsHelpers$scrollAnimMultiplier);
 	});
 var author$project$Update$updateAnimationValues = F2(
 	function (model, elapsedMillis) {
@@ -10626,10 +10628,55 @@ var author$project$Update$getNextTargetNote = F2(
 			return n;
 		}
 	});
+var author$project$ConstantsHelpers$accelYFrames = 2;
+var author$project$ConstantsHelpers$convertFramesToMillisAccel = F2(
+	function (accel, fps) {
+		return (accel * (fps / 1000)) * (fps / 1000);
+	});
+var author$project$ConstantsHelpers$framesPerSecond = 60;
+var author$project$ConstantsHelpers$accelYMillis = A2(author$project$ConstantsHelpers$convertFramesToMillisAccel, author$project$ConstantsHelpers$accelYFrames, author$project$ConstantsHelpers$framesPerSecond);
+var author$project$ConstantsHelpers$getNoteXPos = function (noteIndex) {
+	return author$project$ConstantsHelpers$leftMargin + (noteIndex * author$project$ConstantsHelpers$noteXInterval);
+};
+var author$project$ConstantsHelpers$getRequiredXVelocity = F3(
+	function (startXPos, targetXPos, durationMillis) {
+		return (targetXPos - startXPos) / durationMillis;
+	});
+var author$project$ConstantsHelpers$getRequiredYVelocity = F4(
+	function (startYPos, targetYPos, accelY, durationMillis) {
+		return ((targetYPos - startYPos) - (((0.5 * accelY) * durationMillis) * durationMillis)) / durationMillis;
+	});
+var author$project$ConstantsHelpers$convertFramesToMillisDuration = F2(
+	function (durationFrames, fps) {
+		return (durationFrames * 1000) / fps;
+	});
+var author$project$ConstantsHelpers$jumpDurationFrames = 20;
+var author$project$ConstantsHelpers$jumpDurationMillis = A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, author$project$ConstantsHelpers$jumpDurationFrames, author$project$ConstantsHelpers$framesPerSecond);
+var author$project$Update$updateForCorrectNote = F2(
+	function (model, nextTargetNoteMidiCode) {
+		var newPlayerJumpStartYPosition = model.playerCurrentYPosition;
+		var newPlayerJumpStartXPosition = model.playerCurrentXPosition;
+		var newNextTargetYPosition = author$project$ConstantsHelpers$getNoteYPos(nextTargetNoteMidiCode);
+		var newNextTargetXPosition = author$project$ConstantsHelpers$getNoteXPos(model.nextTargetNoteIndex);
+		return _Utils_update(
+			model,
+			{
+				millisSinceJumpStarted: 0,
+				nextTargetNoteIndex: model.nextTargetNoteIndex + 1,
+				playerJumpStartXPosition: newPlayerJumpStartXPosition,
+				playerJumpStartYPosition: newPlayerJumpStartYPosition,
+				score: model.score + 1,
+				velocityX: A3(author$project$ConstantsHelpers$getRequiredXVelocity, newPlayerJumpStartXPosition, newNextTargetXPosition, author$project$ConstantsHelpers$jumpDurationMillis),
+				velocityY: A4(author$project$ConstantsHelpers$getRequiredYVelocity, newPlayerJumpStartYPosition, newNextTargetYPosition, author$project$ConstantsHelpers$accelYMillis, author$project$ConstantsHelpers$jumpDurationMillis)
+			});
+	});
+var author$project$Update$updateForIncorrectNote = function (model) {
+	return _Utils_update(
+		model,
+		{incorrectTries: model.incorrectTries + 1});
+};
 var author$project$Update$updateNotePressed = F2(
 	function (model, noteCode) {
-		var scrollTarget = A2(author$project$Update$scrollTo, model.scrollPosition, model.nextTargetNoteIndex);
-		var testt = A2(elm$core$Debug$log, 'scrolltarget', scrollTarget);
 		var prevMidi = function () {
 			var _n0 = model.prevMidi;
 			if (_n0.$ === 'Nothing') {
@@ -10641,22 +10688,18 @@ var author$project$Update$updateNotePressed = F2(
 		}();
 		var nextTargetNote = A2(author$project$Update$getNextTargetNote, model.nextTargetNoteIndex, model.targetNotes);
 		var newCurrentNote = author$project$Note$createNote(noteCode);
+		var updatedModelBase = _Utils_update(
+			model,
+			{
+				currentNote: elm$core$Maybe$Just(newCurrentNote),
+				prevMidi: elm$core$Maybe$Just(noteCode)
+			});
 		var isCorrect = A2(
 			author$project$Update$getIsCorrect,
 			nextTargetNote,
 			elm$core$Maybe$Just(newCurrentNote));
-		return _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{
-					currentNote: elm$core$Maybe$Just(newCurrentNote),
-					incorrectTries: isCorrect ? model.incorrectTries : (model.incorrectTries + 1),
-					nextTargetNoteIndex: isCorrect ? (model.nextTargetNoteIndex + 1) : model.nextTargetNoteIndex,
-					playerCurrentXPosition: model.nextTargetNoteIndex * author$project$Constants$noteXInterval,
-					prevMidi: elm$core$Maybe$Just(noteCode),
-					score: isCorrect ? (model.score + 1) : model.score
-				}),
-			elm$core$Platform$Cmd$none);
+		var updatedModel = isCorrect ? A2(author$project$Update$updateForCorrectNote, updatedModelBase, nextTargetNote.midi) : author$project$Update$updateForIncorrectNote(updatedModelBase);
+		return _Utils_Tuple2(updatedModel, elm$core$Platform$Cmd$none);
 	});
 var author$project$Update$update = F2(
 	function (msg, model) {

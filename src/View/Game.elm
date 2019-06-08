@@ -7,7 +7,7 @@ import Svg exposing (..)
 import Svg.Attributes as S exposing (..)
 import Array exposing (..)
 
-import Constants
+import ConstantsHelpers
 import View.Mario exposing (view)
 import View.Coin exposing (view)
 import Note exposing (Note)
@@ -18,9 +18,9 @@ import Msg exposing (..)
 view : Model -> Svg Msg
 view model =
     let
-        widthS = String.fromFloat Constants.svgViewTotalWidth
+        widthS = String.fromFloat ConstantsHelpers.svgViewTotalWidth
 
-        heightS = String.fromFloat Constants.svgViewTotalHeight
+        heightS = String.fromFloat ConstantsHelpers.svgViewTotalHeight
         
         svgListAllNotes = drawAllTargetNotes model.targetNotes
 
@@ -32,7 +32,7 @@ view model =
         -- animate viewBox to scroll game level with all notes drawn inside
         -- updated: draw the current note inside the game level?
         gameLevelSvg = svg [
-            S.viewBox (String.fromFloat (model.scrollPosition + Constants.scrollOffset) ++ " 0 " ++ widthS ++ " " ++ heightS)
+            S.viewBox (String.fromFloat (model.scrollPosition + ConstantsHelpers.scrollOffset) ++ " 0 " ++ widthS ++ " " ++ heightS)
             , S.width widthS
             , S.height heightS
             , S.x "0", S.y "0"
@@ -57,12 +57,12 @@ view model =
 drawStaffLine yPos =
     let
         lineYString =
-            String.fromFloat (Constants.topMargin + (toFloat yPos * Constants.staffLineHeight))
+            String.fromFloat (ConstantsHelpers.topMargin + (toFloat yPos * ConstantsHelpers.staffLineHeight))
     in
     line
         [ S.x1 "0"
         , S.y1 lineYString
-        , S.x2 (String.fromFloat (Constants.leftMargin + Constants.svgViewWidth))
+        , S.x2 (String.fromFloat (ConstantsHelpers.leftMargin + ConstantsHelpers.svgViewWidth))
 --        , S.x2 (String.fromFloat staffWidth)
         , S.y2 lineYString
         , S.stroke "black"
@@ -81,27 +81,15 @@ trebleClef x y =
     text_ [ S.x xS, S.y yS, S.class "treble" ] [ HTML.text "𝄞" ]
 
 
--- Currently, moved this to run in the animation loop (update on every frame)
--- getNoteXPos noteIndex =
-  -- String.fromFloat (Constants.leftMargin + ((toFloat noteIndex) * (toFloat Constants.noteXInterval) ) )
-
-
-getNoteYPos midiCode =
-  let
-    yPosFloat = toFloat (Note.getHeight midiCode)
-  in
-    String.fromFloat (Constants.topMargin + (yPosFloat * Constants.staffLineHeight / 2))
-
-
 drawTargetNote : Int -> Note -> Svg msg
 drawTargetNote xPosIndex note =
     let
-        cyString = getNoteYPos note.midi
+        cyString = String.fromFloat (ConstantsHelpers.getNoteYPos note.midi)
 
         cxString =
-            String.fromFloat (Constants.leftMargin + ((toFloat xPosIndex) * (toFloat Constants.noteXInterval) ) )
+            String.fromFloat (ConstantsHelpers.leftMargin + ((toFloat xPosIndex) * ConstantsHelpers.noteXInterval ) )
 
-        heightString = (String.fromFloat Constants.staffLineHeight)
+        heightString = (String.fromFloat ConstantsHelpers.staffLineHeight)
     in
       View.Coin.view cxString cyString heightString
 
@@ -118,7 +106,7 @@ drawAllTargetNotes notes =
 drawCurrentNote : Float -> Note -> Svg msg
 drawCurrentNote xPos note =
     let
-        cyString = getNoteYPos note.midi
+        cyString = String.fromFloat (ConstantsHelpers.getNoteYPos note.midi)
         cxString = String.fromFloat xPos
     in
       View.Mario.view cxString cyString
