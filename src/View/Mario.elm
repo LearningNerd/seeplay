@@ -55,11 +55,12 @@ getNoteHeight midiCode =
 ------------------------------------
 
 -- for now, no viewbox .... will it still work????
-view yS =
+view xS yS =
     svg 
     [ -- viewBox "0 0 " ++ String.fromFloat spriteWidth ++ " " ++ String.fromFloat spriteHeight
     width (String.fromFloat spriteWidth)
     , height (String.fromFloat spriteHeight)
+    , x xS
     , y yS
     , class "sprite"
     ]

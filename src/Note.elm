@@ -28,6 +28,24 @@ createNote midiCode =
     , frequency = midiToFrequency midiCode
     }
 
+
+getNoteHeight midiCode = 
+  case midiCode of
+    60 -> 11
+    62 -> 10
+    64 -> 9
+    65 -> 8
+    67 -> 7
+    69 -> 6
+    71 -> 5
+    72 -> 4
+    74 -> 3
+    76 -> 2
+    77 -> 1
+    79 -> 0
+    _ -> 12
+
+
 -- Generate list of [num] random midi codes
 getRandomMidiList : Int -> Random.Generator (List Int)
 getRandomMidiList num =

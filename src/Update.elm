@@ -219,6 +219,17 @@ updateNotePressed model noteCode =
             if isCorrect then model.incorrectTries else model.incorrectTries + 1
       , nextTargetNoteIndex =
             if isCorrect then model.nextTargetNoteIndex + 1 else model.nextTargetNoteIndex
+
+
+
+      , playerCurrentXPosition = (toFloat model.nextTargetNoteIndex) * Constants.noteXInterval
+
+
+--      , playerCurrentYPosition = 
+
+--     (Note.getNoteHeight midiCode) * (Constants.staffLineHeight/ 2)
+
+
       }
     , Cmd.none
     )

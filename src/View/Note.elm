@@ -19,7 +19,7 @@ drawTargetNote : Float -> Margins -> Int -> Note -> Svg msg
 drawTargetNote lineHeight margins xPosIndex note =
     let
         yPosFloat =
-            toFloat (getNoteHeight note.midi)
+            toFloat (Note.getNoteHeight note.midi)
     
         cxString =
             String.fromFloat (margins.left + ((toFloat xPosIndex) * (toFloat Constants.noteXInterval) ) )
@@ -32,57 +32,23 @@ drawTargetNote lineHeight margins xPosIndex note =
       View.Coin.view cxString cyString heightString
 
 
-drawCurrentNote : Float -> Margins -> Int -> Note -> Svg msg
-drawCurrentNote lineHeight margins xPosIndex note =
+drawCurrentNote : Float -> Margins -> Float -> Note -> Svg msg
+drawCurrentNote lineHeight margins xPos note =
     let
         cyString = String.fromFloat (getMarioYPosition note.midi)
+        cxString = String.fromFloat xPos
     in
-      View.Mario.view cyString
+      View.Mario.view cxString cyString
 
 
 getMarioYPosition midiCode =
   let
         yPosFloat =
-            toFloat (getNoteHeight midiCode)
+            toFloat (Note.getNoteHeight midiCode)
   in
     (-1 * View.Mario.sizeOffset) + Constants.topMargin + (yPosFloat * Constants.staffLineHeight/ 2)
 
 
-getNoteHeight midiCode = 
-  case midiCode of
-    60 -> 11
-    62 -> 10
-    64 -> 9
-    65 -> 8
-    67 -> 7
-    69 -> 6
-    71 -> 5
-    72 -> 4
-    74 -> 3
-    76 -> 2
-    77 -> 1
-    79 -> 0
-    _ -> 12
-
-
-
-{--
-getNoteHeight midiCode = 
-  case midiCode of
-    60 -> 12
-    62 -> 11
-    64 -> 10
-    65 -> 9
-    67 -> 8
-    69 -> 7
-    71 -> 6
-    72 -> 5
-    74 -> 4
-    76 -> 3
-    77 -> 2
-    79 -> 1
-    _ -> 12
---}
 
 drawAllTargetNotes : Float -> Float -> Margins -> Array Note -> List (Svg msg)
 drawAllTargetNotes staffWidth lineHeight margins notes =

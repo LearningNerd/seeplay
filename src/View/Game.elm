@@ -35,7 +35,7 @@ svgView model width height margins =
 
         currentNoteDrawing = case model.currentNote of
                                  Nothing -> []
-                                 Just n -> [ drawCurrentNoteFunc model.nextTargetNoteIndex n ]
+                                 Just n -> [ drawCurrentNoteFunc model.playerCurrentXPosition n ]
 
         -- animate viewBox to scroll game level with all notes drawn inside
         -- updated: draw the current note inside the game level?
