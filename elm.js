@@ -10131,74 +10131,58 @@ var author$project$Main$subscriptions = function (model) {
 				elm$browser$Browser$Events$onAnimationFrame(author$project$Msg$AnimFrame)
 			]));
 };
+var author$project$Constants$scrollOffset = -300;
 var author$project$Constants$bottomMargin = 50;
+var author$project$Constants$svgViewHeight = 200;
+var author$project$Constants$topMargin = 50;
+var author$project$Constants$svgViewTotalHeight = (author$project$Constants$svgViewHeight + author$project$Constants$topMargin) + author$project$Constants$bottomMargin;
 var author$project$Constants$leftMargin = 0;
 var author$project$Constants$rightMargin = 0;
-var author$project$Constants$svgViewHeight = 200;
 var author$project$Constants$svgViewWidth = 700;
-var author$project$Constants$topMargin = 50;
-var author$project$Constants$scrollOffset = -300;
-var author$project$Constants$staffLineHeight = author$project$Constants$svgViewHeight / 6;
-var author$project$Constants$svgViewTotalHeight = (author$project$Constants$svgViewHeight + author$project$Constants$topMargin) + author$project$Constants$bottomMargin;
 var author$project$Constants$svgViewTotalWidth = (author$project$Constants$svgViewWidth + author$project$Constants$leftMargin) + author$project$Constants$rightMargin;
-var elm$core$String$fromFloat = _String_fromNumber;
+var author$project$Constants$noteXInterval = 200;
+var author$project$Constants$staffLineHeight = author$project$Constants$svgViewHeight / 6;
 var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
-var elm$svg$Svg$line = elm$svg$Svg$trustedNode('line');
-var elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
-var elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
-var elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
-var elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
-var elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
-var author$project$View$Game$staffLines = F4(
-	function (staffWidth, lineHeight, margins, yPos) {
-		var lineYString = elm$core$String$fromFloat(margins.top + (yPos * author$project$Constants$staffLineHeight));
-		return A2(
-			elm$svg$Svg$line,
-			_List_fromArray(
-				[
-					elm$svg$Svg$Attributes$x1('0'),
-					elm$svg$Svg$Attributes$y1(lineYString),
-					elm$svg$Svg$Attributes$x2(
-					elm$core$String$fromFloat(margins.left + staffWidth)),
-					elm$svg$Svg$Attributes$y2(lineYString),
-					elm$svg$Svg$Attributes$stroke('black')
-				]),
-			_List_Nil);
-	});
-var author$project$View$Game$drawStaff = F3(
-	function (staffWidth, lineHeight, margins) {
-		return A2(
-			elm$core$List$map,
-			A3(author$project$View$Game$staffLines, staffWidth, author$project$Constants$staffLineHeight, margins),
-			A2(elm$core$List$range, 1, 5));
-	});
-var author$project$View$Game$backgroundStatic = F3(
-	function (width, lineHeight, margins) {
-		return A3(author$project$View$Game$drawStaff, width, author$project$Constants$staffLineHeight, margins);
-	});
-var elm$svg$Svg$text_ = elm$svg$Svg$trustedNode('text');
+var elm$svg$Svg$image = elm$svg$Svg$trustedNode('image');
+var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
 var elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
+var elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
+var elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
 var elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
+var elm$svg$Svg$Attributes$xlinkHref = function (value) {
+	return A3(
+		_VirtualDom_attributeNS,
+		'http://www.w3.org/1999/xlink',
+		'xlink:href',
+		_VirtualDom_noJavaScriptUri(value));
+};
 var elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
-var author$project$View$Game$trebleClef = F2(
-	function (x, y) {
-		var yS = elm$core$String$fromFloat(y);
-		var xS = elm$core$String$fromFloat(x);
+var author$project$View$Coin$view = F3(
+	function (xS, yS, heightS) {
+		var spriteWidth = 16;
+		var spriteHeight = 16;
 		return A2(
-			elm$svg$Svg$text_,
+			elm$svg$Svg$svg,
 			_List_fromArray(
 				[
+					elm$svg$Svg$Attributes$width(heightS),
+					elm$svg$Svg$Attributes$height(heightS),
 					elm$svg$Svg$Attributes$x(xS),
 					elm$svg$Svg$Attributes$y(yS),
-					elm$svg$Svg$Attributes$class('treble')
+					elm$svg$Svg$Attributes$class('sprite')
 				]),
 			_List_fromArray(
 				[
-					elm$html$Html$text('𝄞')
+					A2(
+					elm$svg$Svg$image,
+					_List_fromArray(
+						[
+							elm$svg$Svg$Attributes$xlinkHref('img/coin.png')
+						]),
+					_List_Nil)
 				]));
 	});
-var author$project$Constants$noteXInterval = 200;
-var author$project$Note$getNoteHeight = function (midiCode) {
+var author$project$Note$getHeight = function (midiCode) {
 	switch (midiCode) {
 		case 60:
 			return 11;
@@ -10228,58 +10212,22 @@ var author$project$Note$getNoteHeight = function (midiCode) {
 			return 12;
 	}
 };
-var elm$svg$Svg$image = elm$svg$Svg$trustedNode('image');
-var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
-var elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
-var elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
-var elm$svg$Svg$Attributes$xlinkHref = function (value) {
-	return A3(
-		_VirtualDom_attributeNS,
-		'http://www.w3.org/1999/xlink',
-		'xlink:href',
-		_VirtualDom_noJavaScriptUri(value));
+var elm$core$String$fromFloat = _String_fromNumber;
+var author$project$View$Game$getNoteYPos = function (midiCode) {
+	var yPosFloat = author$project$Note$getHeight(midiCode);
+	return elm$core$String$fromFloat(author$project$Constants$topMargin + ((yPosFloat * author$project$Constants$staffLineHeight) / 2));
 };
-var author$project$View$Coin$view = F3(
-	function (xS, yS, heightS) {
-		var spriteWidth = 16;
-		var spriteHeight = 16;
-		return A2(
-			elm$svg$Svg$svg,
-			_List_fromArray(
-				[
-					elm$svg$Svg$Attributes$width(heightS),
-					elm$svg$Svg$Attributes$height(heightS),
-					elm$svg$Svg$Attributes$x(xS),
-					elm$svg$Svg$Attributes$y(yS),
-					elm$svg$Svg$Attributes$class('sprite')
-				]),
-			_List_fromArray(
-				[
-					A2(
-					elm$svg$Svg$image,
-					_List_fromArray(
-						[
-							elm$svg$Svg$Attributes$xlinkHref('img/coin.png')
-						]),
-					_List_Nil)
-				]));
-	});
-var author$project$View$Note$drawTargetNote = F4(
-	function (lineHeight, margins, xPosIndex, note) {
-		var yPosFloat = author$project$Note$getNoteHeight(note.midi);
-		var heightString = elm$core$String$fromFloat(lineHeight);
-		var cyString = elm$core$String$fromFloat(margins.top + ((yPosFloat * lineHeight) / 2));
-		var cxString = elm$core$String$fromFloat(margins.left + (xPosIndex * author$project$Constants$noteXInterval));
+var author$project$View$Game$drawTargetNote = F2(
+	function (xPosIndex, note) {
+		var heightString = elm$core$String$fromFloat(author$project$Constants$staffLineHeight);
+		var cyString = author$project$View$Game$getNoteYPos(note.midi);
+		var cxString = elm$core$String$fromFloat(author$project$Constants$leftMargin + (xPosIndex * author$project$Constants$noteXInterval));
 		return A3(author$project$View$Coin$view, cxString, cyString, heightString);
 	});
-var author$project$View$Note$drawAllTargetNotes = F4(
-	function (staffWidth, lineHeight, margins, notes) {
-		var noteList = elm$core$Array$toList(notes);
-		return A2(
-			elm$core$List$indexedMap,
-			A2(author$project$View$Note$drawTargetNote, lineHeight, margins),
-			noteList);
-	});
+var author$project$View$Game$drawAllTargetNotes = function (notes) {
+	var noteList = elm$core$Array$toList(notes);
+	return A2(elm$core$List$indexedMap, author$project$View$Game$drawTargetNote, noteList);
+};
 var author$project$View$Mario$sizeOffset = 15;
 var author$project$View$Mario$spriteHeight = author$project$View$Mario$sizeOffset + author$project$Constants$staffLineHeight;
 var author$project$View$Mario$widthToHeightRatio = 17 / 24;
@@ -10309,75 +10257,101 @@ var author$project$View$Mario$view = F2(
 					_List_Nil)
 				]));
 	});
-var author$project$View$Note$getMarioYPosition = function (midiCode) {
-	var yPosFloat = author$project$Note$getNoteHeight(midiCode);
-	return (((-1) * author$project$View$Mario$sizeOffset) + author$project$Constants$topMargin) + ((yPosFloat * author$project$Constants$staffLineHeight) / 2);
-};
-var author$project$View$Note$drawCurrentNote = F4(
-	function (lineHeight, margins, xPos, note) {
-		var cyString = elm$core$String$fromFloat(
-			author$project$View$Note$getMarioYPosition(note.midi));
+var author$project$View$Game$drawCurrentNote = F2(
+	function (xPos, note) {
+		var cyString = author$project$View$Game$getNoteYPos(note.midi);
 		var cxString = elm$core$String$fromFloat(xPos);
 		return A2(author$project$View$Mario$view, cxString, cyString);
 	});
-var elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
-var author$project$View$Game$svgView = F4(
-	function (model, width, height, margins) {
-		var svgWidth = author$project$Constants$svgViewTotalWidth;
-		var widthS = elm$core$String$fromFloat(svgWidth);
-		var svgListAllNotes = A4(author$project$View$Note$drawAllTargetNotes, width, author$project$Constants$staffLineHeight, margins, model.targetNotes);
-		var heightS = elm$core$String$fromFloat(author$project$Constants$svgViewTotalHeight);
-		var drawCurrentNoteFunc = A2(author$project$View$Note$drawCurrentNote, author$project$Constants$staffLineHeight, margins);
-		var currentNoteDrawing = function () {
-			var _n0 = model.currentNote;
-			if (_n0.$ === 'Nothing') {
-				return _List_Nil;
-			} else {
-				var n = _n0.a;
-				return _List_fromArray(
-					[
-						A2(drawCurrentNoteFunc, model.playerCurrentXPosition, n)
-					]);
-			}
-		}();
-		var gameLevelSvg = A2(
-			elm$svg$Svg$svg,
-			_List_fromArray(
-				[
-					elm$svg$Svg$Attributes$viewBox(
-					elm$core$String$fromFloat(model.scrollPosition + author$project$Constants$scrollOffset) + (' 0 ' + (widthS + (' ' + heightS)))),
-					elm$svg$Svg$Attributes$width(widthS),
-					elm$svg$Svg$Attributes$height(heightS),
-					elm$svg$Svg$Attributes$x('0'),
-					elm$svg$Svg$Attributes$y('0')
-				]),
-			_Utils_ap(currentNoteDrawing, svgListAllNotes));
+var elm$svg$Svg$line = elm$svg$Svg$trustedNode('line');
+var elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
+var elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
+var elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
+var elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
+var elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
+var author$project$View$Game$drawStaffLine = function (yPos) {
+	var lineYString = elm$core$String$fromFloat(author$project$Constants$topMargin + (yPos * author$project$Constants$staffLineHeight));
+	return A2(
+		elm$svg$Svg$line,
+		_List_fromArray(
+			[
+				elm$svg$Svg$Attributes$x1('0'),
+				elm$svg$Svg$Attributes$y1(lineYString),
+				elm$svg$Svg$Attributes$x2(
+				elm$core$String$fromFloat(author$project$Constants$leftMargin + author$project$Constants$svgViewWidth)),
+				elm$svg$Svg$Attributes$y2(lineYString),
+				elm$svg$Svg$Attributes$stroke('black')
+			]),
+		_List_Nil);
+};
+var elm$svg$Svg$text_ = elm$svg$Svg$trustedNode('text');
+var author$project$View$Game$trebleClef = F2(
+	function (x, y) {
+		var yS = elm$core$String$fromFloat(y);
+		var xS = elm$core$String$fromFloat(x);
 		return A2(
-			elm$svg$Svg$svg,
+			elm$svg$Svg$text_,
 			_List_fromArray(
 				[
-					elm$svg$Svg$Attributes$width(widthS),
-					elm$svg$Svg$Attributes$height(heightS),
-					elm$svg$Svg$Attributes$viewBox('0 0 ' + (widthS + (' ' + heightS))),
-					elm$svg$Svg$Attributes$class('center')
+					elm$svg$Svg$Attributes$x(xS),
+					elm$svg$Svg$Attributes$y(yS),
+					elm$svg$Svg$Attributes$class('treble')
 				]),
-			_Utils_ap(
-				A3(author$project$View$Game$backgroundStatic, width, author$project$Constants$staffLineHeight, margins),
-				_Utils_ap(
-					_List_fromArray(
-						[gameLevelSvg]),
-					_List_fromArray(
-						[
-							A2(author$project$View$Game$trebleClef, 0, 237)
-						]))));
+			_List_fromArray(
+				[
+					elm$html$Html$text('𝄞')
+				]));
 	});
+var elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
 var author$project$View$Game$view = function (model) {
-	return A4(
-		author$project$View$Game$svgView,
-		model,
-		author$project$Constants$svgViewWidth,
-		author$project$Constants$svgViewHeight,
-		{bottom: author$project$Constants$bottomMargin, left: author$project$Constants$leftMargin, right: author$project$Constants$rightMargin, top: author$project$Constants$topMargin});
+	var widthS = elm$core$String$fromFloat(author$project$Constants$svgViewTotalWidth);
+	var svgListAllNotes = author$project$View$Game$drawAllTargetNotes(model.targetNotes);
+	var heightS = elm$core$String$fromFloat(author$project$Constants$svgViewTotalHeight);
+	var currentNoteDrawing = function () {
+		var _n0 = model.currentNote;
+		if (_n0.$ === 'Nothing') {
+			return _List_Nil;
+		} else {
+			var currentNote = _n0.a;
+			return _List_fromArray(
+				[
+					A2(author$project$View$Game$drawCurrentNote, model.playerCurrentXPosition, currentNote)
+				]);
+		}
+	}();
+	var gameLevelSvg = A2(
+		elm$svg$Svg$svg,
+		_List_fromArray(
+			[
+				elm$svg$Svg$Attributes$viewBox(
+				elm$core$String$fromFloat(model.scrollPosition + author$project$Constants$scrollOffset) + (' 0 ' + (widthS + (' ' + heightS)))),
+				elm$svg$Svg$Attributes$width(widthS),
+				elm$svg$Svg$Attributes$height(heightS),
+				elm$svg$Svg$Attributes$x('0'),
+				elm$svg$Svg$Attributes$y('0')
+			]),
+		_Utils_ap(currentNoteDrawing, svgListAllNotes));
+	return A2(
+		elm$svg$Svg$svg,
+		_List_fromArray(
+			[
+				elm$svg$Svg$Attributes$width(widthS),
+				elm$svg$Svg$Attributes$height(heightS),
+				elm$svg$Svg$Attributes$viewBox('0 0 ' + (widthS + (' ' + heightS))),
+				elm$svg$Svg$Attributes$class('center')
+			]),
+		_Utils_ap(
+			A2(
+				elm$core$List$map,
+				author$project$View$Game$drawStaffLine,
+				A2(elm$core$List$range, 1, 5)),
+			_Utils_ap(
+				_List_fromArray(
+					[gameLevelSvg]),
+				_List_fromArray(
+					[
+						A2(author$project$View$Game$trebleClef, 0, 237)
+					]))));
 };
 var elm$html$Html$h1 = _VirtualDom_node('h1');
 var elm$html$Html$header = _VirtualDom_node('header');

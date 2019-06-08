@@ -29,7 +29,7 @@ createNote midiCode =
     }
 
 
-getNoteHeight midiCode = 
+getHeight midiCode = 
   case midiCode of
     60 -> 11
     62 -> 10

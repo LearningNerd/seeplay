@@ -6,7 +6,7 @@ import Html.Events exposing (..)
 import Svg exposing (..)
 import Svg.Attributes as S exposing (..)
 
-import Model exposing (Model, Margins)
+import Model exposing (Model)
 import Msg exposing (..)
 
 view : Model -> Html Msg

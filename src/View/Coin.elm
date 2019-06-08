@@ -3,9 +3,6 @@ module View.Coin exposing (view)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 
-import Model exposing (Model, Margins)
-import Msg exposing (..)
-
 
 view xS yS heightS =
   let

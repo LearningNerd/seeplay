@@ -5,37 +5,29 @@ import Html.Attributes as A exposing (..)
 import Html.Events exposing (..)
 import Svg exposing (..)
 import Svg.Attributes as S exposing (..)
+import Array exposing (..)
 
 import Constants
-import Model exposing (Model, Margins)
+import View.Mario exposing (view)
+import View.Coin exposing (view)
+import Note exposing (Note)
+import Model exposing (Model)
 import Msg exposing (..)
-import View.Note
 
 
-view : Model -> Html Msg
+view : Model -> Svg Msg
 view model =
-    svgView model Constants.svgViewWidth Constants.svgViewHeight { top = Constants.topMargin, left = Constants.leftMargin, bottom = Constants.bottomMargin, right = Constants.rightMargin }
-
-
-svgView : Model -> Float -> Float -> Margins -> Svg Msg
-svgView model width height margins =
     let
+        widthS = String.fromFloat Constants.svgViewTotalWidth
 
-        svgWidth =
-            Constants.svgViewTotalWidth
-
-        widthS = String.fromFloat svgWidth
-
-        heightS =
-            String.fromFloat Constants.svgViewTotalHeight
+        heightS = String.fromFloat Constants.svgViewTotalHeight
         
-        drawCurrentNoteFunc = View.Note.drawCurrentNote Constants.staffLineHeight margins
-
-        svgListAllNotes = View.Note.drawAllTargetNotes width Constants.staffLineHeight margins model.targetNotes
+        svgListAllNotes = drawAllTargetNotes model.targetNotes
 
         currentNoteDrawing = case model.currentNote of
                                  Nothing -> []
-                                 Just n -> [ drawCurrentNoteFunc model.playerCurrentXPosition n ]
+                                 Just currentNote -> [ drawCurrentNote model.playerCurrentXPosition currentNote ]
+
 
         -- animate viewBox to scroll game level with all notes drawn inside
         -- updated: draw the current note inside the game level?
@@ -47,23 +39,35 @@ svgView model width height margins =
           ] (currentNoteDrawing ++ svgListAllNotes)
     
     in
-    svg
+      svg
         [ S.width widthS
         , S.height heightS
         , S.viewBox ("0 0 " ++ widthS ++ " " ++ heightS)
         , S.class "center"
         ]
         (
-          (backgroundStatic width Constants.staffLineHeight margins)
+          -- draw 5 staff lines
+          (List.map drawStaffLine (List.range 1 5))
            ++ [gameLevelSvg]
            ++ [ trebleClef 0 237 ]
         ) 
 
 
--- Treble clef and staff are static, other stuff scrolls on top
-backgroundStatic width lineHeight margins = 
-    (drawStaff width Constants.staffLineHeight margins)
 
+drawStaffLine yPos =
+    let
+        lineYString =
+            String.fromFloat (Constants.topMargin + (toFloat yPos * Constants.staffLineHeight))
+    in
+    line
+        [ S.x1 "0"
+        , S.y1 lineYString
+        , S.x2 (String.fromFloat (Constants.leftMargin + Constants.svgViewWidth))
+--        , S.x2 (String.fromFloat staffWidth)
+        , S.y2 lineYString
+        , S.stroke "black"
+        ]
+        []
 
 
 trebleClef x y =
@@ -77,24 +81,45 @@ trebleClef x y =
     text_ [ S.x xS, S.y yS, S.class "treble" ] [ HTML.text "𝄞" ]
 
 
-staffLines : Float -> Float -> Margins -> Int -> Svg msg
-staffLines staffWidth lineHeight margins yPos =
+-- Currently, moved this to run in the animation loop (update on every frame)
+-- getNoteXPos noteIndex =
+  -- String.fromFloat (Constants.leftMargin + ((toFloat noteIndex) * (toFloat Constants.noteXInterval) ) )
+
+
+getNoteYPos midiCode =
+  let
+    yPosFloat = toFloat (Note.getHeight midiCode)
+  in
+    String.fromFloat (Constants.topMargin + (yPosFloat * Constants.staffLineHeight / 2))
+
+
+drawTargetNote : Int -> Note -> Svg msg
+drawTargetNote xPosIndex note =
     let
-        lineYString =
-            String.fromFloat (margins.top + (toFloat yPos * Constants.staffLineHeight))
+        cyString = getNoteYPos note.midi
+
+        cxString =
+            String.fromFloat (Constants.leftMargin + ((toFloat xPosIndex) * (toFloat Constants.noteXInterval) ) )
+
+        heightString = (String.fromFloat Constants.staffLineHeight)
     in
-    line
-        [ S.x1 "0"
-        , S.y1 lineYString
-        , S.x2 (String.fromFloat (margins.left + staffWidth))
---        , S.x2 (String.fromFloat staffWidth)
-        , S.y2 lineYString
-        , S.stroke "black"
-        ]
-        []
+      View.Coin.view cxString cyString heightString
 
 
-drawStaff : Float -> Float -> Margins -> List (Svg msg)
-drawStaff staffWidth lineHeight margins =
-    List.map (staffLines staffWidth Constants.staffLineHeight margins) (List.range 1 5)
+
+drawAllTargetNotes : Array Note -> List (Svg msg)
+drawAllTargetNotes notes =
+    let 
+        noteList = Array.toList notes
+    in
+      List.indexedMap drawTargetNote noteList 
+
+
+drawCurrentNote : Float -> Note -> Svg msg
+drawCurrentNote xPos note =
+    let
+        cyString = getNoteYPos note.midi
+        cxString = String.fromFloat xPos
+    in
+      View.Mario.view cxString cyString
 

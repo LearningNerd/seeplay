@@ -50,10 +50,6 @@ type alias Score =
   , incorrectTries : Int
   }
 
--- For views ... not sure where to put this =P
-type alias Margins =
-    { top : Float, right : Float, bottom : Float, left : Float }
-
 
 initialModel : Model
 initialModel =
