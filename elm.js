@@ -5043,7 +5043,7 @@ var author$project$ConstantsHelpers$convertFramesToMillisDuration = F2(
 		return (durationFrames * 1000) / fps;
 	});
 var author$project$ConstantsHelpers$framesPerSecond = 60;
-var author$project$ConstantsHelpers$jumpDurationFrames = 17;
+var author$project$ConstantsHelpers$jumpDurationFrames = 35;
 var author$project$ConstantsHelpers$jumpDurationMillis = A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, author$project$ConstantsHelpers$jumpDurationFrames, author$project$ConstantsHelpers$framesPerSecond);
 var author$project$ConstantsHelpers$playerInitialNote = 67;
 var author$project$ConstantsHelpers$playerInitialXPosition = 0;
@@ -5301,6 +5301,7 @@ var author$project$Model$initialModel = {
 	isMIDIConnected: elm$core$Maybe$Nothing,
 	isPlaying: false,
 	millisSinceJumpStarted: author$project$ConstantsHelpers$jumpDurationMillis,
+	millisSinceLastSpriteAnimFrame: 0,
 	nextTargetNoteIndex: 0,
 	nextTargetXPosition: author$project$ConstantsHelpers$playerInitialXPosition,
 	nextTargetYPosition: author$project$ConstantsHelpers$getNoteYPos(author$project$ConstantsHelpers$playerInitialNote),
@@ -10607,6 +10608,8 @@ var author$project$Update$startGame = function (model) {
 			{isPlaying: true}),
 		A2(elm$core$Task$perform, author$project$Msg$RestartTimer, elm$time$Time$now));
 };
+var author$project$ConstantsHelpers$spriteAnimDelayFrames = 8;
+var author$project$ConstantsHelpers$spriteAnimDelayMillis = A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, author$project$ConstantsHelpers$spriteAnimDelayFrames, author$project$ConstantsHelpers$framesPerSecond);
 var author$project$ConstantsHelpers$scrollAnimMultiplier = 5.0e-2;
 var author$project$Update$scrollTo = F2(
 	function (currentPosition, nextTargetNoteIndex) {
@@ -10614,7 +10617,7 @@ var author$project$Update$scrollTo = F2(
 		var remainingDistance = targetPosition - currentPosition;
 		return currentPosition + (remainingDistance * author$project$ConstantsHelpers$scrollAnimMultiplier);
 	});
-var author$project$ConstantsHelpers$accelYFrames = 2;
+var author$project$ConstantsHelpers$accelYFrames = 1;
 var author$project$ConstantsHelpers$convertFramesToMillisAccel = F2(
 	function (accel, fps) {
 		return (accel * (fps / 1000)) * (fps / 1000);
@@ -10648,12 +10651,15 @@ var author$project$Update$updateModelStopJumping = function (model) {
 var author$project$View$Mario$numSpriteFrames = 2;
 var author$project$Update$updateAnimationValues = F2(
 	function (model, millisSinceLastFrame) {
-		var newPlayerSpriteIndex = (model.playerSpriteIndex + 1) % author$project$View$Mario$numSpriteFrames;
+		var newMillisSinceLastSpriteAnim = model.millisSinceLastSpriteAnimFrame + millisSinceLastFrame;
+		var newNewMillisSinceLastSpriteAnim = (_Utils_cmp(newMillisSinceLastSpriteAnim, author$project$ConstantsHelpers$spriteAnimDelayMillis) > -1) ? 0 : (model.millisSinceLastSpriteAnimFrame + millisSinceLastFrame);
+		var newPlayerSpriteIndex = (_Utils_cmp(newMillisSinceLastSpriteAnim, author$project$ConstantsHelpers$spriteAnimDelayMillis) > -1) ? ((model.playerSpriteIndex + 1) % author$project$View$Mario$numSpriteFrames) : model.playerSpriteIndex;
 		var newMillisSinceJumpStarted = model.millisSinceJumpStarted + millisSinceLastFrame;
 		var updatedModelBase = _Utils_update(
 			model,
 			{
 				millisSinceJumpStarted: newMillisSinceJumpStarted,
+				millisSinceLastSpriteAnimFrame: newNewMillisSinceLastSpriteAnim,
 				playerSpriteIndex: newPlayerSpriteIndex,
 				scrollPosition: A2(author$project$Update$scrollTo, model.scrollPosition, model.nextTargetNoteIndex)
 			});

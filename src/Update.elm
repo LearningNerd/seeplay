@@ -54,14 +54,33 @@ update msg model =
 updateAnimationValues : Model -> Float -> ( Model, Cmd Msg )
 updateAnimationValues model millisSinceLastFrame =
   let
+    -- update timer for jump, and for each sprite frame anim 
     newMillisSinceJumpStarted = model.millisSinceJumpStarted + millisSinceLastFrame
+    
+    newMillisSinceLastSpriteAnim = model.millisSinceLastSpriteAnimFrame + millisSinceLastFrame
 
-    newPlayerSpriteIndex = ( remainderBy View.Mario.numSpriteFrames (model.playerSpriteIndex + 1) )
-          -- = (spriteIndex + 1) % numSpriteFrames
 
-    -- Always update time since jump started, and scroll position
+    -- Update sprite
+    newPlayerSpriteIndex = 
+      if newMillisSinceLastSpriteAnim >= ConstantsHelpers.spriteAnimDelayMillis then
+         ( remainderBy View.Mario.numSpriteFrames (model.playerSpriteIndex + 1) )
+      else
+        model.playerSpriteIndex -- don't change otherwise
+
+          ------- should refactor this =P
+    -- Update timer for sprite animation
+    newNewMillisSinceLastSpriteAnim = 
+      if newMillisSinceLastSpriteAnim >= ConstantsHelpers.spriteAnimDelayMillis then
+         0 -- reset when it's time to update the sprite
+      else
+        model.millisSinceLastSpriteAnimFrame + millisSinceLastFrame -- keep countin
+
+
+
+    -- Always update time since jump started, since last sprite anim, and scroll position
     updatedModelBase =
         { model | millisSinceJumpStarted = newMillisSinceJumpStarted
+        , millisSinceLastSpriteAnimFrame = newNewMillisSinceLastSpriteAnim
         , scrollPosition = scrollTo model.scrollPosition model.nextTargetNoteIndex
         , playerSpriteIndex = newPlayerSpriteIndex
         }

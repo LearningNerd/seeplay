@@ -47,12 +47,18 @@ framesPerSecond = 60
 
 -- Increase velocity by 2 pixels per frame per frame
 -- positive number means moving downwards for SVG coords
-accelYFrames = 2 
+accelYFrames = 1
+-- accelYFrames = 2 
 accelYMillis = convertFramesToMillisAccel accelYFrames framesPerSecond
 
 -- Complete each jump in x number of frames
-jumpDurationFrames = 17
+-- jumpDurationFrames = 17
+jumpDurationFrames = 35
 jumpDurationMillis = convertFramesToMillisDuration jumpDurationFrames framesPerSecond
+
+-- Update sprite animation frame every X milliseconds
+spriteAnimDelayFrames = 8
+spriteAnimDelayMillis = convertFramesToMillisDuration spriteAnimDelayFrames framesPerSecond
 
 
 --------------------------------------------------------------------------------

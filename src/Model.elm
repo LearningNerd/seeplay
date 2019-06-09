@@ -42,6 +42,7 @@ type alias Model =
     , scrollPosition : Float
 
     , playerSpriteIndex : Int
+    , millisSinceLastSpriteAnimFrame : Float
     }
 
 type alias Score =
@@ -84,6 +85,7 @@ initialModel =
     , scrollPosition = 0
 
     , playerSpriteIndex = 0
+    , millisSinceLastSpriteAnimFrame = 0
     }
 
 
