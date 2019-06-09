@@ -1,4 +1,4 @@
-module View.Mario exposing (..)
+module View.Mario exposing (view, numSpriteFrames)
 
 import Svg exposing (..)
 import Svg.Attributes exposing (..)

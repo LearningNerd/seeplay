@@ -5300,6 +5300,7 @@ var author$project$Model$initialModel = {
 	incorrectTries: 0,
 	isMIDIConnected: elm$core$Maybe$Nothing,
 	isPlaying: false,
+	itemSpriteIndex: 0,
 	millisSinceJumpStarted: author$project$ConstantsHelpers$jumpDurationMillis,
 	millisSinceLastSpriteAnimFrame: 0,
 	nextTargetNoteIndex: 0,
@@ -10210,14 +10211,15 @@ var elm$svg$Svg$Attributes$xlinkHref = function (value) {
 		_VirtualDom_noJavaScriptUri(value));
 };
 var elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
-var author$project$View$Coin$view = F2(
-	function (xS, yS) {
+var author$project$View$Coin$view = F3(
+	function (xS, yS, spriteIndex) {
+		var viewBoxStartXString = elm$core$String$fromInt(spriteIndex * author$project$View$Coin$baseSpriteWidth);
 		return A2(
 			elm$svg$Svg$svg,
 			_List_fromArray(
 				[
 					elm$svg$Svg$Attributes$viewBox(
-					elm$core$String$fromFloat(author$project$View$Coin$baseSpriteWidth) + (' 0 ' + (elm$core$String$fromFloat(author$project$View$Coin$baseSpriteWidth) + (' ' + elm$core$String$fromFloat(author$project$View$Coin$baseSpriteHeight))))),
+					viewBoxStartXString + (' 0 ' + (elm$core$String$fromFloat(author$project$View$Coin$baseSpriteWidth) + (' ' + elm$core$String$fromFloat(author$project$View$Coin$baseSpriteHeight))))),
 					elm$svg$Svg$Attributes$width(
 					elm$core$String$fromFloat(author$project$View$Coin$spriteWidth)),
 					elm$svg$Svg$Attributes$height(
@@ -10237,18 +10239,22 @@ var author$project$View$Coin$view = F2(
 					_List_Nil)
 				]));
 	});
-var author$project$View$Game$drawTargetNote = F2(
-	function (xPosIndex, note) {
+var author$project$View$Game$drawTargetNote = F3(
+	function (spriteIndex, xPosIndex, note) {
 		var cyString = elm$core$String$fromFloat(
 			author$project$ConstantsHelpers$getNoteYPos(note.midi));
 		var cxString = elm$core$String$fromFloat(
 			author$project$ConstantsHelpers$getNoteXPos(xPosIndex));
-		return A2(author$project$View$Coin$view, cxString, cyString);
+		return A3(author$project$View$Coin$view, cxString, cyString, spriteIndex);
 	});
-var author$project$View$Game$drawAllTargetNotes = function (notes) {
-	var noteList = elm$core$Array$toList(notes);
-	return A2(elm$core$List$indexedMap, author$project$View$Game$drawTargetNote, noteList);
-};
+var author$project$View$Game$drawAllTargetNotes = F2(
+	function (spriteIndex, notes) {
+		var noteList = elm$core$Array$toList(notes);
+		return A2(
+			elm$core$List$indexedMap,
+			author$project$View$Game$drawTargetNote(spriteIndex),
+			noteList);
+	});
 var elm$svg$Svg$line = elm$svg$Svg$trustedNode('line');
 var elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
 var elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
@@ -10325,7 +10331,7 @@ var author$project$View$Game$view = function (model) {
 	var yS = elm$core$String$fromFloat(model.playerCurrentYPosition);
 	var xS = elm$core$String$fromFloat(model.playerCurrentXPosition);
 	var widthS = elm$core$String$fromFloat(author$project$ConstantsHelpers$svgViewTotalWidth);
-	var svgListAllNotes = author$project$View$Game$drawAllTargetNotes(model.targetNotes);
+	var svgListAllNotes = A2(author$project$View$Game$drawAllTargetNotes, model.itemSpriteIndex, model.targetNotes);
 	var heightS = elm$core$String$fromFloat(author$project$ConstantsHelpers$svgViewTotalHeight);
 	var currentNoteDrawing = function () {
 		var _n0 = model.currentNote;
@@ -10648,6 +10654,7 @@ var author$project$Update$updateModelStopJumping = function (model) {
 		model,
 		{playerCurrentXPosition: model.nextTargetXPosition, playerCurrentYPosition: model.nextTargetYPosition});
 };
+var author$project$View$Coin$numSpriteFrames = 4;
 var author$project$View$Mario$numSpriteFrames = 2;
 var author$project$Update$updateAnimationValues = F2(
 	function (model, millisSinceLastFrame) {
@@ -10655,9 +10662,11 @@ var author$project$Update$updateAnimationValues = F2(
 		var newNewMillisSinceLastSpriteAnim = (_Utils_cmp(newMillisSinceLastSpriteAnim, author$project$ConstantsHelpers$spriteAnimDelayMillis) > -1) ? 0 : (model.millisSinceLastSpriteAnimFrame + millisSinceLastFrame);
 		var newPlayerSpriteIndex = (_Utils_cmp(newMillisSinceLastSpriteAnim, author$project$ConstantsHelpers$spriteAnimDelayMillis) > -1) ? ((model.playerSpriteIndex + 1) % author$project$View$Mario$numSpriteFrames) : model.playerSpriteIndex;
 		var newMillisSinceJumpStarted = model.millisSinceJumpStarted + millisSinceLastFrame;
+		var newItemSpriteIndex = (_Utils_cmp(newMillisSinceLastSpriteAnim, author$project$ConstantsHelpers$spriteAnimDelayMillis) > -1) ? ((model.itemSpriteIndex + 1) % author$project$View$Coin$numSpriteFrames) : model.playerSpriteIndex;
 		var updatedModelBase = _Utils_update(
 			model,
 			{
+				itemSpriteIndex: newItemSpriteIndex,
 				millisSinceJumpStarted: newMillisSinceJumpStarted,
 				millisSinceLastSpriteAnimFrame: newNewMillisSinceLastSpriteAnim,
 				playerSpriteIndex: newPlayerSpriteIndex,

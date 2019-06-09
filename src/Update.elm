@@ -17,6 +17,7 @@ import Note exposing (Note)
 import Ports
 
 import View.Mario
+import View.Coin
 
 
 
@@ -60,12 +61,21 @@ updateAnimationValues model millisSinceLastFrame =
     newMillisSinceLastSpriteAnim = model.millisSinceLastSpriteAnimFrame + millisSinceLastFrame
 
 
-    -- Update sprite
+    -- Update player sprite
     newPlayerSpriteIndex = 
       if newMillisSinceLastSpriteAnim >= ConstantsHelpers.spriteAnimDelayMillis then
          ( remainderBy View.Mario.numSpriteFrames (model.playerSpriteIndex + 1) )
       else
         model.playerSpriteIndex -- don't change otherwise
+
+
+    -- Update coin sprite
+    newItemSpriteIndex = 
+      if newMillisSinceLastSpriteAnim >= ConstantsHelpers.spriteAnimDelayMillis then
+         ( remainderBy View.Coin.numSpriteFrames (model.itemSpriteIndex + 1) )
+      else
+        model.playerSpriteIndex -- don't change otherwise
+
 
           ------- should refactor this =P
     -- Update timer for sprite animation
@@ -83,6 +93,7 @@ updateAnimationValues model millisSinceLastFrame =
         , millisSinceLastSpriteAnimFrame = newNewMillisSinceLastSpriteAnim
         , scrollPosition = scrollTo model.scrollPosition model.nextTargetNoteIndex
         , playerSpriteIndex = newPlayerSpriteIndex
+        , itemSpriteIndex = newItemSpriteIndex
         }
 
     -- Only update player position for duration of jump

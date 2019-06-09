@@ -1,9 +1,11 @@
-module View.Coin exposing (view)
+module View.Coin exposing (view, numSpriteFrames)
 
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import ConstantsHelpers
 
+
+numSpriteFrames = 4
 
 baseSpriteWidth = 16
 baseSpriteHeight = 16
@@ -15,9 +17,12 @@ spriteWidth = (ConstantsHelpers.staffLineHeight * 0.8) * widthToHeightRatio
 spriteHeight = ConstantsHelpers.staffLineHeight * 0.8
 
 
-view xS yS =
-  svg
-    [ viewBox (String.fromFloat baseSpriteWidth ++ " 0 " ++ String.fromFloat baseSpriteWidth ++ " " ++ String.fromFloat baseSpriteHeight)
+view xS yS spriteIndex =
+  let
+    viewBoxStartXString = String.fromInt (spriteIndex * baseSpriteWidth)
+  in
+    svg
+    [ viewBox (viewBoxStartXString ++ " 0 " ++ String.fromFloat baseSpriteWidth ++ " " ++ String.fromFloat baseSpriteHeight)
     , width (String.fromFloat spriteWidth)
     , height (String.fromFloat spriteHeight)
     , x xS

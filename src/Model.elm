@@ -42,6 +42,7 @@ type alias Model =
     , scrollPosition : Float
 
     , playerSpriteIndex : Int
+    , itemSpriteIndex : Int
     , millisSinceLastSpriteAnimFrame : Float
     }
 
@@ -85,6 +86,7 @@ initialModel =
     , scrollPosition = 0
 
     , playerSpriteIndex = 0
+    , itemSpriteIndex = 0
     , millisSinceLastSpriteAnimFrame = 0
     }
 

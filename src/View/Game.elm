@@ -22,7 +22,7 @@ view model =
 
         heightS = String.fromFloat ConstantsHelpers.svgViewTotalHeight
         
-        svgListAllNotes = drawAllTargetNotes model.targetNotes
+        svgListAllNotes = drawAllTargetNotes model.itemSpriteIndex model.targetNotes
 
         xS = String.fromFloat model.playerCurrentXPosition
         yS = String.fromFloat model.playerCurrentYPosition
@@ -86,20 +86,20 @@ trebleClef x y =
 
 
 
-drawAllTargetNotes : Array Note -> List (Svg msg)
-drawAllTargetNotes notes =
+drawAllTargetNotes : Int -> Array Note -> List (Svg msg)
+drawAllTargetNotes spriteIndex notes =
     let 
         noteList = Array.toList notes
     in
-      List.indexedMap drawTargetNote noteList 
+      List.indexedMap (drawTargetNote spriteIndex) noteList 
 
-drawTargetNote : Int -> Note -> Svg msg
-drawTargetNote xPosIndex note =
+drawTargetNote : Int -> Int -> Note -> Svg msg
+drawTargetNote spriteIndex xPosIndex note =
     let
         cyString = String.fromFloat (ConstantsHelpers.getNoteYPos note.midi)
 
         cxString =
             String.fromFloat (ConstantsHelpers.getNoteXPos xPosIndex)
     in
-      View.Coin.view cxString cyString
+      View.Coin.view cxString cyString spriteIndex
 
