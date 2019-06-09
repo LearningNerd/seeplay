@@ -8,6 +8,7 @@ import ConstantsHelpers
 -- what was this for again...? =P 
 -- sizeOffset = 15
 
+numSpriteFrames = 2 -- just using the first 2 sprites for now
 
 baseSpriteWidth = 17
 baseSpriteHeight = 24
@@ -21,9 +22,12 @@ spriteWidth = (ConstantsHelpers.staffLineHeight) * widthToHeightRatio
 spriteHeight = ConstantsHelpers.staffLineHeight
 
 
-view xS yS =
+view xS yS spriteIndex =
+  let
+      viewBoxStartXString = String.fromInt (spriteIndex * baseSpriteWidth)
+  in
     svg 
-    [ viewBox (String.fromFloat baseSpriteWidth ++ " 0 " ++ String.fromFloat baseSpriteWidth ++ " " ++ String.fromFloat baseSpriteHeight)
+    [ viewBox (viewBoxStartXString ++ " 0 " ++ String.fromFloat baseSpriteWidth ++ " " ++ String.fromFloat baseSpriteHeight)
     , width (String.fromFloat spriteWidth)
     , height (String.fromFloat spriteHeight)
     , x xS

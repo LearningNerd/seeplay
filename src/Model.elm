@@ -40,6 +40,8 @@ type alias Model =
 
     , millisSinceJumpStarted : Float
     , scrollPosition : Float
+
+    , playerSpriteIndex : Int
     }
 
 type alias Score =
@@ -80,6 +82,8 @@ initialModel =
     , velocityY = 0
     , millisSinceJumpStarted = ConstantsHelpers.jumpDurationMillis
     , scrollPosition = 0
+
+    , playerSpriteIndex = 0
     }
 
 

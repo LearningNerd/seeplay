@@ -10292,14 +10292,15 @@ var author$project$View$Mario$baseSpriteWidth = 17;
 var author$project$View$Mario$spriteHeight = author$project$ConstantsHelpers$staffLineHeight;
 var author$project$View$Mario$widthToHeightRatio = author$project$View$Mario$baseSpriteWidth / author$project$View$Mario$baseSpriteHeight;
 var author$project$View$Mario$spriteWidth = author$project$ConstantsHelpers$staffLineHeight * author$project$View$Mario$widthToHeightRatio;
-var author$project$View$Mario$view = F2(
-	function (xS, yS) {
+var author$project$View$Mario$view = F3(
+	function (xS, yS, spriteIndex) {
+		var viewBoxStartXString = elm$core$String$fromInt(spriteIndex * author$project$View$Mario$baseSpriteWidth);
 		return A2(
 			elm$svg$Svg$svg,
 			_List_fromArray(
 				[
 					elm$svg$Svg$Attributes$viewBox(
-					elm$core$String$fromFloat(author$project$View$Mario$baseSpriteWidth) + (' 0 ' + (elm$core$String$fromFloat(author$project$View$Mario$baseSpriteWidth) + (' ' + elm$core$String$fromFloat(author$project$View$Mario$baseSpriteHeight))))),
+					viewBoxStartXString + (' 0 ' + (elm$core$String$fromFloat(author$project$View$Mario$baseSpriteWidth) + (' ' + elm$core$String$fromFloat(author$project$View$Mario$baseSpriteHeight))))),
 					elm$svg$Svg$Attributes$width(
 					elm$core$String$fromFloat(author$project$View$Mario$spriteWidth)),
 					elm$svg$Svg$Attributes$height(
@@ -10333,7 +10334,7 @@ var author$project$View$Game$view = function (model) {
 			var currentNote = _n0.a;
 			return _List_fromArray(
 				[
-					A2(author$project$View$Mario$view, xS, yS)
+					A3(author$project$View$Mario$view, xS, yS, model.playerSpriteIndex)
 				]);
 		}
 	}();
@@ -10644,13 +10645,16 @@ var author$project$Update$updateModelStopJumping = function (model) {
 		model,
 		{playerCurrentXPosition: model.nextTargetXPosition, playerCurrentYPosition: model.nextTargetYPosition});
 };
+var author$project$View$Mario$numSpriteFrames = 2;
 var author$project$Update$updateAnimationValues = F2(
 	function (model, millisSinceLastFrame) {
+		var newPlayerSpriteIndex = (model.playerSpriteIndex + 1) % author$project$View$Mario$numSpriteFrames;
 		var newMillisSinceJumpStarted = model.millisSinceJumpStarted + millisSinceLastFrame;
 		var updatedModelBase = _Utils_update(
 			model,
 			{
 				millisSinceJumpStarted: newMillisSinceJumpStarted,
+				playerSpriteIndex: newPlayerSpriteIndex,
 				scrollPosition: A2(author$project$Update$scrollTo, model.scrollPosition, model.nextTargetNoteIndex)
 			});
 		var updatedModel = (_Utils_cmp(newMillisSinceJumpStarted, author$project$ConstantsHelpers$jumpDurationMillis) < 0) ? author$project$Update$updateModelContinueJumping(updatedModelBase) : author$project$Update$updateModelStopJumping(updatedModelBase);

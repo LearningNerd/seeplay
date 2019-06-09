@@ -56,10 +56,14 @@ updateAnimationValues model millisSinceLastFrame =
   let
     newMillisSinceJumpStarted = model.millisSinceJumpStarted + millisSinceLastFrame
 
+    newPlayerSpriteIndex = ( remainderBy View.Mario.numSpriteFrames (model.playerSpriteIndex + 1) )
+          -- = (spriteIndex + 1) % numSpriteFrames
+
     -- Always update time since jump started, and scroll position
     updatedModelBase =
         { model | millisSinceJumpStarted = newMillisSinceJumpStarted
         , scrollPosition = scrollTo model.scrollPosition model.nextTargetNoteIndex
+        , playerSpriteIndex = newPlayerSpriteIndex
         }
 
     -- Only update player position for duration of jump

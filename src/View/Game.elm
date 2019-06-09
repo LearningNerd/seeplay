@@ -30,7 +30,7 @@ view model =
         currentNoteDrawing = case model.currentNote of
                                  Nothing -> []
                                  Just currentNote -> 
-                                   [ View.Mario.view xS yS ]
+                                   [View.Mario.view xS yS model.playerSpriteIndex]
 
         -- animate viewBox to scroll game level with all notes drawn inside
         -- updated: draw the current note inside the game level?
