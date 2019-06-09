@@ -2,16 +2,24 @@ module View.Coin exposing (view)
 
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
+import ConstantsHelpers
 
 
-view xS yS heightS =
-  let
-    spriteWidth = 16
-    spriteHeight = 16
-  in
+baseSpriteWidth = 16
+baseSpriteHeight = 16
+
+widthToHeightRatio = baseSpriteWidth / baseSpriteHeight
+
+
+spriteWidth = (ConstantsHelpers.staffLineHeight * 0.8) * widthToHeightRatio
+spriteHeight = ConstantsHelpers.staffLineHeight * 0.8
+
+
+view xS yS =
   svg
-    [ width heightS -- (String.fromInt 16) ,
-    , height heightS
+    [ viewBox (String.fromFloat baseSpriteWidth ++ " 0 " ++ String.fromFloat baseSpriteWidth ++ " " ++ String.fromFloat baseSpriteHeight)
+    , width (String.fromFloat spriteWidth)
+    , height (String.fromFloat spriteHeight)
     , x xS
     , y yS
     , class "sprite"

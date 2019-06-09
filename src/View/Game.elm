@@ -100,8 +100,6 @@ drawTargetNote xPosIndex note =
 
         cxString =
             String.fromFloat (ConstantsHelpers.getNoteXPos xPosIndex)
-
-        heightString = (String.fromFloat ConstantsHelpers.staffLineHeight)
     in
-      View.Coin.view cxString cyString heightString
+      View.Coin.view cxString cyString
 
