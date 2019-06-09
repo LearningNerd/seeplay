@@ -10618,7 +10618,7 @@ var author$project$ConstantsHelpers$getCurrentJumpYPosition = F4(
 		return ((((0.5 * accelY) * elapsedTime) * elapsedTime) + (initialVelocityY * elapsedTime)) + startYPos;
 	});
 var elm$core$Debug$log = _Debug_log;
-var author$project$Update$updateModelPlayerPosition = function (model) {
+var author$project$Update$updateModelContinueJumping = function (model) {
 	return _Utils_update(
 		model,
 		{
@@ -10629,6 +10629,11 @@ var author$project$Update$updateModelPlayerPosition = function (model) {
 				A4(author$project$ConstantsHelpers$getCurrentJumpYPosition, model.playerJumpStartYPosition, model.velocityY, author$project$ConstantsHelpers$accelYMillis, model.millisSinceJumpStarted))
 		});
 };
+var author$project$Update$updateModelStopJumping = function (model) {
+	return _Utils_update(
+		model,
+		{playerCurrentXPosition: model.nextTargetXPosition, playerCurrentYPosition: model.nextTargetYPosition});
+};
 var author$project$Update$updateAnimationValues = F2(
 	function (model, millisSinceLastFrame) {
 		var newMillisSinceJumpStarted = model.millisSinceJumpStarted + millisSinceLastFrame;
@@ -10638,7 +10643,7 @@ var author$project$Update$updateAnimationValues = F2(
 				millisSinceJumpStarted: newMillisSinceJumpStarted,
 				scrollPosition: A2(author$project$Update$scrollTo, model.scrollPosition, model.nextTargetNoteIndex)
 			});
-		var updatedModel = (_Utils_cmp(newMillisSinceJumpStarted, author$project$ConstantsHelpers$jumpDurationMillis) < 0) ? author$project$Update$updateModelPlayerPosition(updatedModelBase) : updatedModelBase;
+		var updatedModel = (_Utils_cmp(newMillisSinceJumpStarted, author$project$ConstantsHelpers$jumpDurationMillis) < 0) ? author$project$Update$updateModelContinueJumping(updatedModelBase) : author$project$Update$updateModelStopJumping(updatedModelBase);
 		return _Utils_Tuple2(updatedModel, elm$core$Platform$Cmd$none);
 	});
 var author$project$Update$getIsCorrect = F2(
@@ -10679,6 +10684,8 @@ var author$project$Update$updateForCorrectNote = F2(
 			{
 				millisSinceJumpStarted: 0,
 				nextTargetNoteIndex: model.nextTargetNoteIndex + 1,
+				nextTargetXPosition: newNextTargetXPosition,
+				nextTargetYPosition: newNextTargetYPosition,
 				playerJumpStartXPosition: newPlayerJumpStartXPosition,
 				playerJumpStartYPosition: newPlayerJumpStartYPosition,
 				score: model.score + 1,

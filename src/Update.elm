@@ -66,9 +66,9 @@ updateAnimationValues model millisSinceLastFrame =
     -- (this is so it doesn't animate past the target)
     updatedModel =
         if newMillisSinceJumpStarted < ConstantsHelpers.jumpDurationMillis then
-           updateModelPlayerPosition updatedModelBase
+          updateModelContinueJumping updatedModelBase
         else
-          updatedModelBase
+          updateModelStopJumping updatedModelBase
   in
      ( updatedModel, Cmd.none )
 
@@ -78,12 +78,17 @@ updateAnimationValues model millisSinceLastFrame =
 -- Subtract current timestamp
 
 -- Function to update model with current player position
-updateModelPlayerPosition model =
+updateModelContinueJumping model =
   { model | playerCurrentXPosition =
         ConstantsHelpers.getCurrentJumpXPosition model.playerJumpStartXPosition model.velocityX model.millisSinceJumpStarted
 
   , playerCurrentYPosition =
         Debug.log "currentYPos " (ConstantsHelpers.getCurrentJumpYPosition model.playerJumpStartYPosition model.velocityY ConstantsHelpers.accelYMillis model.millisSinceJumpStarted)
+  }
+
+updateModelStopJumping model =
+  { model | playerCurrentXPosition = model.nextTargetXPosition        
+  , playerCurrentYPosition = model.nextTargetYPosition
   }
 
 
@@ -261,6 +266,9 @@ updateForCorrectNote model nextTargetNoteMidiCode =
 
       , playerJumpStartXPosition = newPlayerJumpStartXPosition
       , playerJumpStartYPosition = newPlayerJumpStartYPosition
+
+      , nextTargetXPosition = newNextTargetXPosition
+      , nextTargetYPosition = newNextTargetYPosition
 
       , velocityX = 
           ConstantsHelpers.getRequiredXVelocity newPlayerJumpStartXPosition newNextTargetXPosition ConstantsHelpers.jumpDurationMillis
