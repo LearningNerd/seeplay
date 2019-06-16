@@ -4917,7 +4917,6 @@ function _Browser_load(url)
 	}));
 }
 var author$project$ConstantsHelpers$notesPerLevel = 100;
-var author$project$ConstantsHelpers$svgViewHeight = 200;
 var elm$core$Basics$EQ = {$: 'EQ'};
 var elm$core$Basics$GT = {$: 'GT'};
 var elm$core$Basics$LT = {$: 'LT'};
@@ -4999,6 +4998,14 @@ var elm$core$Array$toList = function (array) {
 	return A3(elm$core$Array$foldr, elm$core$List$cons, _List_Nil, array);
 };
 var elm$core$Basics$fdiv = _Basics_fdiv;
+var elm$core$Basics$mul = _Basics_mul;
+var author$project$ConstantsHelpers$convertFramesToMillisDuration = F2(
+	function (durationFrames, fps) {
+		return (durationFrames * 1000) / fps;
+	});
+var author$project$ConstantsHelpers$defaultJumpDurationFrames = 35;
+var author$project$ConstantsHelpers$framesPerSecond = 60;
+var author$project$ConstantsHelpers$svgViewHeight = 200;
 var author$project$ConstantsHelpers$staffLineHeight = author$project$ConstantsHelpers$svgViewHeight / 6;
 var author$project$ConstantsHelpers$topMargin = 50;
 var author$project$Note$getHeight = function (midiCode) {
@@ -5032,19 +5039,11 @@ var author$project$Note$getHeight = function (midiCode) {
 	}
 };
 var elm$core$Basics$add = _Basics_add;
-var elm$core$Basics$mul = _Basics_mul;
 var elm$core$Basics$toFloat = _Basics_toFloat;
 var author$project$ConstantsHelpers$getNoteYPos = function (midiCode) {
 	var yPosFloat = author$project$Note$getHeight(midiCode);
 	return author$project$ConstantsHelpers$topMargin + ((yPosFloat * author$project$ConstantsHelpers$staffLineHeight) / 2);
 };
-var author$project$ConstantsHelpers$convertFramesToMillisDuration = F2(
-	function (durationFrames, fps) {
-		return (durationFrames * 1000) / fps;
-	});
-var author$project$ConstantsHelpers$framesPerSecond = 60;
-var author$project$ConstantsHelpers$jumpDurationFrames = 35;
-var author$project$ConstantsHelpers$jumpDurationMillis = A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, author$project$ConstantsHelpers$jumpDurationFrames, author$project$ConstantsHelpers$framesPerSecond);
 var author$project$ConstantsHelpers$playerInitialNote = 67;
 var author$project$ConstantsHelpers$playerInitialXPosition = 0;
 var elm$core$Basics$pow = _Basics_pow;
@@ -5301,7 +5300,8 @@ var author$project$Model$initialModel = {
 	isMIDIConnected: elm$core$Maybe$Nothing,
 	isPlaying: false,
 	itemSpriteIndex: 0,
-	millisSinceJumpStarted: author$project$ConstantsHelpers$jumpDurationMillis,
+	jumpDurationMillis: A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, author$project$ConstantsHelpers$defaultJumpDurationFrames, author$project$ConstantsHelpers$framesPerSecond),
+	millisSinceJumpStarted: A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, author$project$ConstantsHelpers$defaultJumpDurationFrames, author$project$ConstantsHelpers$framesPerSecond),
 	millisSinceLastSpriteAnimFrame: 0,
 	nextTargetNoteIndex: 0,
 	nextTargetXPosition: author$project$ConstantsHelpers$playerInitialXPosition,
@@ -10637,16 +10637,12 @@ var author$project$ConstantsHelpers$getCurrentJumpYPosition = F4(
 	function (startYPos, initialVelocityY, accelY, elapsedTime) {
 		return ((((0.5 * accelY) * elapsedTime) * elapsedTime) + (initialVelocityY * elapsedTime)) + startYPos;
 	});
-var elm$core$Debug$log = _Debug_log;
 var author$project$Update$updateModelContinueJumping = function (model) {
 	return _Utils_update(
 		model,
 		{
 			playerCurrentXPosition: A3(author$project$ConstantsHelpers$getCurrentJumpXPosition, model.playerJumpStartXPosition, model.velocityX, model.millisSinceJumpStarted),
-			playerCurrentYPosition: A2(
-				elm$core$Debug$log,
-				'currentYPos ',
-				A4(author$project$ConstantsHelpers$getCurrentJumpYPosition, model.playerJumpStartYPosition, model.velocityY, author$project$ConstantsHelpers$accelYMillis, model.millisSinceJumpStarted))
+			playerCurrentYPosition: A4(author$project$ConstantsHelpers$getCurrentJumpYPosition, model.playerJumpStartYPosition, model.velocityY, author$project$ConstantsHelpers$accelYMillis, model.millisSinceJumpStarted)
 		});
 };
 var author$project$Update$updateModelStopJumping = function (model) {
@@ -10672,7 +10668,7 @@ var author$project$Update$updateAnimationValues = F2(
 				playerSpriteIndex: newPlayerSpriteIndex,
 				scrollPosition: A2(author$project$Update$scrollTo, model.scrollPosition, model.nextTargetNoteIndex)
 			});
-		var updatedModel = (_Utils_cmp(newMillisSinceJumpStarted, author$project$ConstantsHelpers$jumpDurationMillis) < 0) ? author$project$Update$updateModelContinueJumping(updatedModelBase) : author$project$Update$updateModelStopJumping(updatedModelBase);
+		var updatedModel = (_Utils_cmp(newMillisSinceJumpStarted, model.jumpDurationMillis) < 0) ? author$project$Update$updateModelContinueJumping(updatedModelBase) : author$project$Update$updateModelStopJumping(updatedModelBase);
 		return _Utils_Tuple2(updatedModel, elm$core$Platform$Cmd$none);
 	});
 var author$project$Update$getIsCorrect = F2(
@@ -10708,9 +10704,11 @@ var author$project$Update$updateForCorrectNote = F2(
 		var newPlayerJumpStartXPosition = model.playerCurrentXPosition;
 		var newNextTargetYPosition = author$project$ConstantsHelpers$getNoteYPos(nextTargetNoteMidiCode);
 		var newNextTargetXPosition = author$project$ConstantsHelpers$getNoteXPos(model.nextTargetNoteIndex);
+		var newJumpDurationMillis = A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, author$project$ConstantsHelpers$defaultJumpDurationFrames, author$project$ConstantsHelpers$framesPerSecond);
 		return _Utils_update(
 			model,
 			{
+				jumpDurationMillis: newJumpDurationMillis,
 				millisSinceJumpStarted: 0,
 				nextTargetNoteIndex: model.nextTargetNoteIndex + 1,
 				nextTargetXPosition: newNextTargetXPosition,
@@ -10718,26 +10716,37 @@ var author$project$Update$updateForCorrectNote = F2(
 				playerJumpStartXPosition: newPlayerJumpStartXPosition,
 				playerJumpStartYPosition: newPlayerJumpStartYPosition,
 				score: model.score + 1,
-				velocityX: A3(author$project$ConstantsHelpers$getRequiredXVelocity, newPlayerJumpStartXPosition, newNextTargetXPosition, author$project$ConstantsHelpers$jumpDurationMillis),
-				velocityY: A4(author$project$ConstantsHelpers$getRequiredYVelocity, newPlayerJumpStartYPosition, newNextTargetYPosition, author$project$ConstantsHelpers$accelYMillis, author$project$ConstantsHelpers$jumpDurationMillis)
+				velocityX: A3(author$project$ConstantsHelpers$getRequiredXVelocity, newPlayerJumpStartXPosition, newNextTargetXPosition, newJumpDurationMillis),
+				velocityY: A4(author$project$ConstantsHelpers$getRequiredYVelocity, newPlayerJumpStartYPosition, newNextTargetYPosition, author$project$ConstantsHelpers$accelYMillis, newJumpDurationMillis)
 			});
 	});
+var author$project$ConstantsHelpers$baseJumpDurationFrames = 20;
+var author$project$ConstantsHelpers$minJumpDurationFrames = 15;
+var elm$core$Debug$log = _Debug_log;
 var author$project$Update$updateForIncorrectNote = F2(
 	function (model, incorrectMidiCodeJustPressed) {
 		var newPlayerJumpStartYPosition = model.playerCurrentYPosition;
 		var newPlayerJumpStartXPosition = model.playerCurrentXPosition;
 		var newNextTargetYPosition = author$project$ConstantsHelpers$getNoteYPos(incorrectMidiCodeJustPressed);
 		var newNextTargetXPosition = model.playerCurrentXPosition;
+		var distanceToJumpY = A2(
+			elm$core$Debug$log,
+			'distanceToJumpY ',
+			elm$core$Basics$abs(newNextTargetYPosition - model.playerCurrentYPosition));
+		var multiplyJumpBy = A2(elm$core$Debug$log, 'multiplyJumpBy ', distanceToJumpY / author$project$ConstantsHelpers$svgViewHeight);
+		var newJumpDurFrames = A2(elm$core$Debug$log, ' newJumpDurFrames ', author$project$ConstantsHelpers$minJumpDurationFrames + (author$project$ConstantsHelpers$baseJumpDurationFrames * multiplyJumpBy));
+		var newJumpDurationMillis = A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, newJumpDurFrames, author$project$ConstantsHelpers$framesPerSecond);
 		return _Utils_update(
 			model,
 			{
 				incorrectTries: model.incorrectTries + 1,
+				jumpDurationMillis: newJumpDurationMillis,
 				millisSinceJumpStarted: 0,
 				nextTargetYPosition: newNextTargetYPosition,
 				playerJumpStartXPosition: newPlayerJumpStartXPosition,
 				playerJumpStartYPosition: newPlayerJumpStartYPosition,
-				velocityX: A3(author$project$ConstantsHelpers$getRequiredXVelocity, newPlayerJumpStartXPosition, newNextTargetXPosition, author$project$ConstantsHelpers$jumpDurationMillis),
-				velocityY: A4(author$project$ConstantsHelpers$getRequiredYVelocity, newPlayerJumpStartYPosition, newNextTargetYPosition, author$project$ConstantsHelpers$accelYMillis, author$project$ConstantsHelpers$jumpDurationMillis)
+				velocityX: A3(author$project$ConstantsHelpers$getRequiredXVelocity, newPlayerJumpStartXPosition, newNextTargetXPosition, newJumpDurationMillis),
+				velocityY: A4(author$project$ConstantsHelpers$getRequiredYVelocity, newPlayerJumpStartYPosition, newNextTargetYPosition, author$project$ConstantsHelpers$accelYMillis, newJumpDurationMillis)
 			});
 	});
 var author$project$Update$updateNotePressed = F2(

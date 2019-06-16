@@ -99,7 +99,7 @@ updateAnimationValues model millisSinceLastFrame =
     -- Only update player position for duration of jump
     -- (this is so it doesn't animate past the target)
     updatedModel =
-        if newMillisSinceJumpStarted < ConstantsHelpers.jumpDurationMillis then
+        if newMillisSinceJumpStarted < model.jumpDurationMillis then
           updateModelContinueJumping updatedModelBase
         else
           updateModelStopJumping updatedModelBase
@@ -117,7 +117,7 @@ updateModelContinueJumping model =
         ConstantsHelpers.getCurrentJumpXPosition model.playerJumpStartXPosition model.velocityX model.millisSinceJumpStarted
 
   , playerCurrentYPosition =
-        Debug.log "currentYPos " (ConstantsHelpers.getCurrentJumpYPosition model.playerJumpStartYPosition model.velocityY ConstantsHelpers.accelYMillis model.millisSinceJumpStarted)
+        ConstantsHelpers.getCurrentJumpYPosition model.playerJumpStartYPosition model.velocityY ConstantsHelpers.accelYMillis model.millisSinceJumpStarted
   }
 
 -- Update player to "stick" to the target position when animation is done
@@ -297,6 +297,9 @@ updateForCorrectNote model nextTargetNoteMidiCode =
 
     newNextTargetXPosition = ConstantsHelpers.getNoteXPos model.nextTargetNoteIndex
     newNextTargetYPosition = ConstantsHelpers.getNoteYPos nextTargetNoteMidiCode
+
+    newJumpDurationMillis = ConstantsHelpers.convertFramesToMillisDuration ConstantsHelpers.defaultJumpDurationFrames ConstantsHelpers.framesPerSecond
+
   in
       { model | score = model.score + 1
       , nextTargetNoteIndex = model.nextTargetNoteIndex + 1
@@ -308,11 +311,12 @@ updateForCorrectNote model nextTargetNoteMidiCode =
       , nextTargetYPosition = newNextTargetYPosition
 
       , velocityX = 
-          ConstantsHelpers.getRequiredXVelocity newPlayerJumpStartXPosition newNextTargetXPosition ConstantsHelpers.jumpDurationMillis
+          ConstantsHelpers.getRequiredXVelocity newPlayerJumpStartXPosition newNextTargetXPosition newJumpDurationMillis
 
       , velocityY = 
-          ConstantsHelpers.getRequiredYVelocity newPlayerJumpStartYPosition newNextTargetYPosition ConstantsHelpers.accelYMillis ConstantsHelpers.jumpDurationMillis
+          ConstantsHelpers.getRequiredYVelocity newPlayerJumpStartYPosition newNextTargetYPosition ConstantsHelpers.accelYMillis newJumpDurationMillis
 
+      , jumpDurationMillis = newJumpDurationMillis
       , millisSinceJumpStarted = 0
       }
 
@@ -327,12 +331,15 @@ updateForIncorrectNote model incorrectMidiCodeJustPressed =
     newNextTargetYPosition = ConstantsHelpers.getNoteYPos incorrectMidiCodeJustPressed
     newNextTargetXPosition = model.playerCurrentXPosition -- X pos stays same
 
-{--
-    temporaryJumpDurationFrames = 15 + (newNextTargetYPosition - model.playerCurrentYPosition) * 0.05
-    temporaryJumpDurationMillis = ConstantsHelpers.convertFramesToMillisDuration temporaryJumpDurationFrames ConstantsHelpers.framesPerSecond
 
-    t = Debug.log "jumpDur for incr: " temporaryJumpDurationMillis
---}
+    distanceToJumpY = Debug.log "distanceToJumpY " (abs (newNextTargetYPosition - model.playerCurrentYPosition))
+
+    multiplyJumpBy = Debug.log "multiplyJumpBy " (distanceToJumpY/ConstantsHelpers.svgViewHeight)
+
+    newJumpDurFrames = Debug.log " newJumpDurFrames " <| ConstantsHelpers.minJumpDurationFrames + ConstantsHelpers.baseJumpDurationFrames * multiplyJumpBy
+
+    newJumpDurationMillis = ConstantsHelpers.convertFramesToMillisDuration newJumpDurFrames ConstantsHelpers.framesPerSecond
+
   in
       { model | incorrectTries = model.incorrectTries + 1
 
@@ -349,11 +356,12 @@ updateForIncorrectNote model incorrectMidiCodeJustPressed =
 --}
 
       , velocityX = 
-           ConstantsHelpers.getRequiredXVelocity newPlayerJumpStartXPosition newNextTargetXPosition ConstantsHelpers.jumpDurationMillis
+           ConstantsHelpers.getRequiredXVelocity newPlayerJumpStartXPosition newNextTargetXPosition newJumpDurationMillis
 
       , velocityY = 
-          ConstantsHelpers.getRequiredYVelocity newPlayerJumpStartYPosition newNextTargetYPosition ConstantsHelpers.accelYMillis ConstantsHelpers.jumpDurationMillis
-      
+          ConstantsHelpers.getRequiredYVelocity newPlayerJumpStartYPosition newNextTargetYPosition ConstantsHelpers.accelYMillis newJumpDurationMillis
+     
+      , jumpDurationMillis = newJumpDurationMillis
       , millisSinceJumpStarted = 0
       }
 

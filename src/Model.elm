@@ -37,6 +37,7 @@ type alias Model =
     , nextTargetYPosition : Float
     , velocityX : Float
     , velocityY : Float
+    , jumpDurationMillis : Float
 
     , millisSinceJumpStarted : Float
     , scrollPosition : Float
@@ -82,7 +83,9 @@ initialModel =
 
     , velocityX = 0
     , velocityY = 0
-    , millisSinceJumpStarted = ConstantsHelpers.jumpDurationMillis
+    , jumpDurationMillis = ConstantsHelpers.convertFramesToMillisDuration ConstantsHelpers.defaultJumpDurationFrames ConstantsHelpers.framesPerSecond
+
+    , millisSinceJumpStarted = ConstantsHelpers.convertFramesToMillisDuration ConstantsHelpers.defaultJumpDurationFrames ConstantsHelpers.framesPerSecond
     , scrollPosition = 0
 
     , playerSpriteIndex = 0

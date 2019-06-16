@@ -52,9 +52,14 @@ accelYFrames = 0.6
 accelYMillis = convertFramesToMillisAccel accelYFrames framesPerSecond
 
 -- Complete each jump in x number of frames
--- jumpDurationFrames = 17
-jumpDurationFrames = 35
-jumpDurationMillis = convertFramesToMillisDuration jumpDurationFrames framesPerSecond
+defaultJumpDurationFrames = 35
+
+-- Even the smallest jump takes at least this many frames:
+minJumpDurationFrames = 15 
+
+-- The largest jump is minJumpDurationFrames plus this many frames, or as a percentage of total staff height:
+baseJumpDurationFrames = 20
+
 
 -- Update sprite animation frame every X milliseconds
 spriteAnimDelayFrames = 8
