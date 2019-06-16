@@ -10623,7 +10623,7 @@ var author$project$Update$scrollTo = F2(
 		var remainingDistance = targetPosition - currentPosition;
 		return currentPosition + (remainingDistance * author$project$ConstantsHelpers$scrollAnimMultiplier);
 	});
-var author$project$ConstantsHelpers$accelYFrames = 1;
+var author$project$ConstantsHelpers$accelYFrames = 0.6;
 var author$project$ConstantsHelpers$convertFramesToMillisAccel = F2(
 	function (accel, fps) {
 		return (accel * (fps / 1000)) * (fps / 1000);
@@ -10722,11 +10722,24 @@ var author$project$Update$updateForCorrectNote = F2(
 				velocityY: A4(author$project$ConstantsHelpers$getRequiredYVelocity, newPlayerJumpStartYPosition, newNextTargetYPosition, author$project$ConstantsHelpers$accelYMillis, author$project$ConstantsHelpers$jumpDurationMillis)
 			});
 	});
-var author$project$Update$updateForIncorrectNote = function (model) {
-	return _Utils_update(
-		model,
-		{incorrectTries: model.incorrectTries + 1});
-};
+var author$project$Update$updateForIncorrectNote = F2(
+	function (model, incorrectMidiCodeJustPressed) {
+		var newPlayerJumpStartYPosition = model.playerCurrentYPosition;
+		var newPlayerJumpStartXPosition = model.playerCurrentXPosition;
+		var newNextTargetYPosition = author$project$ConstantsHelpers$getNoteYPos(incorrectMidiCodeJustPressed);
+		var newNextTargetXPosition = model.playerCurrentXPosition;
+		return _Utils_update(
+			model,
+			{
+				incorrectTries: model.incorrectTries + 1,
+				millisSinceJumpStarted: 0,
+				nextTargetYPosition: newNextTargetYPosition,
+				playerJumpStartXPosition: newPlayerJumpStartXPosition,
+				playerJumpStartYPosition: newPlayerJumpStartYPosition,
+				velocityX: A3(author$project$ConstantsHelpers$getRequiredXVelocity, newPlayerJumpStartXPosition, newNextTargetXPosition, author$project$ConstantsHelpers$jumpDurationMillis),
+				velocityY: A4(author$project$ConstantsHelpers$getRequiredYVelocity, newPlayerJumpStartYPosition, newNextTargetYPosition, author$project$ConstantsHelpers$accelYMillis, author$project$ConstantsHelpers$jumpDurationMillis)
+			});
+	});
 var author$project$Update$updateNotePressed = F2(
 	function (model, noteCode) {
 		var prevMidi = function () {
@@ -10750,7 +10763,7 @@ var author$project$Update$updateNotePressed = F2(
 			author$project$Update$getIsCorrect,
 			nextTargetNote,
 			elm$core$Maybe$Just(newCurrentNote));
-		var updatedModel = isCorrect ? A2(author$project$Update$updateForCorrectNote, updatedModelBase, nextTargetNote.midi) : author$project$Update$updateForIncorrectNote(updatedModelBase);
+		var updatedModel = isCorrect ? A2(author$project$Update$updateForCorrectNote, updatedModelBase, nextTargetNote.midi) : A2(author$project$Update$updateForIncorrectNote, updatedModelBase, noteCode);
 		return _Utils_Tuple2(updatedModel, elm$core$Platform$Cmd$none);
 	});
 var author$project$Update$update = F2(

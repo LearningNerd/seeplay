@@ -47,7 +47,7 @@ framesPerSecond = 60
 
 -- Increase velocity by 2 pixels per frame per frame
 -- positive number means moving downwards for SVG coords
-accelYFrames = 1
+accelYFrames = 0.6
 -- accelYFrames = 2 
 accelYMillis = convertFramesToMillisAccel accelYFrames framesPerSecond
 
