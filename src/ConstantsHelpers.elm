@@ -7,7 +7,7 @@ import Note exposing (Note)
 ------------          Constants
 --------------------------------------------------------------------------------
 
-notesPerLevel = 10
+notesPerLevel = 100
 
 noteXInterval = 200
 

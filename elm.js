@@ -4916,7 +4916,7 @@ function _Browser_load(url)
 		}
 	}));
 }
-var author$project$ConstantsHelpers$notesPerLevel = 10;
+var author$project$ConstantsHelpers$notesPerLevel = 100;
 var author$project$ConstantsHelpers$svgViewHeight = 200;
 var elm$core$Basics$EQ = {$: 'EQ'};
 var elm$core$Basics$GT = {$: 'GT'};
