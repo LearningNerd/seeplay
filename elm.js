@@ -10295,7 +10295,7 @@ var author$project$View$Game$trebleClef = F2(
 				]));
 	});
 var author$project$View$Player$baseSpriteHeight = 11;
-var author$project$View$Player$baseSpriteWidth = 10;
+var author$project$View$Player$baseSpriteWidth = 12;
 var author$project$View$Player$spriteHeight = author$project$ConstantsHelpers$staffLineHeight * 0.9;
 var author$project$View$Player$widthToHeightRatio = author$project$View$Player$baseSpriteWidth / author$project$View$Player$baseSpriteHeight;
 var author$project$View$Player$spriteWidth = (author$project$ConstantsHelpers$staffLineHeight * 0.9) * author$project$View$Player$widthToHeightRatio;
@@ -10324,7 +10324,7 @@ var author$project$View$Player$view = F3(
 					elm$svg$Svg$image,
 					_List_fromArray(
 						[
-							elm$svg$Svg$Attributes$xlinkHref('img/ice-idlejump-10w-11h-4i.png')
+							elm$svg$Svg$Attributes$xlinkHref('img/ice-idlejump-12w-11h-4i.png')
 						]),
 					_List_Nil)
 				]));
@@ -10730,7 +10730,6 @@ var author$project$Update$updateForIncorrectNote = F2(
 		var newPlayerJumpStartYPosition = model.playerCurrentYPosition;
 		var newPlayerJumpStartXPosition = model.playerCurrentXPosition;
 		var newNextTargetYPosition = author$project$ConstantsHelpers$getNoteYPos(incorrectMidiCodeJustPressed);
-		var newNextTargetXPosition = model.playerCurrentXPosition;
 		var distanceToJumpY = A2(
 			elm$core$Debug$log,
 			'distanceToJumpY ',
@@ -10747,7 +10746,7 @@ var author$project$Update$updateForIncorrectNote = F2(
 				nextTargetYPosition: newNextTargetYPosition,
 				playerJumpStartXPosition: newPlayerJumpStartXPosition,
 				playerJumpStartYPosition: newPlayerJumpStartYPosition,
-				velocityX: A3(author$project$ConstantsHelpers$getRequiredXVelocity, newPlayerJumpStartXPosition, newNextTargetXPosition, newJumpDurationMillis),
+				velocityX: A3(author$project$ConstantsHelpers$getRequiredXVelocity, newPlayerJumpStartXPosition, model.nextTargetXPosition, newJumpDurationMillis),
 				velocityY: A4(author$project$ConstantsHelpers$getRequiredYVelocity, newPlayerJumpStartYPosition, newNextTargetYPosition, author$project$ConstantsHelpers$accelYMillis, newJumpDurationMillis)
 			});
 	});

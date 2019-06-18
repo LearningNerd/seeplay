@@ -329,8 +329,6 @@ updateForIncorrectNote model incorrectMidiCodeJustPressed =
     newPlayerJumpStartYPosition = model.playerCurrentYPosition
 
     newNextTargetYPosition = ConstantsHelpers.getNoteYPos incorrectMidiCodeJustPressed
-    newNextTargetXPosition = model.playerCurrentXPosition -- X pos stays same
-
 
     distanceToJumpY = Debug.log "distanceToJumpY " (abs (newNextTargetYPosition - model.playerCurrentYPosition))
 
@@ -356,7 +354,7 @@ updateForIncorrectNote model incorrectMidiCodeJustPressed =
 --}
 
       , velocityX = 
-           ConstantsHelpers.getRequiredXVelocity newPlayerJumpStartXPosition newNextTargetXPosition newJumpDurationMillis
+           ConstantsHelpers.getRequiredXVelocity newPlayerJumpStartXPosition model.nextTargetXPosition newJumpDurationMillis
 
       , velocityY = 
           ConstantsHelpers.getRequiredYVelocity newPlayerJumpStartYPosition newNextTargetYPosition ConstantsHelpers.accelYMillis newJumpDurationMillis
