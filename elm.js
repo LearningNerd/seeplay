@@ -10189,11 +10189,11 @@ var author$project$ConstantsHelpers$noteXInterval = 200;
 var author$project$ConstantsHelpers$getNoteXPos = function (noteIndex) {
 	return author$project$ConstantsHelpers$leftMargin + (noteIndex * author$project$ConstantsHelpers$noteXInterval);
 };
-var author$project$View$Coin$baseSpriteHeight = 16;
-var author$project$View$Coin$baseSpriteWidth = 16;
-var author$project$View$Coin$spriteHeight = author$project$ConstantsHelpers$staffLineHeight * 0.8;
-var author$project$View$Coin$widthToHeightRatio = author$project$View$Coin$baseSpriteWidth / author$project$View$Coin$baseSpriteHeight;
-var author$project$View$Coin$spriteWidth = (author$project$ConstantsHelpers$staffLineHeight * 0.8) * author$project$View$Coin$widthToHeightRatio;
+var author$project$View$Target$baseSpriteHeight = 44;
+var author$project$View$Target$baseSpriteWidth = 59;
+var author$project$View$Target$spriteHeight = author$project$ConstantsHelpers$staffLineHeight * 1.5;
+var author$project$View$Target$widthToHeightRatio = author$project$View$Target$baseSpriteWidth / author$project$View$Target$baseSpriteHeight;
+var author$project$View$Target$spriteWidth = (author$project$ConstantsHelpers$staffLineHeight * 1.5) * author$project$View$Target$widthToHeightRatio;
 var elm$core$String$fromFloat = _String_fromNumber;
 var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
 var elm$svg$Svg$image = elm$svg$Svg$trustedNode('image');
@@ -10211,19 +10211,21 @@ var elm$svg$Svg$Attributes$xlinkHref = function (value) {
 		_VirtualDom_noJavaScriptUri(value));
 };
 var elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
-var author$project$View$Coin$view = F3(
-	function (xS, yS, spriteIndex) {
-		var viewBoxStartXString = elm$core$String$fromInt(spriteIndex * author$project$View$Coin$baseSpriteWidth);
+var author$project$View$Target$view = F3(
+	function (xPos, yPos, spriteIndex) {
+		var yS = elm$core$String$fromFloat(yPos - 7);
+		var xS = elm$core$String$fromFloat(xPos - 17);
+		var viewBoxStartXString = elm$core$String$fromInt(spriteIndex * author$project$View$Target$baseSpriteWidth);
 		return A2(
 			elm$svg$Svg$svg,
 			_List_fromArray(
 				[
 					elm$svg$Svg$Attributes$viewBox(
-					viewBoxStartXString + (' 0 ' + (elm$core$String$fromFloat(author$project$View$Coin$baseSpriteWidth) + (' ' + elm$core$String$fromFloat(author$project$View$Coin$baseSpriteHeight))))),
+					viewBoxStartXString + (' 0 ' + (elm$core$String$fromFloat(author$project$View$Target$baseSpriteWidth) + (' ' + elm$core$String$fromFloat(author$project$View$Target$baseSpriteHeight))))),
 					elm$svg$Svg$Attributes$width(
-					elm$core$String$fromFloat(author$project$View$Coin$spriteWidth)),
+					elm$core$String$fromFloat(author$project$View$Target$spriteWidth)),
 					elm$svg$Svg$Attributes$height(
-					elm$core$String$fromFloat(author$project$View$Coin$spriteHeight)),
+					elm$core$String$fromFloat(author$project$View$Target$spriteHeight)),
 					elm$svg$Svg$Attributes$x(xS),
 					elm$svg$Svg$Attributes$y(yS),
 					elm$svg$Svg$Attributes$class('sprite')
@@ -10234,18 +10236,16 @@ var author$project$View$Coin$view = F3(
 					elm$svg$Svg$image,
 					_List_fromArray(
 						[
-							elm$svg$Svg$Attributes$xlinkHref('img/coin.png')
+							elm$svg$Svg$Attributes$xlinkHref('img/happycloud-59w-44h-5i.png')
 						]),
 					_List_Nil)
 				]));
 	});
 var author$project$View$Game$drawTargetNote = F3(
 	function (spriteIndex, xPosIndex, note) {
-		var cyString = elm$core$String$fromFloat(
-			author$project$ConstantsHelpers$getNoteYPos(note.midi));
-		var cxString = elm$core$String$fromFloat(
-			author$project$ConstantsHelpers$getNoteXPos(xPosIndex));
-		return A3(author$project$View$Coin$view, cxString, cyString, spriteIndex);
+		var y = author$project$ConstantsHelpers$getNoteYPos(note.midi);
+		var x = author$project$ConstantsHelpers$getNoteXPos(xPosIndex);
+		return A3(author$project$View$Target$view, x, y, spriteIndex);
 	});
 var author$project$View$Game$drawAllTargetNotes = F2(
 	function (spriteIndex, notes) {
@@ -10294,24 +10294,26 @@ var author$project$View$Game$trebleClef = F2(
 					elm$html$Html$text('𝄞')
 				]));
 	});
-var author$project$View$Mario$baseSpriteHeight = 24;
-var author$project$View$Mario$baseSpriteWidth = 17;
-var author$project$View$Mario$spriteHeight = author$project$ConstantsHelpers$staffLineHeight;
-var author$project$View$Mario$widthToHeightRatio = author$project$View$Mario$baseSpriteWidth / author$project$View$Mario$baseSpriteHeight;
-var author$project$View$Mario$spriteWidth = author$project$ConstantsHelpers$staffLineHeight * author$project$View$Mario$widthToHeightRatio;
-var author$project$View$Mario$view = F3(
-	function (xS, yS, spriteIndex) {
-		var viewBoxStartXString = elm$core$String$fromInt(spriteIndex * author$project$View$Mario$baseSpriteWidth);
+var author$project$View$Player$baseSpriteHeight = 11;
+var author$project$View$Player$baseSpriteWidth = 10;
+var author$project$View$Player$spriteHeight = author$project$ConstantsHelpers$staffLineHeight * 0.9;
+var author$project$View$Player$widthToHeightRatio = author$project$View$Player$baseSpriteWidth / author$project$View$Player$baseSpriteHeight;
+var author$project$View$Player$spriteWidth = (author$project$ConstantsHelpers$staffLineHeight * 0.9) * author$project$View$Player$widthToHeightRatio;
+var author$project$View$Player$view = F3(
+	function (xPos, yPos, spriteIndex) {
+		var yS = elm$core$String$fromFloat(yPos - 3);
+		var xS = elm$core$String$fromFloat(xPos);
+		var viewBoxStartXString = elm$core$String$fromInt(spriteIndex * author$project$View$Player$baseSpriteWidth);
 		return A2(
 			elm$svg$Svg$svg,
 			_List_fromArray(
 				[
 					elm$svg$Svg$Attributes$viewBox(
-					viewBoxStartXString + (' 0 ' + (elm$core$String$fromFloat(author$project$View$Mario$baseSpriteWidth) + (' ' + elm$core$String$fromFloat(author$project$View$Mario$baseSpriteHeight))))),
+					viewBoxStartXString + (' 0 ' + (elm$core$String$fromFloat(author$project$View$Player$baseSpriteWidth) + (' ' + elm$core$String$fromFloat(author$project$View$Player$baseSpriteHeight))))),
 					elm$svg$Svg$Attributes$width(
-					elm$core$String$fromFloat(author$project$View$Mario$spriteWidth)),
+					elm$core$String$fromFloat(author$project$View$Player$spriteWidth)),
 					elm$svg$Svg$Attributes$height(
-					elm$core$String$fromFloat(author$project$View$Mario$spriteHeight)),
+					elm$core$String$fromFloat(author$project$View$Player$spriteHeight)),
 					elm$svg$Svg$Attributes$x(xS),
 					elm$svg$Svg$Attributes$y(yS),
 					elm$svg$Svg$Attributes$class('sprite')
@@ -10322,14 +10324,14 @@ var author$project$View$Mario$view = F3(
 					elm$svg$Svg$image,
 					_List_fromArray(
 						[
-							elm$svg$Svg$Attributes$xlinkHref('img/mariosmall.png')
+							elm$svg$Svg$Attributes$xlinkHref('img/ice-idlejump-10w-11h-4i.png')
 						]),
 					_List_Nil)
 				]));
 	});
 var author$project$View$Game$view = function (model) {
-	var yS = elm$core$String$fromFloat(model.playerCurrentYPosition);
-	var xS = elm$core$String$fromFloat(model.playerCurrentXPosition);
+	var y = model.playerCurrentYPosition;
+	var x = model.playerCurrentXPosition;
 	var widthS = elm$core$String$fromFloat(author$project$ConstantsHelpers$svgViewTotalWidth);
 	var svgListAllNotes = A2(author$project$View$Game$drawAllTargetNotes, model.itemSpriteIndex, model.targetNotes);
 	var heightS = elm$core$String$fromFloat(author$project$ConstantsHelpers$svgViewTotalHeight);
@@ -10341,7 +10343,7 @@ var author$project$View$Game$view = function (model) {
 			var currentNote = _n0.a;
 			return _List_fromArray(
 				[
-					A3(author$project$View$Mario$view, xS, yS, model.playerSpriteIndex)
+					A3(author$project$View$Player$view, x, y, model.playerSpriteIndex)
 				]);
 		}
 	}();
@@ -10356,7 +10358,7 @@ var author$project$View$Game$view = function (model) {
 				elm$svg$Svg$Attributes$x('0'),
 				elm$svg$Svg$Attributes$y('0')
 			]),
-		_Utils_ap(currentNoteDrawing, svgListAllNotes));
+		_Utils_ap(svgListAllNotes, currentNoteDrawing));
 	return A2(
 		elm$svg$Svg$svg,
 		_List_fromArray(
@@ -10650,15 +10652,15 @@ var author$project$Update$updateModelStopJumping = function (model) {
 		model,
 		{playerCurrentXPosition: model.nextTargetXPosition, playerCurrentYPosition: model.nextTargetYPosition});
 };
-var author$project$View$Coin$numSpriteFrames = 4;
-var author$project$View$Mario$numSpriteFrames = 2;
+var author$project$View$Player$numSpriteFrames = 4;
+var author$project$View$Target$numSpriteFrames = 5;
 var author$project$Update$updateAnimationValues = F2(
 	function (model, millisSinceLastFrame) {
 		var newMillisSinceLastSpriteAnim = model.millisSinceLastSpriteAnimFrame + millisSinceLastFrame;
 		var newNewMillisSinceLastSpriteAnim = (_Utils_cmp(newMillisSinceLastSpriteAnim, author$project$ConstantsHelpers$spriteAnimDelayMillis) > -1) ? 0 : (model.millisSinceLastSpriteAnimFrame + millisSinceLastFrame);
-		var newPlayerSpriteIndex = (_Utils_cmp(newMillisSinceLastSpriteAnim, author$project$ConstantsHelpers$spriteAnimDelayMillis) > -1) ? ((model.playerSpriteIndex + 1) % author$project$View$Mario$numSpriteFrames) : model.playerSpriteIndex;
+		var newPlayerSpriteIndex = (_Utils_cmp(newMillisSinceLastSpriteAnim, author$project$ConstantsHelpers$spriteAnimDelayMillis) > -1) ? ((model.playerSpriteIndex + 1) % author$project$View$Player$numSpriteFrames) : model.playerSpriteIndex;
 		var newMillisSinceJumpStarted = model.millisSinceJumpStarted + millisSinceLastFrame;
-		var newItemSpriteIndex = (_Utils_cmp(newMillisSinceLastSpriteAnim, author$project$ConstantsHelpers$spriteAnimDelayMillis) > -1) ? ((model.itemSpriteIndex + 1) % author$project$View$Coin$numSpriteFrames) : model.playerSpriteIndex;
+		var newItemSpriteIndex = (_Utils_cmp(newMillisSinceLastSpriteAnim, author$project$ConstantsHelpers$spriteAnimDelayMillis) > -1) ? ((model.itemSpriteIndex + 1) % author$project$View$Target$numSpriteFrames) : model.playerSpriteIndex;
 		var updatedModelBase = _Utils_update(
 			model,
 			{

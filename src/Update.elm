@@ -16,8 +16,8 @@ import Msg exposing (..)
 import Note exposing (Note)
 import Ports
 
-import View.Mario
-import View.Coin
+import View.Player
+import View.Target
 
 
 
@@ -64,7 +64,7 @@ updateAnimationValues model millisSinceLastFrame =
     -- Update player sprite
     newPlayerSpriteIndex = 
       if newMillisSinceLastSpriteAnim >= ConstantsHelpers.spriteAnimDelayMillis then
-         ( remainderBy View.Mario.numSpriteFrames (model.playerSpriteIndex + 1) )
+         ( remainderBy View.Player.numSpriteFrames (model.playerSpriteIndex + 1) )
       else
         model.playerSpriteIndex -- don't change otherwise
 
@@ -72,7 +72,7 @@ updateAnimationValues model millisSinceLastFrame =
     -- Update coin sprite
     newItemSpriteIndex = 
       if newMillisSinceLastSpriteAnim >= ConstantsHelpers.spriteAnimDelayMillis then
-         ( remainderBy View.Coin.numSpriteFrames (model.itemSpriteIndex + 1) )
+         ( remainderBy View.Target.numSpriteFrames (model.itemSpriteIndex + 1) )
       else
         model.playerSpriteIndex -- don't change otherwise
 

@@ -26,8 +26,8 @@ import View.MidiStatus
 import View.StartScreen
 import View.Game
 -- TEST:
-import View.Coin
-import View.Mario
+import View.Target
+import View.Player
 
 
 -- TIME HELPER...
@@ -55,7 +55,7 @@ view model =
             -- If Nothing or False (waiting to init or no MIDI available), then show the MidiStatus screen (waiting for input)
             Nothing ->
               View.MidiStatus.view model
-              -- View.Coin.view model
+              -- View.Target.view model
               -- View.Game.view model
 
 

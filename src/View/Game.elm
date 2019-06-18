@@ -8,8 +8,8 @@ import Svg.Attributes as S exposing (..)
 import Array exposing (..)
 
 import ConstantsHelpers
-import View.Mario exposing (view)
-import View.Coin exposing (view)
+import View.Player exposing (view)
+import View.Target exposing (view)
 import Note exposing (Note)
 import Model exposing (Model)
 import Msg exposing (..)
@@ -24,13 +24,13 @@ view model =
         
         svgListAllNotes = drawAllTargetNotes model.itemSpriteIndex model.targetNotes
 
-        xS = String.fromFloat model.playerCurrentXPosition
-        yS = String.fromFloat model.playerCurrentYPosition
+        x = model.playerCurrentXPosition
+        y = model.playerCurrentYPosition
 
         currentNoteDrawing = case model.currentNote of
                                  Nothing -> []
                                  Just currentNote -> 
-                                   [View.Mario.view xS yS model.playerSpriteIndex]
+                                   [View.Player.view x y model.playerSpriteIndex]
 
         -- animate viewBox to scroll game level with all notes drawn inside
         -- updated: draw the current note inside the game level?
@@ -39,7 +39,7 @@ view model =
             , S.width widthS
             , S.height heightS
             , S.x "0", S.y "0"
-          ] (currentNoteDrawing ++ svgListAllNotes)
+          ] (svgListAllNotes ++ currentNoteDrawing)
     
     in
       svg
@@ -96,10 +96,9 @@ drawAllTargetNotes spriteIndex notes =
 drawTargetNote : Int -> Int -> Note -> Svg msg
 drawTargetNote spriteIndex xPosIndex note =
     let
-        cyString = String.fromFloat (ConstantsHelpers.getNoteYPos note.midi)
+        y = ConstantsHelpers.getNoteYPos note.midi
 
-        cxString =
-            String.fromFloat (ConstantsHelpers.getNoteXPos xPosIndex)
+        x = ConstantsHelpers.getNoteXPos xPosIndex
     in
-      View.Coin.view cxString cyString spriteIndex
+      View.Target.view x y spriteIndex
 

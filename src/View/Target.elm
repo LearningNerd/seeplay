@@ -1,25 +1,38 @@
-module View.Coin exposing (view, numSpriteFrames)
+module View.Target exposing (view, numSpriteFrames)
 
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import ConstantsHelpers
 
 
+{-- coin sprite dimensions:
 numSpriteFrames = 4
-
 baseSpriteWidth = 16
 baseSpriteHeight = 16
+--}
+
+
+numSpriteFrames = 5
+
+baseSpriteWidth = 59
+baseSpriteHeight = 44
 
 widthToHeightRatio = baseSpriteWidth / baseSpriteHeight
 
 
+spriteWidth = (ConstantsHelpers.staffLineHeight * 1.5) * widthToHeightRatio
+spriteHeight = ConstantsHelpers.staffLineHeight * 1.5
+
+{--
 spriteWidth = (ConstantsHelpers.staffLineHeight * 0.8) * widthToHeightRatio
 spriteHeight = ConstantsHelpers.staffLineHeight * 0.8
+--}
 
-
-view xS yS spriteIndex =
+view xPos yPos spriteIndex =
   let
     viewBoxStartXString = String.fromInt (spriteIndex * baseSpriteWidth)
+    xS = String.fromFloat (xPos - 17) -- center it...?
+    yS = String.fromFloat (yPos - 7)
   in
     svg
     [ viewBox (viewBoxStartXString ++ " 0 " ++ String.fromFloat baseSpriteWidth ++ " " ++ String.fromFloat baseSpriteHeight)
@@ -29,5 +42,5 @@ view xS yS spriteIndex =
     , y yS
     , class "sprite"
     ]
-    [ image [xlinkHref "img/coin.png"] [] ]
+    [ image [xlinkHref "img/happycloud-59w-44h-5i.png"] [] ]
 
