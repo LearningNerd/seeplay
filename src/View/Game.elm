@@ -22,7 +22,7 @@ view model =
 
         heightS = String.fromFloat ConstantsHelpers.svgViewTotalHeight
         
-        svgListAllNotes = drawAllTargetNotes model.itemSpriteIndex model.targetNotes
+        svgListAllNotes = drawAllTargetNotes model.itemSpriteIndex model.nextTargetNoteIndex model.targetNotes
 
         x = model.playerCurrentXPosition
         y = model.playerCurrentYPosition
@@ -86,19 +86,26 @@ trebleClef x y =
 
 
 
-drawAllTargetNotes : Int -> Array Note -> List (Svg msg)
-drawAllTargetNotes spriteIndex notes =
+drawAllTargetNotes : Int -> Int -> Array Note -> List (Svg msg)
+drawAllTargetNotes spriteIndex targetNoteIndex notes =
     let 
         noteList = Array.toList notes
     in
-      List.indexedMap (drawTargetNote spriteIndex) noteList 
+      List.indexedMap (drawTargetNote spriteIndex targetNoteIndex) noteList 
 
-drawTargetNote : Int -> Int -> Note -> Svg msg
-drawTargetNote spriteIndex xPosIndex note =
+drawTargetNote : Int -> Int -> Int -> Note -> Svg msg
+drawTargetNote spriteIndex targetNoteIndex xPosIndex note =
     let
         y = ConstantsHelpers.getNoteYPos note.midi
 
         x = ConstantsHelpers.getNoteXPos xPosIndex
+
+        spriteImage = 
+          if xPosIndex > (targetNoteIndex - 1) then -- future notes are "next targets"
+            ConstantsHelpers.nextTargetSpriteImage
+          else
+            ConstantsHelpers.correctTargetSpriteImage -- prev/cur notes are correct
+
     in
-      View.Target.view x y spriteIndex
+      View.Target.view x y spriteIndex spriteImage
 

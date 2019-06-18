@@ -28,6 +28,10 @@ svgViewTotalHeight = svgViewHeight + topMargin + bottomMargin
 playerInitialXPosition = 0 -- currently added to leftMargin
 playerInitialNote = 67 -- controls initial y position; start on G
 
+
+correctTargetSpriteImage = "img/happycloud-59w-44h-5i.png"
+nextTargetSpriteImage = "img/raincloud-59w-44h-5i.png"
+
 -------------------------------  Animations: ----------------------------------
 
 -- Game level view box scrolls by this percent closer to the next target value

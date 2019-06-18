@@ -28,7 +28,7 @@ spriteWidth = (ConstantsHelpers.staffLineHeight * 0.8) * widthToHeightRatio
 spriteHeight = ConstantsHelpers.staffLineHeight * 0.8
 --}
 
-view xPos yPos spriteIndex =
+view xPos yPos spriteIndex spriteImage =
   let
     viewBoxStartXString = String.fromInt (spriteIndex * baseSpriteWidth)
     xS = String.fromFloat (xPos - 17) -- center it...?
@@ -42,5 +42,5 @@ view xPos yPos spriteIndex =
     , y yS
     , class "sprite"
     ]
-    [ image [xlinkHref "img/happycloud-59w-44h-5i.png"] [] ]
+    [ image [xlinkHref spriteImage] [] ]
 

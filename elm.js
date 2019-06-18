@@ -10185,10 +10185,12 @@ var author$project$ConstantsHelpers$leftMargin = 200;
 var author$project$ConstantsHelpers$rightMargin = 0;
 var author$project$ConstantsHelpers$svgViewWidth = 700;
 var author$project$ConstantsHelpers$svgViewTotalWidth = (author$project$ConstantsHelpers$svgViewWidth + author$project$ConstantsHelpers$leftMargin) + author$project$ConstantsHelpers$rightMargin;
+var author$project$ConstantsHelpers$correctTargetSpriteImage = 'img/happycloud-59w-44h-5i.png';
 var author$project$ConstantsHelpers$noteXInterval = 200;
 var author$project$ConstantsHelpers$getNoteXPos = function (noteIndex) {
 	return author$project$ConstantsHelpers$leftMargin + (noteIndex * author$project$ConstantsHelpers$noteXInterval);
 };
+var author$project$ConstantsHelpers$nextTargetSpriteImage = 'img/raincloud-59w-44h-5i.png';
 var author$project$View$Target$baseSpriteHeight = 44;
 var author$project$View$Target$baseSpriteWidth = 59;
 var author$project$View$Target$spriteHeight = author$project$ConstantsHelpers$staffLineHeight * 1.5;
@@ -10211,8 +10213,8 @@ var elm$svg$Svg$Attributes$xlinkHref = function (value) {
 		_VirtualDom_noJavaScriptUri(value));
 };
 var elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
-var author$project$View$Target$view = F3(
-	function (xPos, yPos, spriteIndex) {
+var author$project$View$Target$view = F4(
+	function (xPos, yPos, spriteIndex, spriteImage) {
 		var yS = elm$core$String$fromFloat(yPos - 7);
 		var xS = elm$core$String$fromFloat(xPos - 17);
 		var viewBoxStartXString = elm$core$String$fromInt(spriteIndex * author$project$View$Target$baseSpriteWidth);
@@ -10236,23 +10238,24 @@ var author$project$View$Target$view = F3(
 					elm$svg$Svg$image,
 					_List_fromArray(
 						[
-							elm$svg$Svg$Attributes$xlinkHref('img/happycloud-59w-44h-5i.png')
+							elm$svg$Svg$Attributes$xlinkHref(spriteImage)
 						]),
 					_List_Nil)
 				]));
 	});
-var author$project$View$Game$drawTargetNote = F3(
-	function (spriteIndex, xPosIndex, note) {
+var author$project$View$Game$drawTargetNote = F4(
+	function (spriteIndex, targetNoteIndex, xPosIndex, note) {
 		var y = author$project$ConstantsHelpers$getNoteYPos(note.midi);
 		var x = author$project$ConstantsHelpers$getNoteXPos(xPosIndex);
-		return A3(author$project$View$Target$view, x, y, spriteIndex);
+		var spriteImage = (_Utils_cmp(xPosIndex, targetNoteIndex - 1) > 0) ? author$project$ConstantsHelpers$nextTargetSpriteImage : author$project$ConstantsHelpers$correctTargetSpriteImage;
+		return A4(author$project$View$Target$view, x, y, spriteIndex, spriteImage);
 	});
-var author$project$View$Game$drawAllTargetNotes = F2(
-	function (spriteIndex, notes) {
+var author$project$View$Game$drawAllTargetNotes = F3(
+	function (spriteIndex, targetNoteIndex, notes) {
 		var noteList = elm$core$Array$toList(notes);
 		return A2(
 			elm$core$List$indexedMap,
-			author$project$View$Game$drawTargetNote(spriteIndex),
+			A2(author$project$View$Game$drawTargetNote, spriteIndex, targetNoteIndex),
 			noteList);
 	});
 var elm$svg$Svg$line = elm$svg$Svg$trustedNode('line');
@@ -10333,7 +10336,7 @@ var author$project$View$Game$view = function (model) {
 	var y = model.playerCurrentYPosition;
 	var x = model.playerCurrentXPosition;
 	var widthS = elm$core$String$fromFloat(author$project$ConstantsHelpers$svgViewTotalWidth);
-	var svgListAllNotes = A2(author$project$View$Game$drawAllTargetNotes, model.itemSpriteIndex, model.targetNotes);
+	var svgListAllNotes = A3(author$project$View$Game$drawAllTargetNotes, model.itemSpriteIndex, model.nextTargetNoteIndex, model.targetNotes);
 	var heightS = elm$core$String$fromFloat(author$project$ConstantsHelpers$svgViewTotalHeight);
 	var currentNoteDrawing = function () {
 		var _n0 = model.currentNote;
