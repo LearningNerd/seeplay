@@ -23,7 +23,6 @@ type alias Model =
     , startTimestamp : Maybe Time.Posix
     , answerSpeed : Int -- result of subtracting two times via posixToMillis
     , incorrectTries : Int
-    , scoreList : List Score -- store a list of score records for each practice session ... goes into local storage
     , sessionId : Int
 
 ------------- for animation: -------------------
@@ -47,12 +46,6 @@ type alias Model =
     , millisSinceLastSpriteAnimFrame : Float
     }
 
-type alias Score =
-  { correctNote : Note -- midi code of the Note (not the Note itself!)
-  , answerSpeed : Int
-  , incorrectTries : Int
-  }
-
 
 initialModel : Model
 initialModel =
@@ -68,7 +61,6 @@ initialModel =
     , startTimestamp = Nothing
     , answerSpeed = 0
     , incorrectTries = 0
-    , scoreList = []
     , sessionId = 0
 
 ------------- for animation: -------------------

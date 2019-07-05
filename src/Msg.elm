@@ -9,6 +9,5 @@ type Msg
     
     | GenerateTargetNotes (List Int)
     | StartGame
-    | RestartTimer Time.Posix
     | AnimFrame Float
 

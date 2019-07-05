@@ -14,7 +14,7 @@ import Html.Attributes as A exposing (..)
 import Html.Events exposing (..)
 
 import ConstantsHelpers
-import Model exposing (Model, Score, initialModel)
+import Model exposing (Model, initialModel)
 import Update
 import Color
 import Msg exposing (..)
@@ -28,18 +28,6 @@ import View.Game
 -- TEST:
 import View.Target
 import View.Player
-
-
--- TIME HELPER...
-displayTimestamp timestamp =
-  case timestamp of
-        Nothing -> "EMPTY"
-        Just t -> String.fromInt (Time.posixToMillis t)
-
-getMillis timestamp =
-  case timestamp of
-        Nothing -> 0
-        Just t -> Time.posixToMillis t
 
 
 
@@ -109,12 +97,4 @@ init initialSessionId =
     , Random.generate GenerateTargetNotes (Note.getRandomMidiList ConstantsHelpers.notesPerLevel)
   )
 
-
-
-updateScore : Int -> Note -> Note -> ( Int, Bool )
-updateScore score correctNote currentNote =
-    if currentNote.midi == correctNote.midi then
-        ( score + 1, True )
-    else
-        ( score, False )
 

@@ -1,6 +1,7 @@
 port module Update exposing (update)
 
 
+import Msg exposing (..)
 import Dict exposing (Dict)
 import Array exposing (..)
 import Browser
@@ -11,8 +12,7 @@ import Time
 import Json.Encode as E
 
 import ConstantsHelpers
-import Model exposing (Model, Score)
-import Msg exposing (..)
+import Model exposing (Model)
 import Note exposing (Note)
 import Ports
 
@@ -37,13 +37,11 @@ update msg model =
         
         StartGame ->
           startGame model
-       
+      
+        -- triggered by init function in Main.elm
         GenerateTargetNotes midiCodeList ->
           generateTargetNotes model midiCodeList
 
-        RestartTimer currentTimestamp ->
-          restartTimer model currentTimestamp
-          
         NoteReleased _ -> (model, Cmd.none)
 
         NotePressed noteCode -> 
@@ -163,7 +161,7 @@ startGame model =
      ( { model |
        isPlaying = True
        }
-     , Task.perform RestartTimer Time.now 
+     , Cmd.none
      )
 
 
@@ -179,57 +177,6 @@ generateTargetNotes model midiCodeList =
      , Cmd.none
      )
 
-
--- Initialize timer when user starts the game
--- and restart timer after every correct answer
--- Cache this data in local storage
--- restartTimer : Model -> List Int -> ( Model, Cmd Msg )
-restartTimer model currentTimestamp =
-  let
-    newAnswerSpeed =
-      getNewAnswerSpeed model.startTimestamp currentTimestamp
-
-
-    correctNote = getCurrentCorrectNote model.nextTargetNoteIndex model.targetNotes
-
-    -- Append data to scoreList if startTime has been initialized
-    newScoreObjectList =
-      if model.startTimestamp /= Nothing
-        then [ Score correctNote newAnswerSpeed model.incorrectTries ]
-        else []
-
-    -- Only save to local storage if this is NOT the very first note displayed
-    nextCommand =
-      if model.startTimestamp /= Nothing
-        then Cmd.batch [
-          Ports.saveLocalData (E.list convertScoreToJSON
-                  (model.scoreList ++ newScoreObjectList)
-                )
-          ]
-      else Cmd.none
-  in
-     ( { model | answerSpeed = newAnswerSpeed
-       , scoreList = model.scoreList ++ newScoreObjectList
-       -- Always update start time:
-       , startTimestamp = Just currentTimestamp
-       -- RESET after getting it correct (and command below will send OLD value, not the new one):
-       , incorrectTries = 0
-       }
-     , nextCommand
-     )
-
-
--- HELPERS FOR FUNCTION ABOVE:
- 
-getCurrentCorrectNote index arr =
-  let
-    maybeCorrectNote = Array.get index arr
-  in
-    case maybeCorrectNote of
-      Nothing ->
-        Note.createNote 60 -- temporary fix =P last note is always C4 ?
-      Just correctNote ->
-        correctNote
 
 
 -- Edge case: starting the timer when game begins shouldn't update answerSpeed
