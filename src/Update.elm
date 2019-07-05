@@ -20,54 +20,52 @@ import View.Player
 import View.Target
 
 
-
-
--- UPDATE
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
+  case model of
 
-    case ( msg, model ) of
+---------------------   LOADING SCREEN   --------------------
+      LoadingScreen ->
+        case msg of
 
-        ( AnimFrame millisSinceLastFrame, Game gameModel ) ->
-            ( Game (updateAnimationValues gameModel millisSinceLastFrame)
-            , Cmd.none
-            )
+            InitMIDI isMIDIConnectedBool ->
+              ( initMidi isMIDIConnectedBool, Cmd.none )
 
+            _ ->
+              ( model, Cmd.none )
 
-        ( InitMIDI isMIDIConnectedBool, LoadingScreen ) ->
-            ( initMidi isMIDIConnectedBool
-            , Cmd.none
-            )
+---------------------   START SCREEN   --------------------
+      StartScreen ->
+        case msg of
 
+            StartGame ->
+              ( model, Random.generate GenerateTargetNotes (Note.getRandomMidiList ConstantsHelpers.notesPerLevel) )
 
-        -- triggerd by click "start" in start screen
-        -- generate random target notes...
-        ( StartGame, StartScreen ) ->
-            ( StartScreen
-            , Random.generate GenerateTargetNotes (Note.getRandomMidiList ConstantsHelpers.notesPerLevel)
-            )
+            GenerateTargetNotes midiCodeList ->
+              ( Game (generateTargetNotes initialGameModel midiCodeList), Cmd.none )
 
-        -- actually start the game, using the generated notes
-        ( GenerateTargetNotes midiCodeList, _ ) ->
-            ( Game (generateTargetNotes initialGameModel midiCodeList)
-            , Cmd.none
-            )
+            _ ->
+              ( model, Cmd.none )
 
+---------------------   GAME SCREEN   --------------------
+      Game gameModel ->
+        let
+          newGameModel = 
+            case msg of
+      
+              AnimFrame millisSinceLastFrame ->
+                updateAnimationValues gameModel millisSinceLastFrame
 
-        ( NoteReleased _, Game gameModel ) ->
-            (Game gameModel, Cmd.none)
+              NotePressed noteCode -> 
+                updateNotePressed gameModel noteCode
 
+              NoteReleased _ ->
+                gameModel
 
-        ( NotePressed noteCode, Game gameModel ) -> 
-            ( Game (updateNotePressed gameModel noteCode)
-            , Cmd.none
-            )
-
-        -- don't change the model for all other scenarios
-        _ ->
-            ( model, Cmd.none )
-          
+              _ ->
+                gameModel
+        in
+          ( Game newGameModel, Cmd.none )
 
 
 

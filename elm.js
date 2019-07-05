@@ -10191,7 +10191,6 @@ var author$project$ConstantsHelpers$notesPerLevel = 100;
 var author$project$Model$Game = function (a) {
 	return {$: 'Game', a: a};
 };
-var author$project$Model$StartScreen = {$: 'StartScreen'};
 var author$project$ConstantsHelpers$convertFramesToMillisDuration = F2(
 	function (durationFrames, fps) {
 		return (durationFrames * 1000) / fps;
@@ -10417,6 +10416,7 @@ var author$project$Update$generateTargetNotes = F2(
 			model,
 			{targetNotes: targetNotes});
 	});
+var author$project$Model$StartScreen = {$: 'StartScreen'};
 var author$project$Update$initMidi = function (isMIDIConnectedBool) {
 	var newModel = function () {
 		if (isMIDIConnectedBool) {
@@ -10666,73 +10666,54 @@ var elm$random$Random$generate = F2(
 	});
 var author$project$Update$update = F2(
 	function (msg, model) {
-		var _n0 = _Utils_Tuple2(msg, model);
-		_n0$6:
-		while (true) {
-			switch (_n0.a.$) {
-				case 'AnimFrame':
-					if (_n0.b.$ === 'Game') {
-						var millisSinceLastFrame = _n0.a.a;
-						var gameModel = _n0.b.a;
+		switch (model.$) {
+			case 'LoadingScreen':
+				if (msg.$ === 'InitMIDI') {
+					var isMIDIConnectedBool = msg.a;
+					return _Utils_Tuple2(
+						author$project$Update$initMidi(isMIDIConnectedBool),
+						elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+				}
+			case 'StartScreen':
+				switch (msg.$) {
+					case 'StartGame':
 						return _Utils_Tuple2(
-							author$project$Model$Game(
-								A2(author$project$Update$updateAnimationValues, gameModel, millisSinceLastFrame)),
-							elm$core$Platform$Cmd$none);
-					} else {
-						break _n0$6;
-					}
-				case 'InitMIDI':
-					if (_n0.b.$ === 'LoadingScreen') {
-						var isMIDIConnectedBool = _n0.a.a;
-						var _n1 = _n0.b;
-						return _Utils_Tuple2(
-							author$project$Update$initMidi(isMIDIConnectedBool),
-							elm$core$Platform$Cmd$none);
-					} else {
-						break _n0$6;
-					}
-				case 'StartGame':
-					if (_n0.b.$ === 'StartScreen') {
-						var _n2 = _n0.a;
-						var _n3 = _n0.b;
-						return _Utils_Tuple2(
-							author$project$Model$StartScreen,
+							model,
 							A2(
 								elm$random$Random$generate,
 								author$project$Msg$GenerateTargetNotes,
 								author$project$Note$getRandomMidiList(author$project$ConstantsHelpers$notesPerLevel)));
-					} else {
-						break _n0$6;
-					}
-				case 'GenerateTargetNotes':
-					var midiCodeList = _n0.a.a;
-					return _Utils_Tuple2(
-						author$project$Model$Game(
-							A2(author$project$Update$generateTargetNotes, author$project$Model$initialGameModel, midiCodeList)),
-						elm$core$Platform$Cmd$none);
-				case 'NoteReleased':
-					if (_n0.b.$ === 'Game') {
-						var gameModel = _n0.b.a;
-						return _Utils_Tuple2(
-							author$project$Model$Game(gameModel),
-							elm$core$Platform$Cmd$none);
-					} else {
-						break _n0$6;
-					}
-				default:
-					if (_n0.b.$ === 'Game') {
-						var noteCode = _n0.a.a;
-						var gameModel = _n0.b.a;
+					case 'GenerateTargetNotes':
+						var midiCodeList = msg.a;
 						return _Utils_Tuple2(
 							author$project$Model$Game(
-								A2(author$project$Update$updateNotePressed, gameModel, noteCode)),
+								A2(author$project$Update$generateTargetNotes, author$project$Model$initialGameModel, midiCodeList)),
 							elm$core$Platform$Cmd$none);
-					} else {
-						break _n0$6;
+					default:
+						return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+				}
+			default:
+				var gameModel = model.a;
+				var newGameModel = function () {
+					switch (msg.$) {
+						case 'AnimFrame':
+							var millisSinceLastFrame = msg.a;
+							return A2(author$project$Update$updateAnimationValues, gameModel, millisSinceLastFrame);
+						case 'NotePressed':
+							var noteCode = msg.a;
+							return A2(author$project$Update$updateNotePressed, gameModel, noteCode);
+						case 'NoteReleased':
+							return gameModel;
+						default:
+							return gameModel;
 					}
-			}
+				}();
+				return _Utils_Tuple2(
+					author$project$Model$Game(newGameModel),
+					elm$core$Platform$Cmd$none);
 		}
-		return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
 	});
 var elm$browser$Browser$element = _Browser_element;
 var author$project$Main$main = elm$browser$Browser$element(
