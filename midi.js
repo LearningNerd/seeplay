@@ -84,9 +84,11 @@ function getMIDIMessage(midiMessage) {
   const noteCode = midiMessage.data[1];
   const velocity = midiMessage.data[2];
 
-  console.log(command);
-  console.log(noteCode);
-  console.log(velocity);
+  console.log(midiMessage.data);
+
+  // console.log(command);
+  // console.log(noteCode);
+  // console.log(velocity);
 
   if (command === 144 && velocity > 0) {
     // Send MIDI note code to Elm -- integer

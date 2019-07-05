@@ -50,7 +50,7 @@ view : Model -> Html Msg
 view model =
     div [ ]
         [ View.Header.view model
-        , main_ [A.class "container"] [ Html.p [] []
+        , main_ [A.class "gameContainer"] [ Html.p [] []
                 , case model.isMIDIConnected of
             -- If Nothing or False (waiting to init or no MIDI available), then show the MidiStatus screen (waiting for input)
             Nothing ->

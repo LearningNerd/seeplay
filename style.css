@@ -14,6 +14,11 @@ button {
     box-shadow: 1px 1px 5px rgba(0,0,0,0.2);
 }
 
+.gameContainer {
+  padding-left: 0;
+  padding-right: 0;
+}
+
 .container {
   max-width: 45em;
   margin: 2em auto;

@@ -9,17 +9,19 @@ import Note exposing (Note)
 
 notesPerLevel = 100
 
-noteXInterval = 200
+noteXInterval = 300
 
-svgViewWidth = 700
-svgViewHeight = 200
+svgViewWidth = 1400
+svgViewHeight = 400
 
 staffLineHeight = svgViewHeight / 6
 
 topMargin = 50
 bottomMargin = 50
-leftMargin = 200 ---- shifts target notes, not player
+leftMargin = 300 ---- shifts target notes, not player
 rightMargin = 0
+
+trebleLeftMargin = 20
 
 svgViewTotalWidth = svgViewWidth + leftMargin + rightMargin
 svgViewTotalHeight = svgViewHeight + topMargin + bottomMargin
@@ -27,6 +29,9 @@ svgViewTotalHeight = svgViewHeight + topMargin + bottomMargin
 -- Player appears here when game is initialized
 playerInitialXPosition = 0 -- currently added to leftMargin
 playerInitialNote = 67 -- controls initial y position; start on G
+
+-- To center the player/start of level
+scrollOffset = -900
 
 
 correctTargetSpriteImage = "img/happycloud-59w-44h-5i.png"
@@ -39,9 +44,6 @@ nextTargetSpriteImage = "img/raincloud-59w-44h-5i.png"
 -- Value between 0 and 1
 -- Larger values = faster scrolling (by a lot!)
 scrollAnimMultiplier = 0.05
-
--- To center the player/start of level
-scrollOffset = -500
 
 -- Frames per second (just makes the numbers nicer for accel, vel, duration etc)
 framesPerSecond = 60

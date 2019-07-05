@@ -52,7 +52,7 @@ view model =
           -- draw 5 staff lines
           (List.map drawStaffLine (List.range 1 5))
            ++ [gameLevelSvg]
-           ++ [ trebleClef 0 237 ]
+           ++ [trebleClef]
         ) 
 
 
@@ -74,15 +74,17 @@ drawStaffLine yPos =
 
 
 
-trebleClef x y =
+trebleClef =
     let
         xS =
-            String.fromFloat x
+            String.fromFloat ConstantsHelpers.trebleLeftMargin
 
         yS =
-            String.fromFloat y
+            String.fromFloat (ConstantsHelpers.topMargin + (ConstantsHelpers.staffLineHeight * 5.75))
+
+        fontSizeS = String.fromFloat (ConstantsHelpers.svgViewWidth * 0.4214)
     in
-    text_ [ S.x xS, S.y yS, S.class "treble" ] [ HTML.text "𝄞" ]
+    text_ [ S.x xS, S.y yS, S.fontSize fontSizeS ] [ HTML.text "𝄞" ]
 
 
 

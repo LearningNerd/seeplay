@@ -20,8 +20,8 @@ baseSpriteHeight = 44
 widthToHeightRatio = baseSpriteWidth / baseSpriteHeight
 
 
-spriteWidth = (ConstantsHelpers.staffLineHeight * 1.5) * widthToHeightRatio
-spriteHeight = ConstantsHelpers.staffLineHeight * 1.5
+spriteWidth = (ConstantsHelpers.staffLineHeight * 1) * widthToHeightRatio
+spriteHeight = ConstantsHelpers.staffLineHeight * 1
 
 {--
 spriteWidth = (ConstantsHelpers.staffLineHeight * 0.8) * widthToHeightRatio
@@ -31,8 +31,8 @@ spriteHeight = ConstantsHelpers.staffLineHeight * 0.8
 view xPos yPos spriteIndex spriteImage =
   let
     viewBoxStartXString = String.fromInt (spriteIndex * baseSpriteWidth)
-    xS = String.fromFloat (xPos - 17) -- center it...?
-    yS = String.fromFloat (yPos - 7)
+    xS = String.fromFloat (xPos - 25) -- center it...?
+    yS = String.fromFloat (yPos + 5)
   in
     svg
     [ viewBox (viewBoxStartXString ++ " 0 " ++ String.fromFloat baseSpriteWidth ++ " " ++ String.fromFloat baseSpriteHeight)
