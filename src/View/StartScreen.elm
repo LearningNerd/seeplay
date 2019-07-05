@@ -10,8 +10,7 @@ import Model exposing (Model)
 import Msg exposing (..)
 
 
-view : Model -> Html Msg
-view model =
+view =
     div [A.class "startScreen"] [
           button [ A.class "startButton", onClick StartGame] [ HTML.text "Start playing!" ]
         ]

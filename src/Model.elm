@@ -10,7 +10,17 @@ import Note exposing (Note)
 import Color
 
 
-type alias Model =
+type Model = 
+  LoadingScreen
+  | StartScreen
+  | Game GameModel
+
+initialModel : Model
+initialModel =
+  LoadingScreen
+
+
+type alias GameModel =
     { isMIDIConnected : Maybe Bool
     , isPlaying : Bool
 
@@ -47,8 +57,8 @@ type alias Model =
     }
 
 
-initialModel : Model
-initialModel =
+initialGameModel : GameModel
+initialGameModel =
     { isMIDIConnected = Nothing
     , isPlaying = False
     

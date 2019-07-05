@@ -14,7 +14,7 @@ import Html.Attributes as A exposing (..)
 import Html.Events exposing (..)
 
 import ConstantsHelpers
-import Model exposing (Model, initialModel)
+import Model exposing (Model(..), GameModel, initialModel)
 import Update
 import Color
 import Msg exposing (..)
@@ -36,28 +36,22 @@ import View.Player
 
 view : Model -> Html Msg
 view model =
+  let
+    currentView = 
+      case model of
+        LoadingScreen -> View.MidiStatus.view model
+        StartScreen -> View.StartScreen.view
+        Game gameModel -> View.Game.view gameModel
+  in
     div [ ]
         [ View.Header.view model
-        , main_ [A.class "gameContainer"] [ Html.p [] []
-                , case model.isMIDIConnected of
-            -- If Nothing or False (waiting to init or no MIDI available), then show the MidiStatus screen (waiting for input)
-            Nothing ->
-              View.MidiStatus.view model
-              -- View.Target.view model
-              -- View.Game.view model
-
-
-            Just False ->
-              View.MidiStatus.view model
-
-            Just True ->
-              if model.isPlaying
-                 then View.Game.view model
-                 else View.StartScreen.view model
-           ] -- end main 
+        , main_ [A.class "gameContainer"]
+            [ Html.p [] [] -- ..why empty p???
+            , currentView
+            ]
         ]
 
-
+ 
 
 -- SUBSCRIPTIONS
 
@@ -89,12 +83,12 @@ main =
         , subscriptions = subscriptions
         }
 
+
+-- Note: Int here is left over from prev version that used session IDs for saving score to local storage....
 init : Int -> ( Model, Cmd Msg )
 init initialSessionId =
-    -- Get session ID from JS flag (starts at 0, or incremented from localstorage)
-    -- Generate list of random numbers
-  ( { initialModel | sessionId = initialSessionId }
-    , Random.generate GenerateTargetNotes (Note.getRandomMidiList ConstantsHelpers.notesPerLevel)
+  ( initialModel 
+  , Cmd.none 
   )
 
 

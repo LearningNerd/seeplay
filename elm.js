@@ -853,280 +853,6 @@ var _Basics_xor = F2(function(a, b) { return a !== b; });
 
 
 
-var _Bitwise_and = F2(function(a, b)
-{
-	return a & b;
-});
-
-var _Bitwise_or = F2(function(a, b)
-{
-	return a | b;
-});
-
-var _Bitwise_xor = F2(function(a, b)
-{
-	return a ^ b;
-});
-
-function _Bitwise_complement(a)
-{
-	return ~a;
-};
-
-var _Bitwise_shiftLeftBy = F2(function(offset, a)
-{
-	return a << offset;
-});
-
-var _Bitwise_shiftRightBy = F2(function(offset, a)
-{
-	return a >> offset;
-});
-
-var _Bitwise_shiftRightZfBy = F2(function(offset, a)
-{
-	return a >>> offset;
-});
-
-
-
-// TASKS
-
-function _Scheduler_succeed(value)
-{
-	return {
-		$: 0,
-		a: value
-	};
-}
-
-function _Scheduler_fail(error)
-{
-	return {
-		$: 1,
-		a: error
-	};
-}
-
-function _Scheduler_binding(callback)
-{
-	return {
-		$: 2,
-		b: callback,
-		c: null
-	};
-}
-
-var _Scheduler_andThen = F2(function(callback, task)
-{
-	return {
-		$: 3,
-		b: callback,
-		d: task
-	};
-});
-
-var _Scheduler_onError = F2(function(callback, task)
-{
-	return {
-		$: 4,
-		b: callback,
-		d: task
-	};
-});
-
-function _Scheduler_receive(callback)
-{
-	return {
-		$: 5,
-		b: callback
-	};
-}
-
-
-// PROCESSES
-
-var _Scheduler_guid = 0;
-
-function _Scheduler_rawSpawn(task)
-{
-	var proc = {
-		$: 0,
-		e: _Scheduler_guid++,
-		f: task,
-		g: null,
-		h: []
-	};
-
-	_Scheduler_enqueue(proc);
-
-	return proc;
-}
-
-function _Scheduler_spawn(task)
-{
-	return _Scheduler_binding(function(callback) {
-		callback(_Scheduler_succeed(_Scheduler_rawSpawn(task)));
-	});
-}
-
-function _Scheduler_rawSend(proc, msg)
-{
-	proc.h.push(msg);
-	_Scheduler_enqueue(proc);
-}
-
-var _Scheduler_send = F2(function(proc, msg)
-{
-	return _Scheduler_binding(function(callback) {
-		_Scheduler_rawSend(proc, msg);
-		callback(_Scheduler_succeed(_Utils_Tuple0));
-	});
-});
-
-function _Scheduler_kill(proc)
-{
-	return _Scheduler_binding(function(callback) {
-		var task = proc.f;
-		if (task.$ === 2 && task.c)
-		{
-			task.c();
-		}
-
-		proc.f = null;
-
-		callback(_Scheduler_succeed(_Utils_Tuple0));
-	});
-}
-
-
-/* STEP PROCESSES
-
-type alias Process =
-  { $ : tag
-  , id : unique_id
-  , root : Task
-  , stack : null | { $: SUCCEED | FAIL, a: callback, b: stack }
-  , mailbox : [msg]
-  }
-
-*/
-
-
-var _Scheduler_working = false;
-var _Scheduler_queue = [];
-
-
-function _Scheduler_enqueue(proc)
-{
-	_Scheduler_queue.push(proc);
-	if (_Scheduler_working)
-	{
-		return;
-	}
-	_Scheduler_working = true;
-	while (proc = _Scheduler_queue.shift())
-	{
-		_Scheduler_step(proc);
-	}
-	_Scheduler_working = false;
-}
-
-
-function _Scheduler_step(proc)
-{
-	while (proc.f)
-	{
-		var rootTag = proc.f.$;
-		if (rootTag === 0 || rootTag === 1)
-		{
-			while (proc.g && proc.g.$ !== rootTag)
-			{
-				proc.g = proc.g.i;
-			}
-			if (!proc.g)
-			{
-				return;
-			}
-			proc.f = proc.g.b(proc.f.a);
-			proc.g = proc.g.i;
-		}
-		else if (rootTag === 2)
-		{
-			proc.f.c = proc.f.b(function(newRoot) {
-				proc.f = newRoot;
-				_Scheduler_enqueue(proc);
-			});
-			return;
-		}
-		else if (rootTag === 5)
-		{
-			if (proc.h.length === 0)
-			{
-				return;
-			}
-			proc.f = proc.f.b(proc.h.shift());
-		}
-		else // if (rootTag === 3 || rootTag === 4)
-		{
-			proc.g = {
-				$: rootTag === 3 ? 0 : 1,
-				b: proc.f.b,
-				i: proc.g
-			};
-			proc.f = proc.f.d;
-		}
-	}
-}
-
-
-
-function _Time_now(millisToPosix)
-{
-	return _Scheduler_binding(function(callback)
-	{
-		callback(_Scheduler_succeed(millisToPosix(Date.now())));
-	});
-}
-
-var _Time_setInterval = F2(function(interval, task)
-{
-	return _Scheduler_binding(function(callback)
-	{
-		var id = setInterval(function() { _Scheduler_rawSpawn(task); }, interval);
-		return function() { clearInterval(id); };
-	});
-});
-
-function _Time_here()
-{
-	return _Scheduler_binding(function(callback)
-	{
-		callback(_Scheduler_succeed(
-			A2(elm$time$Time$customZone, -(new Date().getTimezoneOffset()), _List_Nil)
-		));
-	});
-}
-
-
-function _Time_getZoneName()
-{
-	return _Scheduler_binding(function(callback)
-	{
-		try
-		{
-			var name = elm$time$Time$Name(Intl.DateTimeFormat().resolvedOptions().timeZone);
-		}
-		catch (e)
-		{
-			var name = elm$time$Time$Offset(new Date().getTimezoneOffset());
-		}
-		callback(_Scheduler_succeed(name));
-	});
-}
-
-
-
 function _Char_toCode(char)
 {
 	var code = char.charCodeAt(0);
@@ -1915,6 +1641,197 @@ function _Json_addEntry(func)
 }
 
 var _Json_encodeNull = _Json_wrap(null);
+
+
+
+// TASKS
+
+function _Scheduler_succeed(value)
+{
+	return {
+		$: 0,
+		a: value
+	};
+}
+
+function _Scheduler_fail(error)
+{
+	return {
+		$: 1,
+		a: error
+	};
+}
+
+function _Scheduler_binding(callback)
+{
+	return {
+		$: 2,
+		b: callback,
+		c: null
+	};
+}
+
+var _Scheduler_andThen = F2(function(callback, task)
+{
+	return {
+		$: 3,
+		b: callback,
+		d: task
+	};
+});
+
+var _Scheduler_onError = F2(function(callback, task)
+{
+	return {
+		$: 4,
+		b: callback,
+		d: task
+	};
+});
+
+function _Scheduler_receive(callback)
+{
+	return {
+		$: 5,
+		b: callback
+	};
+}
+
+
+// PROCESSES
+
+var _Scheduler_guid = 0;
+
+function _Scheduler_rawSpawn(task)
+{
+	var proc = {
+		$: 0,
+		e: _Scheduler_guid++,
+		f: task,
+		g: null,
+		h: []
+	};
+
+	_Scheduler_enqueue(proc);
+
+	return proc;
+}
+
+function _Scheduler_spawn(task)
+{
+	return _Scheduler_binding(function(callback) {
+		callback(_Scheduler_succeed(_Scheduler_rawSpawn(task)));
+	});
+}
+
+function _Scheduler_rawSend(proc, msg)
+{
+	proc.h.push(msg);
+	_Scheduler_enqueue(proc);
+}
+
+var _Scheduler_send = F2(function(proc, msg)
+{
+	return _Scheduler_binding(function(callback) {
+		_Scheduler_rawSend(proc, msg);
+		callback(_Scheduler_succeed(_Utils_Tuple0));
+	});
+});
+
+function _Scheduler_kill(proc)
+{
+	return _Scheduler_binding(function(callback) {
+		var task = proc.f;
+		if (task.$ === 2 && task.c)
+		{
+			task.c();
+		}
+
+		proc.f = null;
+
+		callback(_Scheduler_succeed(_Utils_Tuple0));
+	});
+}
+
+
+/* STEP PROCESSES
+
+type alias Process =
+  { $ : tag
+  , id : unique_id
+  , root : Task
+  , stack : null | { $: SUCCEED | FAIL, a: callback, b: stack }
+  , mailbox : [msg]
+  }
+
+*/
+
+
+var _Scheduler_working = false;
+var _Scheduler_queue = [];
+
+
+function _Scheduler_enqueue(proc)
+{
+	_Scheduler_queue.push(proc);
+	if (_Scheduler_working)
+	{
+		return;
+	}
+	_Scheduler_working = true;
+	while (proc = _Scheduler_queue.shift())
+	{
+		_Scheduler_step(proc);
+	}
+	_Scheduler_working = false;
+}
+
+
+function _Scheduler_step(proc)
+{
+	while (proc.f)
+	{
+		var rootTag = proc.f.$;
+		if (rootTag === 0 || rootTag === 1)
+		{
+			while (proc.g && proc.g.$ !== rootTag)
+			{
+				proc.g = proc.g.i;
+			}
+			if (!proc.g)
+			{
+				return;
+			}
+			proc.f = proc.g.b(proc.f.a);
+			proc.g = proc.g.i;
+		}
+		else if (rootTag === 2)
+		{
+			proc.f.c = proc.f.b(function(newRoot) {
+				proc.f = newRoot;
+				_Scheduler_enqueue(proc);
+			});
+			return;
+		}
+		else if (rootTag === 5)
+		{
+			if (proc.h.length === 0)
+			{
+				return;
+			}
+			proc.f = proc.f.b(proc.h.shift());
+		}
+		else // if (rootTag === 3 || rootTag === 4)
+		{
+			proc.g = {
+				$: rootTag === 3 ? 0 : 1,
+				b: proc.f.b,
+				i: proc.g
+			};
+			proc.f = proc.f.d;
+		}
+	}
+}
 
 
 
@@ -3955,6 +3872,43 @@ function _VirtualDom_dekey(keyedNode)
 
 
 
+var _Bitwise_and = F2(function(a, b)
+{
+	return a & b;
+});
+
+var _Bitwise_or = F2(function(a, b)
+{
+	return a | b;
+});
+
+var _Bitwise_xor = F2(function(a, b)
+{
+	return a ^ b;
+});
+
+function _Bitwise_complement(a)
+{
+	return ~a;
+};
+
+var _Bitwise_shiftLeftBy = F2(function(offset, a)
+{
+	return a << offset;
+});
+
+var _Bitwise_shiftRightBy = F2(function(offset, a)
+{
+	return a >> offset;
+});
+
+var _Bitwise_shiftRightZfBy = F2(function(offset, a)
+{
+	return a >>> offset;
+});
+
+
+
 
 // HELPERS
 
@@ -4916,7 +4870,63 @@ function _Browser_load(url)
 		}
 	}));
 }
-var author$project$ConstantsHelpers$notesPerLevel = 100;
+
+
+
+function _Time_now(millisToPosix)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		callback(_Scheduler_succeed(millisToPosix(Date.now())));
+	});
+}
+
+var _Time_setInterval = F2(function(interval, task)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var id = setInterval(function() { _Scheduler_rawSpawn(task); }, interval);
+		return function() { clearInterval(id); };
+	});
+});
+
+function _Time_here()
+{
+	return _Scheduler_binding(function(callback)
+	{
+		callback(_Scheduler_succeed(
+			A2(elm$time$Time$customZone, -(new Date().getTimezoneOffset()), _List_Nil)
+		));
+	});
+}
+
+
+function _Time_getZoneName()
+{
+	return _Scheduler_binding(function(callback)
+	{
+		try
+		{
+			var name = elm$time$Time$Name(Intl.DateTimeFormat().resolvedOptions().timeZone);
+		}
+		catch (e)
+		{
+			var name = elm$time$Time$Offset(new Date().getTimezoneOffset());
+		}
+		callback(_Scheduler_succeed(name));
+	});
+}
+var author$project$Model$LoadingScreen = {$: 'LoadingScreen'};
+var author$project$Model$initialModel = author$project$Model$LoadingScreen;
+var elm$core$Basics$False = {$: 'False'};
+var elm$core$Basics$True = {$: 'True'};
+var elm$core$Result$isOk = function (result) {
+	if (result.$ === 'Ok') {
+		return true;
+	} else {
+		return false;
+	}
+};
 var elm$core$Basics$EQ = {$: 'EQ'};
 var elm$core$Basics$GT = {$: 'GT'};
 var elm$core$Basics$LT = {$: 'LT'};
@@ -4997,71 +5007,18 @@ var elm$core$Array$foldr = F3(
 var elm$core$Array$toList = function (array) {
 	return A3(elm$core$Array$foldr, elm$core$List$cons, _List_Nil, array);
 };
-var elm$core$Basics$fdiv = _Basics_fdiv;
-var elm$core$Basics$mul = _Basics_mul;
-var author$project$ConstantsHelpers$convertFramesToMillisDuration = F2(
-	function (durationFrames, fps) {
-		return (durationFrames * 1000) / fps;
-	});
-var author$project$ConstantsHelpers$defaultJumpDurationFrames = 35;
-var author$project$ConstantsHelpers$framesPerSecond = 60;
-var author$project$ConstantsHelpers$svgViewHeight = 400;
-var author$project$ConstantsHelpers$staffLineHeight = author$project$ConstantsHelpers$svgViewHeight / 6;
-var author$project$ConstantsHelpers$topMargin = 50;
-var author$project$Note$getHeight = function (midiCode) {
-	switch (midiCode) {
-		case 60:
-			return 11;
-		case 62:
-			return 10;
-		case 64:
-			return 9;
-		case 65:
-			return 8;
-		case 67:
-			return 7;
-		case 69:
-			return 6;
-		case 71:
-			return 5;
-		case 72:
-			return 4;
-		case 74:
-			return 3;
-		case 76:
-			return 2;
-		case 77:
-			return 1;
-		case 79:
-			return 0;
-		default:
-			return 12;
-	}
-};
-var elm$core$Basics$add = _Basics_add;
-var elm$core$Basics$toFloat = _Basics_toFloat;
-var author$project$ConstantsHelpers$getNoteYPos = function (midiCode) {
-	var yPosFloat = author$project$Note$getHeight(midiCode);
-	return author$project$ConstantsHelpers$topMargin + ((yPosFloat * author$project$ConstantsHelpers$staffLineHeight) / 2);
-};
-var author$project$ConstantsHelpers$playerInitialNote = 67;
-var author$project$ConstantsHelpers$playerInitialXPosition = 0;
-var elm$core$Basics$pow = _Basics_pow;
-var author$project$Note$midiToFrequency = function (midiCode) {
-	var semitoneRatio = 1.0594630943592953;
-	var lowestFreq = 8.1757989156;
-	return lowestFreq * A2(elm$core$Basics$pow, semitoneRatio, midiCode);
-};
+var elm$core$Array$branchFactor = 32;
 var elm$core$Array$Array_elm_builtin = F4(
 	function (a, b, c, d) {
 		return {$: 'Array_elm_builtin', a: a, b: b, c: c, d: d};
 	});
-var elm$core$Array$branchFactor = 32;
 var elm$core$Basics$ceiling = _Basics_ceiling;
+var elm$core$Basics$fdiv = _Basics_fdiv;
 var elm$core$Basics$logBase = F2(
 	function (base, number) {
 		return _Basics_log(number) / _Basics_log(base);
 	});
+var elm$core$Basics$toFloat = _Basics_toFloat;
 var elm$core$Array$shiftStep = elm$core$Basics$ceiling(
 	A2(elm$core$Basics$logBase, 2, elm$core$Array$branchFactor));
 var elm$core$Elm$JsArray$empty = _JsArray_empty;
@@ -5142,6 +5099,7 @@ var elm$core$Array$treeFromBuilder = F2(
 			}
 		}
 	});
+var elm$core$Basics$add = _Basics_add;
 var elm$core$Basics$apL = F2(
 	function (f, x) {
 		return f(x);
@@ -5152,6 +5110,7 @@ var elm$core$Basics$max = F2(
 	function (x, y) {
 		return (_Utils_cmp(x, y) > 0) ? x : y;
 	});
+var elm$core$Basics$mul = _Basics_mul;
 var elm$core$Basics$sub = _Basics_sub;
 var elm$core$Elm$JsArray$length = _JsArray_length;
 var elm$core$Array$builderToArray = F2(
@@ -5177,421 +5136,8 @@ var elm$core$Array$builderToArray = F2(
 				builder.tail);
 		}
 	});
-var elm$core$Basics$True = {$: 'True'};
-var elm$core$Basics$lt = _Utils_lt;
-var elm$core$Array$fromListHelp = F3(
-	function (list, nodeList, nodeListSize) {
-		fromListHelp:
-		while (true) {
-			var _n0 = A2(elm$core$Elm$JsArray$initializeFromList, elm$core$Array$branchFactor, list);
-			var jsArray = _n0.a;
-			var remainingItems = _n0.b;
-			if (_Utils_cmp(
-				elm$core$Elm$JsArray$length(jsArray),
-				elm$core$Array$branchFactor) < 0) {
-				return A2(
-					elm$core$Array$builderToArray,
-					true,
-					{nodeList: nodeList, nodeListSize: nodeListSize, tail: jsArray});
-			} else {
-				var $temp$list = remainingItems,
-					$temp$nodeList = A2(
-					elm$core$List$cons,
-					elm$core$Array$Leaf(jsArray),
-					nodeList),
-					$temp$nodeListSize = nodeListSize + 1;
-				list = $temp$list;
-				nodeList = $temp$nodeList;
-				nodeListSize = $temp$nodeListSize;
-				continue fromListHelp;
-			}
-		}
-	});
-var elm$core$Array$fromList = function (list) {
-	if (!list.b) {
-		return elm$core$Array$empty;
-	} else {
-		return A3(elm$core$Array$fromListHelp, list, _List_Nil, 0);
-	}
-};
-var elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
-var elm$core$Array$bitMask = 4294967295 >>> (32 - elm$core$Array$shiftStep);
-var elm$core$Bitwise$and = _Bitwise_and;
-var elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
-var elm$core$Array$getHelp = F3(
-	function (shift, index, tree) {
-		getHelp:
-		while (true) {
-			var pos = elm$core$Array$bitMask & (index >>> shift);
-			var _n0 = A2(elm$core$Elm$JsArray$unsafeGet, pos, tree);
-			if (_n0.$ === 'SubTree') {
-				var subTree = _n0.a;
-				var $temp$shift = shift - elm$core$Array$shiftStep,
-					$temp$index = index,
-					$temp$tree = subTree;
-				shift = $temp$shift;
-				index = $temp$index;
-				tree = $temp$tree;
-				continue getHelp;
-			} else {
-				var values = _n0.a;
-				return A2(elm$core$Elm$JsArray$unsafeGet, elm$core$Array$bitMask & index, values);
-			}
-		}
-	});
-var elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
-var elm$core$Array$tailIndex = function (len) {
-	return (len >>> 5) << 5;
-};
-var elm$core$Basics$ge = _Utils_ge;
-var elm$core$Basics$or = _Basics_or;
-var elm$core$Maybe$Just = function (a) {
-	return {$: 'Just', a: a};
-};
-var elm$core$Maybe$Nothing = {$: 'Nothing'};
-var elm$core$Array$get = F2(
-	function (index, _n0) {
-		var len = _n0.a;
-		var startShift = _n0.b;
-		var tree = _n0.c;
-		var tail = _n0.d;
-		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? elm$core$Maybe$Nothing : ((_Utils_cmp(
-			index,
-			elm$core$Array$tailIndex(len)) > -1) ? elm$core$Maybe$Just(
-			A2(elm$core$Elm$JsArray$unsafeGet, elm$core$Array$bitMask & index, tail)) : elm$core$Maybe$Just(
-			A3(elm$core$Array$getHelp, startShift, index, tree)));
-	});
 var elm$core$Basics$idiv = _Basics_idiv;
-var elm$core$Basics$remainderBy = _Basics_remainderBy;
-var author$project$Note$midiToNoteName = function (midiCode) {
-	var pitchClasses = elm$core$Array$fromList(
-		_List_fromArray(
-			['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']));
-	var octave = ((midiCode / 12) | 0) - 1;
-	var index = midiCode % 12;
-	var pitchClass = function () {
-		var _n0 = A2(elm$core$Array$get, index, pitchClasses);
-		if (_n0.$ === 'Nothing') {
-			return 'C';
-		} else {
-			var x = _n0.a;
-			return x;
-		}
-	}();
-	return _Utils_Tuple2(pitchClass, octave);
-};
-var elm$core$Basics$clamp = F3(
-	function (low, high, number) {
-		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
-	});
-var author$project$Note$createNote = function (midiCode) {
-	return {
-		frequency: author$project$Note$midiToFrequency(midiCode),
-		midi: A3(elm$core$Basics$clamp, 21, 108, midiCode),
-		noteName: author$project$Note$midiToNoteName(midiCode)
-	};
-};
-var elm$core$Basics$False = {$: 'False'};
-var author$project$Model$initialModel = {
-	answerSpeed: 0,
-	currentNote: elm$core$Maybe$Just(
-		author$project$Note$createNote(65)),
-	incorrectTries: 0,
-	isMIDIConnected: elm$core$Maybe$Nothing,
-	isPlaying: false,
-	itemSpriteIndex: 0,
-	jumpDurationMillis: A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, author$project$ConstantsHelpers$defaultJumpDurationFrames, author$project$ConstantsHelpers$framesPerSecond),
-	millisSinceJumpStarted: A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, author$project$ConstantsHelpers$defaultJumpDurationFrames, author$project$ConstantsHelpers$framesPerSecond),
-	millisSinceLastSpriteAnimFrame: 0,
-	nextTargetNoteIndex: 0,
-	nextTargetXPosition: author$project$ConstantsHelpers$playerInitialXPosition,
-	nextTargetYPosition: author$project$ConstantsHelpers$getNoteYPos(author$project$ConstantsHelpers$playerInitialNote),
-	playerCurrentXPosition: author$project$ConstantsHelpers$playerInitialXPosition,
-	playerCurrentYPosition: author$project$ConstantsHelpers$getNoteYPos(author$project$ConstantsHelpers$playerInitialNote),
-	playerJumpStartXPosition: author$project$ConstantsHelpers$playerInitialXPosition,
-	playerJumpStartYPosition: author$project$ConstantsHelpers$getNoteYPos(author$project$ConstantsHelpers$playerInitialNote),
-	playerSpriteIndex: 0,
-	prevMidi: elm$core$Maybe$Nothing,
-	score: 0,
-	scrollPosition: 0,
-	sessionId: 0,
-	startTimestamp: elm$core$Maybe$Nothing,
-	targetNotes: elm$core$Array$empty,
-	velocityX: 0,
-	velocityY: 0
-};
-var author$project$Msg$GenerateTargetNotes = function (a) {
-	return {$: 'GenerateTargetNotes', a: a};
-};
-var elm$core$Basics$identity = function (x) {
-	return x;
-};
-var elm$random$Random$Generator = function (a) {
-	return {$: 'Generator', a: a};
-};
-var elm$random$Random$listHelp = F4(
-	function (revList, n, gen, seed) {
-		listHelp:
-		while (true) {
-			if (n < 1) {
-				return _Utils_Tuple2(revList, seed);
-			} else {
-				var _n0 = gen(seed);
-				var value = _n0.a;
-				var newSeed = _n0.b;
-				var $temp$revList = A2(elm$core$List$cons, value, revList),
-					$temp$n = n - 1,
-					$temp$gen = gen,
-					$temp$seed = newSeed;
-				revList = $temp$revList;
-				n = $temp$n;
-				gen = $temp$gen;
-				seed = $temp$seed;
-				continue listHelp;
-			}
-		}
-	});
-var elm$random$Random$list = F2(
-	function (n, _n0) {
-		var gen = _n0.a;
-		return elm$random$Random$Generator(
-			function (seed) {
-				return A4(elm$random$Random$listHelp, _List_Nil, n, gen, seed);
-			});
-	});
-var elm$core$List$foldrHelper = F4(
-	function (fn, acc, ctr, ls) {
-		if (!ls.b) {
-			return acc;
-		} else {
-			var a = ls.a;
-			var r1 = ls.b;
-			if (!r1.b) {
-				return A2(fn, a, acc);
-			} else {
-				var b = r1.a;
-				var r2 = r1.b;
-				if (!r2.b) {
-					return A2(
-						fn,
-						a,
-						A2(fn, b, acc));
-				} else {
-					var c = r2.a;
-					var r3 = r2.b;
-					if (!r3.b) {
-						return A2(
-							fn,
-							a,
-							A2(
-								fn,
-								b,
-								A2(fn, c, acc)));
-					} else {
-						var d = r3.a;
-						var r4 = r3.b;
-						var res = (ctr > 500) ? A3(
-							elm$core$List$foldl,
-							fn,
-							acc,
-							elm$core$List$reverse(r4)) : A4(elm$core$List$foldrHelper, fn, acc, ctr + 1, r4);
-						return A2(
-							fn,
-							a,
-							A2(
-								fn,
-								b,
-								A2(
-									fn,
-									c,
-									A2(fn, d, res))));
-					}
-				}
-			}
-		}
-	});
-var elm$core$List$foldr = F3(
-	function (fn, acc, ls) {
-		return A4(elm$core$List$foldrHelper, fn, acc, 0, ls);
-	});
-var elm$core$List$map = F2(
-	function (f, xs) {
-		return A3(
-			elm$core$List$foldr,
-			F2(
-				function (x, acc) {
-					return A2(
-						elm$core$List$cons,
-						f(x),
-						acc);
-				}),
-			_List_Nil,
-			xs);
-	});
-var elm$random$Random$addOne = function (value) {
-	return _Utils_Tuple2(1, value);
-};
-var elm$core$Basics$negate = function (n) {
-	return -n;
-};
-var elm$core$Basics$abs = function (n) {
-	return (n < 0) ? (-n) : n;
-};
-var elm$core$List$sum = function (numbers) {
-	return A3(elm$core$List$foldl, elm$core$Basics$add, 0, numbers);
-};
-var elm$random$Random$Seed = F2(
-	function (a, b) {
-		return {$: 'Seed', a: a, b: b};
-	});
-var elm$random$Random$next = function (_n0) {
-	var state0 = _n0.a;
-	var incr = _n0.b;
-	return A2(elm$random$Random$Seed, ((state0 * 1664525) + incr) >>> 0, incr);
-};
-var elm$core$Bitwise$xor = _Bitwise_xor;
-var elm$random$Random$peel = function (_n0) {
-	var state = _n0.a;
-	var word = (state ^ (state >>> ((state >>> 28) + 4))) * 277803737;
-	return ((word >>> 22) ^ word) >>> 0;
-};
-var elm$random$Random$float = F2(
-	function (a, b) {
-		return elm$random$Random$Generator(
-			function (seed0) {
-				var seed1 = elm$random$Random$next(seed0);
-				var range = elm$core$Basics$abs(b - a);
-				var n1 = elm$random$Random$peel(seed1);
-				var n0 = elm$random$Random$peel(seed0);
-				var lo = (134217727 & n1) * 1.0;
-				var hi = (67108863 & n0) * 1.0;
-				var val = ((hi * 1.34217728e8) + lo) / 9.007199254740992e15;
-				var scaled = (val * range) + a;
-				return _Utils_Tuple2(
-					scaled,
-					elm$random$Random$next(seed1));
-			});
-	});
-var elm$core$Basics$le = _Utils_le;
-var elm$random$Random$getByWeight = F3(
-	function (_n0, others, countdown) {
-		getByWeight:
-		while (true) {
-			var weight = _n0.a;
-			var value = _n0.b;
-			if (!others.b) {
-				return value;
-			} else {
-				var second = others.a;
-				var otherOthers = others.b;
-				if (_Utils_cmp(
-					countdown,
-					elm$core$Basics$abs(weight)) < 1) {
-					return value;
-				} else {
-					var $temp$_n0 = second,
-						$temp$others = otherOthers,
-						$temp$countdown = countdown - elm$core$Basics$abs(weight);
-					_n0 = $temp$_n0;
-					others = $temp$others;
-					countdown = $temp$countdown;
-					continue getByWeight;
-				}
-			}
-		}
-	});
-var elm$random$Random$map = F2(
-	function (func, _n0) {
-		var genA = _n0.a;
-		return elm$random$Random$Generator(
-			function (seed0) {
-				var _n1 = genA(seed0);
-				var a = _n1.a;
-				var seed1 = _n1.b;
-				return _Utils_Tuple2(
-					func(a),
-					seed1);
-			});
-	});
-var elm$random$Random$weighted = F2(
-	function (first, others) {
-		var normalize = function (_n0) {
-			var weight = _n0.a;
-			return elm$core$Basics$abs(weight);
-		};
-		var total = normalize(first) + elm$core$List$sum(
-			A2(elm$core$List$map, normalize, others));
-		return A2(
-			elm$random$Random$map,
-			A2(elm$random$Random$getByWeight, first, others),
-			A2(elm$random$Random$float, 0, total));
-	});
-var elm$random$Random$uniform = F2(
-	function (value, valueList) {
-		return A2(
-			elm$random$Random$weighted,
-			elm$random$Random$addOne(value),
-			A2(elm$core$List$map, elm$random$Random$addOne, valueList));
-	});
-var author$project$Note$getRandomMidiList = function (num) {
-	return A2(
-		elm$random$Random$list,
-		num,
-		A2(
-			elm$random$Random$uniform,
-			60,
-			_List_fromArray(
-				[64, 67])));
-};
-var elm$random$Random$Generate = function (a) {
-	return {$: 'Generate', a: a};
-};
-var elm$core$Task$andThen = _Scheduler_andThen;
-var elm$core$Task$succeed = _Scheduler_succeed;
-var elm$random$Random$initialSeed = function (x) {
-	var _n0 = elm$random$Random$next(
-		A2(elm$random$Random$Seed, 0, 1013904223));
-	var state1 = _n0.a;
-	var incr = _n0.b;
-	var state2 = (state1 + x) >>> 0;
-	return elm$random$Random$next(
-		A2(elm$random$Random$Seed, state2, incr));
-};
-var elm$time$Time$Name = function (a) {
-	return {$: 'Name', a: a};
-};
-var elm$time$Time$Offset = function (a) {
-	return {$: 'Offset', a: a};
-};
-var elm$time$Time$Zone = F2(
-	function (a, b) {
-		return {$: 'Zone', a: a, b: b};
-	});
-var elm$time$Time$customZone = elm$time$Time$Zone;
-var elm$time$Time$Posix = function (a) {
-	return {$: 'Posix', a: a};
-};
-var elm$time$Time$millisToPosix = elm$time$Time$Posix;
-var elm$time$Time$now = _Time_now(elm$time$Time$millisToPosix);
-var elm$time$Time$posixToMillis = function (_n0) {
-	var millis = _n0.a;
-	return millis;
-};
-var elm$random$Random$init = A2(
-	elm$core$Task$andThen,
-	function (time) {
-		return elm$core$Task$succeed(
-			elm$random$Random$initialSeed(
-				elm$time$Time$posixToMillis(time)));
-	},
-	elm$time$Time$now);
-var elm$core$Result$isOk = function (result) {
-	if (result.$ === 'Ok') {
-		return true;
-	} else {
-		return false;
-	}
-};
+var elm$core$Basics$lt = _Utils_lt;
 var elm$core$Elm$JsArray$initialize = _JsArray_initialize;
 var elm$core$Array$initializeHelp = F5(
 	function (fn, fromIndex, len, nodeList, tail) {
@@ -5619,6 +5165,8 @@ var elm$core$Array$initializeHelp = F5(
 			}
 		}
 	});
+var elm$core$Basics$le = _Utils_le;
+var elm$core$Basics$remainderBy = _Basics_remainderBy;
 var elm$core$Array$initialize = F2(
 	function (len, fn) {
 		if (len <= 0) {
@@ -5630,6 +5178,10 @@ var elm$core$Array$initialize = F2(
 			return A5(elm$core$Array$initializeHelp, fn, initialFromIndex, len, _List_Nil, tail);
 		}
 	});
+var elm$core$Maybe$Just = function (a) {
+	return {$: 'Just', a: a};
+};
+var elm$core$Maybe$Nothing = {$: 'Nothing'};
 var elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
@@ -5653,6 +5205,7 @@ var elm$json$Json$Decode$OneOf = function (a) {
 };
 var elm$core$Basics$and = _Basics_and;
 var elm$core$Basics$append = _Utils_append;
+var elm$core$Basics$or = _Basics_or;
 var elm$core$Char$toCode = _Char_toCode;
 var elm$core$Char$isLower = function (_char) {
 	var code = elm$core$Char$toCode(_char);
@@ -5840,57 +5393,10 @@ var elm$json$Json$Decode$errorToStringHelp = F2(
 			}
 		}
 	});
-var elm$core$Platform$sendToApp = _Platform_sendToApp;
-var elm$random$Random$step = F2(
-	function (_n0, seed) {
-		var generator = _n0.a;
-		return generator(seed);
-	});
-var elm$random$Random$onEffects = F3(
-	function (router, commands, seed) {
-		if (!commands.b) {
-			return elm$core$Task$succeed(seed);
-		} else {
-			var generator = commands.a.a;
-			var rest = commands.b;
-			var _n1 = A2(elm$random$Random$step, generator, seed);
-			var value = _n1.a;
-			var newSeed = _n1.b;
-			return A2(
-				elm$core$Task$andThen,
-				function (_n2) {
-					return A3(elm$random$Random$onEffects, router, rest, newSeed);
-				},
-				A2(elm$core$Platform$sendToApp, router, value));
-		}
-	});
-var elm$random$Random$onSelfMsg = F3(
-	function (_n0, _n1, seed) {
-		return elm$core$Task$succeed(seed);
-	});
-var elm$random$Random$cmdMap = F2(
-	function (func, _n0) {
-		var generator = _n0.a;
-		return elm$random$Random$Generate(
-			A2(elm$random$Random$map, func, generator));
-	});
-_Platform_effectManagers['Random'] = _Platform_createManager(elm$random$Random$init, elm$random$Random$onEffects, elm$random$Random$onSelfMsg, elm$random$Random$cmdMap);
-var elm$random$Random$command = _Platform_leaf('Random');
-var elm$random$Random$generate = F2(
-	function (tagger, generator) {
-		return elm$random$Random$command(
-			elm$random$Random$Generate(
-				A2(elm$random$Random$map, tagger, generator)));
-	});
+var elm$core$Platform$Cmd$batch = _Platform_batch;
+var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var author$project$Main$init = function (initialSessionId) {
-	return _Utils_Tuple2(
-		_Utils_update(
-			author$project$Model$initialModel,
-			{sessionId: initialSessionId}),
-		A2(
-			elm$random$Random$generate,
-			author$project$Msg$GenerateTargetNotes,
-			author$project$Note$getRandomMidiList(author$project$ConstantsHelpers$notesPerLevel)));
+	return _Utils_Tuple2(author$project$Model$initialModel, elm$core$Platform$Cmd$none);
 };
 var author$project$Msg$AnimFrame = function (a) {
 	return {$: 'AnimFrame', a: a};
@@ -5919,6 +5425,7 @@ var elm$browser$Browser$AnimationManager$State = F3(
 	function (subs, request, oldTime) {
 		return {oldTime: oldTime, request: request, subs: subs};
 	});
+var elm$core$Task$succeed = _Scheduler_succeed;
 var elm$browser$Browser$AnimationManager$init = elm$core$Task$succeed(
 	A3(elm$browser$Browser$AnimationManager$State, _List_Nil, elm$core$Maybe$Nothing, 0));
 var elm$browser$Browser$External = function (a) {
@@ -5939,10 +5446,83 @@ var elm$core$Basics$never = function (_n0) {
 		continue never;
 	}
 };
+var elm$core$Basics$identity = function (x) {
+	return x;
+};
 var elm$core$Task$Perform = function (a) {
 	return {$: 'Perform', a: a};
 };
 var elm$core$Task$init = elm$core$Task$succeed(_Utils_Tuple0);
+var elm$core$List$foldrHelper = F4(
+	function (fn, acc, ctr, ls) {
+		if (!ls.b) {
+			return acc;
+		} else {
+			var a = ls.a;
+			var r1 = ls.b;
+			if (!r1.b) {
+				return A2(fn, a, acc);
+			} else {
+				var b = r1.a;
+				var r2 = r1.b;
+				if (!r2.b) {
+					return A2(
+						fn,
+						a,
+						A2(fn, b, acc));
+				} else {
+					var c = r2.a;
+					var r3 = r2.b;
+					if (!r3.b) {
+						return A2(
+							fn,
+							a,
+							A2(
+								fn,
+								b,
+								A2(fn, c, acc)));
+					} else {
+						var d = r3.a;
+						var r4 = r3.b;
+						var res = (ctr > 500) ? A3(
+							elm$core$List$foldl,
+							fn,
+							acc,
+							elm$core$List$reverse(r4)) : A4(elm$core$List$foldrHelper, fn, acc, ctr + 1, r4);
+						return A2(
+							fn,
+							a,
+							A2(
+								fn,
+								b,
+								A2(
+									fn,
+									c,
+									A2(fn, d, res))));
+					}
+				}
+			}
+		}
+	});
+var elm$core$List$foldr = F3(
+	function (fn, acc, ls) {
+		return A4(elm$core$List$foldrHelper, fn, acc, 0, ls);
+	});
+var elm$core$List$map = F2(
+	function (f, xs) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, acc) {
+					return A2(
+						elm$core$List$cons,
+						f(x),
+						acc);
+				}),
+			_List_Nil,
+			xs);
+	});
+var elm$core$Task$andThen = _Scheduler_andThen;
 var elm$core$Task$map = F2(
 	function (func, taskA) {
 		return A2(
@@ -5975,6 +5555,7 @@ var elm$core$Task$sequence = function (tasks) {
 		elm$core$Task$succeed(_List_Nil),
 		tasks);
 };
+var elm$core$Platform$sendToApp = _Platform_sendToApp;
 var elm$core$Task$spawnCmd = F2(
 	function (router, _n0) {
 		var task = _n0.a;
@@ -6799,6 +6380,9 @@ var elm$core$String$left = F2(
 		return (n < 1) ? '' : A3(elm$core$String$slice, 0, n, string);
 	});
 var elm$core$String$length = _String_length;
+var elm$core$Basics$negate = function (n) {
+	return -n;
+};
 var elm$core$String$right = F2(
 	function (n, string) {
 		return (n < 1) ? '' : A3(
@@ -8978,6 +8562,41 @@ var elm$browser$Debugger$History$Snapshot = F2(
 	function (model, messages) {
 		return {messages: messages, model: model};
 	});
+var elm$core$Array$fromListHelp = F3(
+	function (list, nodeList, nodeListSize) {
+		fromListHelp:
+		while (true) {
+			var _n0 = A2(elm$core$Elm$JsArray$initializeFromList, elm$core$Array$branchFactor, list);
+			var jsArray = _n0.a;
+			var remainingItems = _n0.b;
+			if (_Utils_cmp(
+				elm$core$Elm$JsArray$length(jsArray),
+				elm$core$Array$branchFactor) < 0) {
+				return A2(
+					elm$core$Array$builderToArray,
+					true,
+					{nodeList: nodeList, nodeListSize: nodeListSize, tail: jsArray});
+			} else {
+				var $temp$list = remainingItems,
+					$temp$nodeList = A2(
+					elm$core$List$cons,
+					elm$core$Array$Leaf(jsArray),
+					nodeList),
+					$temp$nodeListSize = nodeListSize + 1;
+				list = $temp$list;
+				nodeList = $temp$nodeList;
+				nodeListSize = $temp$nodeListSize;
+				continue fromListHelp;
+			}
+		}
+	});
+var elm$core$Array$fromList = function (list) {
+	if (!list.b) {
+		return elm$core$Array$empty;
+	} else {
+		return A3(elm$core$Array$fromListHelp, list, _List_Nil, 0);
+	}
+};
 var elm$browser$Debugger$History$addRecent = F3(
 	function (msg, newModel, _n0) {
 		var model = _n0.model;
@@ -9002,8 +8621,13 @@ var elm$browser$Debugger$History$addRecent = F3(
 				A2(elm$core$List$cons, msg, messages),
 				numMessages + 1));
 	});
+var elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
+var elm$core$Array$bitMask = 4294967295 >>> (32 - elm$core$Array$shiftStep);
+var elm$core$Basics$ge = _Utils_ge;
+var elm$core$Bitwise$and = _Bitwise_and;
 var elm$core$Elm$JsArray$push = _JsArray_push;
 var elm$core$Elm$JsArray$singleton = _JsArray_singleton;
+var elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
 var elm$core$Elm$JsArray$unsafeSet = _JsArray_unsafeSet;
 var elm$core$Array$insertTailInTree = F4(
 	function (shift, index, tail, tree) {
@@ -9040,6 +8664,7 @@ var elm$core$Array$insertTailInTree = F4(
 			}
 		}
 	});
+var elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
 var elm$core$Array$unsafeReplaceTail = F2(
 	function (newTail, _n0) {
 		var len = _n0.a;
@@ -9139,6 +8764,42 @@ var elm$browser$Debugger$History$undone = function (getResult) {
 		}
 	}
 };
+var elm$core$Array$getHelp = F3(
+	function (shift, index, tree) {
+		getHelp:
+		while (true) {
+			var pos = elm$core$Array$bitMask & (index >>> shift);
+			var _n0 = A2(elm$core$Elm$JsArray$unsafeGet, pos, tree);
+			if (_n0.$ === 'SubTree') {
+				var subTree = _n0.a;
+				var $temp$shift = shift - elm$core$Array$shiftStep,
+					$temp$index = index,
+					$temp$tree = subTree;
+				shift = $temp$shift;
+				index = $temp$index;
+				tree = $temp$tree;
+				continue getHelp;
+			} else {
+				var values = _n0.a;
+				return A2(elm$core$Elm$JsArray$unsafeGet, elm$core$Array$bitMask & index, values);
+			}
+		}
+	});
+var elm$core$Array$tailIndex = function (len) {
+	return (len >>> 5) << 5;
+};
+var elm$core$Array$get = F2(
+	function (index, _n0) {
+		var len = _n0.a;
+		var startShift = _n0.b;
+		var tree = _n0.c;
+		var tail = _n0.d;
+		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? elm$core$Maybe$Nothing : ((_Utils_cmp(
+			index,
+			elm$core$Array$tailIndex(len)) > -1) ? elm$core$Maybe$Just(
+			A2(elm$core$Elm$JsArray$unsafeGet, elm$core$Array$bitMask & index, tail)) : elm$core$Maybe$Just(
+			A3(elm$core$Array$getHelp, startShift, index, tree)));
+	});
 var elm$browser$Debugger$History$get = F3(
 	function (update, index, history) {
 		get:
@@ -9366,8 +9027,6 @@ var elm$browser$Debugger$Overlay$BadImport = function (a) {
 };
 var elm$browser$Debugger$Report$CorruptHistory = {$: 'CorruptHistory'};
 var elm$browser$Debugger$Overlay$corruptImport = elm$browser$Debugger$Overlay$BadImport(elm$browser$Debugger$Report$CorruptHistory);
-var elm$core$Platform$Cmd$batch = _Platform_batch;
-var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var elm$browser$Debugger$Main$loadNewHistory = F3(
 	function (rawHistory, update, model) {
 		var pureUserUpdate = F2(
@@ -10099,6 +9758,10 @@ var elm$browser$Browser$AnimationManager$onEffects = F3(
 			}
 		}
 	});
+var elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var elm$time$Time$millisToPosix = elm$time$Time$Posix;
 var elm$browser$Browser$AnimationManager$onSelfMsg = F3(
 	function (router, newTime, _n0) {
 		var subs = _n0.subs;
@@ -10179,6 +9842,8 @@ var author$project$Main$subscriptions = function (model) {
 };
 var author$project$ConstantsHelpers$scrollOffset = -900;
 var author$project$ConstantsHelpers$bottomMargin = 50;
+var author$project$ConstantsHelpers$svgViewHeight = 400;
+var author$project$ConstantsHelpers$topMargin = 50;
 var author$project$ConstantsHelpers$svgViewTotalHeight = (author$project$ConstantsHelpers$svgViewHeight + author$project$ConstantsHelpers$topMargin) + author$project$ConstantsHelpers$bottomMargin;
 var author$project$ConstantsHelpers$leftMargin = 300;
 var author$project$ConstantsHelpers$rightMargin = 0;
@@ -10188,6 +9853,41 @@ var author$project$ConstantsHelpers$correctTargetSpriteImage = 'img/happycloud-5
 var author$project$ConstantsHelpers$noteXInterval = 300;
 var author$project$ConstantsHelpers$getNoteXPos = function (noteIndex) {
 	return author$project$ConstantsHelpers$leftMargin + (noteIndex * author$project$ConstantsHelpers$noteXInterval);
+};
+var author$project$ConstantsHelpers$staffLineHeight = author$project$ConstantsHelpers$svgViewHeight / 6;
+var author$project$Note$getHeight = function (midiCode) {
+	switch (midiCode) {
+		case 60:
+			return 11;
+		case 62:
+			return 10;
+		case 64:
+			return 9;
+		case 65:
+			return 8;
+		case 67:
+			return 7;
+		case 69:
+			return 6;
+		case 71:
+			return 5;
+		case 72:
+			return 4;
+		case 74:
+			return 3;
+		case 76:
+			return 2;
+		case 77:
+			return 1;
+		case 79:
+			return 0;
+		default:
+			return 12;
+	}
+};
+var author$project$ConstantsHelpers$getNoteYPos = function (midiCode) {
+	var yPosFloat = author$project$Note$getHeight(midiCode);
+	return author$project$ConstantsHelpers$topMargin + ((yPosFloat * author$project$ConstantsHelpers$staffLineHeight) / 2);
 };
 var author$project$ConstantsHelpers$nextTargetSpriteImage = 'img/raincloud-59w-44h-5i.png';
 var author$project$View$Target$baseSpriteHeight = 44;
@@ -10416,38 +10116,6 @@ var author$project$View$Header$view = function (model) {
 					]))
 			]));
 };
-var elm$html$Html$br = _VirtualDom_node('br');
-var author$project$View$MidiStatus$midiStatusString = function (isConnected) {
-	if (isConnected.$ === 'Nothing') {
-		return _List_fromArray(
-			[
-				elm$html$Html$text('Connect a MIDI instrument to play!'),
-				A2(elm$html$Html$br, _List_Nil, _List_Nil),
-				A2(
-				elm$html$Html$span,
-				_List_fromArray(
-					[
-						elm$html$Html$Attributes$class('bigEmoji')
-					]),
-				_List_fromArray(
-					[
-						elm$html$Html$text('🎹')
-					]))
-			]);
-	} else {
-		if (isConnected.a) {
-			return _List_fromArray(
-				[
-					elm$html$Html$text('Your MIDI device is connected, yay! See the note below? Play it on your instrument!')
-				]);
-		} else {
-			return _List_fromArray(
-				[
-					elm$html$Html$text('Hmm, looks like your MIDI device got disconnected. Try reconnecting it, or if that doesn\'t work, try refreshing this page or turning your MIDI device off and on again.')
-				]);
-		}
-	}
-};
 var author$project$View$MidiStatus$view = function (model) {
 	return A2(
 		elm$html$Html$div,
@@ -10460,34 +10128,46 @@ var author$project$View$MidiStatus$view = function (model) {
 				A2(
 				elm$html$Html$p,
 				_List_Nil,
-				author$project$View$MidiStatus$midiStatusString(model.isMIDIConnected))
-			]));
-};
-var author$project$Msg$StartGame = {$: 'StartGame'};
-var author$project$View$StartScreen$view = function (model) {
-	return A2(
-		elm$html$Html$div,
-		_List_fromArray(
-			[
-				elm$html$Html$Attributes$class('startScreen')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				elm$html$Html$button,
 				_List_fromArray(
 					[
-						elm$html$Html$Attributes$class('startButton'),
-						elm$html$Html$Events$onClick(author$project$Msg$StartGame)
-					]),
-				_List_fromArray(
-					[
-						elm$html$Html$text('Start playing!')
+						elm$html$Html$text('Connect a MIDI instrument to play!')
 					]))
 			]));
 };
+var author$project$Msg$StartGame = {$: 'StartGame'};
+var author$project$View$StartScreen$view = A2(
+	elm$html$Html$div,
+	_List_fromArray(
+		[
+			elm$html$Html$Attributes$class('startScreen')
+		]),
+	_List_fromArray(
+		[
+			A2(
+			elm$html$Html$button,
+			_List_fromArray(
+				[
+					elm$html$Html$Attributes$class('startButton'),
+					elm$html$Html$Events$onClick(author$project$Msg$StartGame)
+				]),
+			_List_fromArray(
+				[
+					elm$html$Html$text('Start playing!')
+				]))
+		]));
 var elm$html$Html$main_ = _VirtualDom_node('main');
 var author$project$Main$view = function (model) {
+	var currentView = function () {
+		switch (model.$) {
+			case 'LoadingScreen':
+				return author$project$View$MidiStatus$view(model);
+			case 'StartScreen':
+				return author$project$View$StartScreen$view;
+			default:
+				var gameModel = model.a;
+				return author$project$View$Game$view(gameModel);
+		}
+	}();
 	return A2(
 		elm$html$Html$div,
 		_List_Nil,
@@ -10503,49 +10183,249 @@ var author$project$Main$view = function (model) {
 				_List_fromArray(
 					[
 						A2(elm$html$Html$p, _List_Nil, _List_Nil),
-						function () {
-						var _n0 = model.isMIDIConnected;
-						if (_n0.$ === 'Nothing') {
-							return author$project$View$MidiStatus$view(model);
-						} else {
-							if (!_n0.a) {
-								return author$project$View$MidiStatus$view(model);
-							} else {
-								return model.isPlaying ? author$project$View$Game$view(model) : author$project$View$StartScreen$view(model);
-							}
-						}
-					}()
+						currentView
 					]))
 			]));
+};
+var author$project$ConstantsHelpers$notesPerLevel = 100;
+var author$project$Model$Game = function (a) {
+	return {$: 'Game', a: a};
+};
+var author$project$Model$StartScreen = {$: 'StartScreen'};
+var author$project$ConstantsHelpers$convertFramesToMillisDuration = F2(
+	function (durationFrames, fps) {
+		return (durationFrames * 1000) / fps;
+	});
+var author$project$ConstantsHelpers$defaultJumpDurationFrames = 35;
+var author$project$ConstantsHelpers$framesPerSecond = 60;
+var author$project$ConstantsHelpers$playerInitialNote = 67;
+var author$project$ConstantsHelpers$playerInitialXPosition = 0;
+var elm$core$Basics$pow = _Basics_pow;
+var author$project$Note$midiToFrequency = function (midiCode) {
+	var semitoneRatio = 1.0594630943592953;
+	var lowestFreq = 8.1757989156;
+	return lowestFreq * A2(elm$core$Basics$pow, semitoneRatio, midiCode);
+};
+var author$project$Note$midiToNoteName = function (midiCode) {
+	var pitchClasses = elm$core$Array$fromList(
+		_List_fromArray(
+			['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']));
+	var octave = ((midiCode / 12) | 0) - 1;
+	var index = midiCode % 12;
+	var pitchClass = function () {
+		var _n0 = A2(elm$core$Array$get, index, pitchClasses);
+		if (_n0.$ === 'Nothing') {
+			return 'C';
+		} else {
+			var x = _n0.a;
+			return x;
+		}
+	}();
+	return _Utils_Tuple2(pitchClass, octave);
+};
+var elm$core$Basics$clamp = F3(
+	function (low, high, number) {
+		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
+	});
+var author$project$Note$createNote = function (midiCode) {
+	return {
+		frequency: author$project$Note$midiToFrequency(midiCode),
+		midi: A3(elm$core$Basics$clamp, 21, 108, midiCode),
+		noteName: author$project$Note$midiToNoteName(midiCode)
+	};
+};
+var author$project$Model$initialGameModel = {
+	answerSpeed: 0,
+	currentNote: elm$core$Maybe$Just(
+		author$project$Note$createNote(65)),
+	incorrectTries: 0,
+	isMIDIConnected: elm$core$Maybe$Nothing,
+	isPlaying: false,
+	itemSpriteIndex: 0,
+	jumpDurationMillis: A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, author$project$ConstantsHelpers$defaultJumpDurationFrames, author$project$ConstantsHelpers$framesPerSecond),
+	millisSinceJumpStarted: A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, author$project$ConstantsHelpers$defaultJumpDurationFrames, author$project$ConstantsHelpers$framesPerSecond),
+	millisSinceLastSpriteAnimFrame: 0,
+	nextTargetNoteIndex: 0,
+	nextTargetXPosition: author$project$ConstantsHelpers$playerInitialXPosition,
+	nextTargetYPosition: author$project$ConstantsHelpers$getNoteYPos(author$project$ConstantsHelpers$playerInitialNote),
+	playerCurrentXPosition: author$project$ConstantsHelpers$playerInitialXPosition,
+	playerCurrentYPosition: author$project$ConstantsHelpers$getNoteYPos(author$project$ConstantsHelpers$playerInitialNote),
+	playerJumpStartXPosition: author$project$ConstantsHelpers$playerInitialXPosition,
+	playerJumpStartYPosition: author$project$ConstantsHelpers$getNoteYPos(author$project$ConstantsHelpers$playerInitialNote),
+	playerSpriteIndex: 0,
+	prevMidi: elm$core$Maybe$Nothing,
+	score: 0,
+	scrollPosition: 0,
+	sessionId: 0,
+	startTimestamp: elm$core$Maybe$Nothing,
+	targetNotes: elm$core$Array$empty,
+	velocityX: 0,
+	velocityY: 0
+};
+var author$project$Msg$GenerateTargetNotes = function (a) {
+	return {$: 'GenerateTargetNotes', a: a};
+};
+var elm$random$Random$Generator = function (a) {
+	return {$: 'Generator', a: a};
+};
+var elm$random$Random$listHelp = F4(
+	function (revList, n, gen, seed) {
+		listHelp:
+		while (true) {
+			if (n < 1) {
+				return _Utils_Tuple2(revList, seed);
+			} else {
+				var _n0 = gen(seed);
+				var value = _n0.a;
+				var newSeed = _n0.b;
+				var $temp$revList = A2(elm$core$List$cons, value, revList),
+					$temp$n = n - 1,
+					$temp$gen = gen,
+					$temp$seed = newSeed;
+				revList = $temp$revList;
+				n = $temp$n;
+				gen = $temp$gen;
+				seed = $temp$seed;
+				continue listHelp;
+			}
+		}
+	});
+var elm$random$Random$list = F2(
+	function (n, _n0) {
+		var gen = _n0.a;
+		return elm$random$Random$Generator(
+			function (seed) {
+				return A4(elm$random$Random$listHelp, _List_Nil, n, gen, seed);
+			});
+	});
+var elm$random$Random$addOne = function (value) {
+	return _Utils_Tuple2(1, value);
+};
+var elm$core$Basics$abs = function (n) {
+	return (n < 0) ? (-n) : n;
+};
+var elm$core$List$sum = function (numbers) {
+	return A3(elm$core$List$foldl, elm$core$Basics$add, 0, numbers);
+};
+var elm$random$Random$Seed = F2(
+	function (a, b) {
+		return {$: 'Seed', a: a, b: b};
+	});
+var elm$random$Random$next = function (_n0) {
+	var state0 = _n0.a;
+	var incr = _n0.b;
+	return A2(elm$random$Random$Seed, ((state0 * 1664525) + incr) >>> 0, incr);
+};
+var elm$core$Bitwise$xor = _Bitwise_xor;
+var elm$random$Random$peel = function (_n0) {
+	var state = _n0.a;
+	var word = (state ^ (state >>> ((state >>> 28) + 4))) * 277803737;
+	return ((word >>> 22) ^ word) >>> 0;
+};
+var elm$random$Random$float = F2(
+	function (a, b) {
+		return elm$random$Random$Generator(
+			function (seed0) {
+				var seed1 = elm$random$Random$next(seed0);
+				var range = elm$core$Basics$abs(b - a);
+				var n1 = elm$random$Random$peel(seed1);
+				var n0 = elm$random$Random$peel(seed0);
+				var lo = (134217727 & n1) * 1.0;
+				var hi = (67108863 & n0) * 1.0;
+				var val = ((hi * 1.34217728e8) + lo) / 9.007199254740992e15;
+				var scaled = (val * range) + a;
+				return _Utils_Tuple2(
+					scaled,
+					elm$random$Random$next(seed1));
+			});
+	});
+var elm$random$Random$getByWeight = F3(
+	function (_n0, others, countdown) {
+		getByWeight:
+		while (true) {
+			var weight = _n0.a;
+			var value = _n0.b;
+			if (!others.b) {
+				return value;
+			} else {
+				var second = others.a;
+				var otherOthers = others.b;
+				if (_Utils_cmp(
+					countdown,
+					elm$core$Basics$abs(weight)) < 1) {
+					return value;
+				} else {
+					var $temp$_n0 = second,
+						$temp$others = otherOthers,
+						$temp$countdown = countdown - elm$core$Basics$abs(weight);
+					_n0 = $temp$_n0;
+					others = $temp$others;
+					countdown = $temp$countdown;
+					continue getByWeight;
+				}
+			}
+		}
+	});
+var elm$random$Random$map = F2(
+	function (func, _n0) {
+		var genA = _n0.a;
+		return elm$random$Random$Generator(
+			function (seed0) {
+				var _n1 = genA(seed0);
+				var a = _n1.a;
+				var seed1 = _n1.b;
+				return _Utils_Tuple2(
+					func(a),
+					seed1);
+			});
+	});
+var elm$random$Random$weighted = F2(
+	function (first, others) {
+		var normalize = function (_n0) {
+			var weight = _n0.a;
+			return elm$core$Basics$abs(weight);
+		};
+		var total = normalize(first) + elm$core$List$sum(
+			A2(elm$core$List$map, normalize, others));
+		return A2(
+			elm$random$Random$map,
+			A2(elm$random$Random$getByWeight, first, others),
+			A2(elm$random$Random$float, 0, total));
+	});
+var elm$random$Random$uniform = F2(
+	function (value, valueList) {
+		return A2(
+			elm$random$Random$weighted,
+			elm$random$Random$addOne(value),
+			A2(elm$core$List$map, elm$random$Random$addOne, valueList));
+	});
+var author$project$Note$getRandomMidiList = function (num) {
+	return A2(
+		elm$random$Random$list,
+		num,
+		A2(
+			elm$random$Random$uniform,
+			60,
+			_List_fromArray(
+				[64, 67])));
 };
 var author$project$Update$generateTargetNotes = F2(
 	function (model, midiCodeList) {
 		var targetNotes = elm$core$Array$fromList(
 			A2(elm$core$List$map, author$project$Note$createNote, midiCodeList));
-		return _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{targetNotes: targetNotes}),
-			elm$core$Platform$Cmd$none);
-	});
-var author$project$Update$initMidi = F2(
-	function (model, isMIDIConnectedBool) {
-		var isPlaying = (model.isPlaying && (!isMIDIConnectedBool)) ? false : model.isPlaying;
-		return _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{
-					isMIDIConnected: elm$core$Maybe$Just(isMIDIConnectedBool),
-					isPlaying: isPlaying
-				}),
-			elm$core$Platform$Cmd$none);
-	});
-var author$project$Update$startGame = function (model) {
-	return _Utils_Tuple2(
-		_Utils_update(
+		return _Utils_update(
 			model,
-			{isPlaying: true}),
-		elm$core$Platform$Cmd$none);
+			{targetNotes: targetNotes});
+	});
+var author$project$Update$initMidi = function (isMIDIConnectedBool) {
+	var newModel = function () {
+		if (isMIDIConnectedBool) {
+			return author$project$Model$StartScreen;
+		} else {
+			return author$project$Model$LoadingScreen;
+		}
+	}();
+	return newModel;
 };
 var author$project$ConstantsHelpers$spriteAnimDelayFrames = 8;
 var author$project$ConstantsHelpers$spriteAnimDelayMillis = A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, author$project$ConstantsHelpers$spriteAnimDelayFrames, author$project$ConstantsHelpers$framesPerSecond);
@@ -10602,7 +10482,7 @@ var author$project$Update$updateAnimationValues = F2(
 				scrollPosition: A2(author$project$Update$scrollTo, model.scrollPosition, model.nextTargetNoteIndex)
 			});
 		var updatedModel = (_Utils_cmp(newMillisSinceJumpStarted, model.jumpDurationMillis) < 0) ? author$project$Update$updateModelContinueJumping(updatedModelBase) : author$project$Update$updateModelStopJumping(updatedModelBase);
-		return _Utils_Tuple2(updatedModel, elm$core$Platform$Cmd$none);
+		return updatedModel;
 	});
 var author$project$Update$getIsCorrect = F2(
 	function (correctNote, currentNote) {
@@ -10705,30 +10585,156 @@ var author$project$Update$updateNotePressed = F2(
 			nextTargetNote,
 			elm$core$Maybe$Just(newCurrentNote));
 		var updatedModel = isCorrect ? A2(author$project$Update$updateForCorrectNote, updatedModelBase, nextTargetNote.midi) : A2(author$project$Update$updateForIncorrectNote, updatedModelBase, noteCode);
-		return _Utils_Tuple2(updatedModel, elm$core$Platform$Cmd$none);
+		return updatedModel;
+	});
+var elm$random$Random$Generate = function (a) {
+	return {$: 'Generate', a: a};
+};
+var elm$random$Random$initialSeed = function (x) {
+	var _n0 = elm$random$Random$next(
+		A2(elm$random$Random$Seed, 0, 1013904223));
+	var state1 = _n0.a;
+	var incr = _n0.b;
+	var state2 = (state1 + x) >>> 0;
+	return elm$random$Random$next(
+		A2(elm$random$Random$Seed, state2, incr));
+};
+var elm$time$Time$Name = function (a) {
+	return {$: 'Name', a: a};
+};
+var elm$time$Time$Offset = function (a) {
+	return {$: 'Offset', a: a};
+};
+var elm$time$Time$Zone = F2(
+	function (a, b) {
+		return {$: 'Zone', a: a, b: b};
+	});
+var elm$time$Time$customZone = elm$time$Time$Zone;
+var elm$time$Time$now = _Time_now(elm$time$Time$millisToPosix);
+var elm$time$Time$posixToMillis = function (_n0) {
+	var millis = _n0.a;
+	return millis;
+};
+var elm$random$Random$init = A2(
+	elm$core$Task$andThen,
+	function (time) {
+		return elm$core$Task$succeed(
+			elm$random$Random$initialSeed(
+				elm$time$Time$posixToMillis(time)));
+	},
+	elm$time$Time$now);
+var elm$random$Random$step = F2(
+	function (_n0, seed) {
+		var generator = _n0.a;
+		return generator(seed);
+	});
+var elm$random$Random$onEffects = F3(
+	function (router, commands, seed) {
+		if (!commands.b) {
+			return elm$core$Task$succeed(seed);
+		} else {
+			var generator = commands.a.a;
+			var rest = commands.b;
+			var _n1 = A2(elm$random$Random$step, generator, seed);
+			var value = _n1.a;
+			var newSeed = _n1.b;
+			return A2(
+				elm$core$Task$andThen,
+				function (_n2) {
+					return A3(elm$random$Random$onEffects, router, rest, newSeed);
+				},
+				A2(elm$core$Platform$sendToApp, router, value));
+		}
+	});
+var elm$random$Random$onSelfMsg = F3(
+	function (_n0, _n1, seed) {
+		return elm$core$Task$succeed(seed);
+	});
+var elm$random$Random$cmdMap = F2(
+	function (func, _n0) {
+		var generator = _n0.a;
+		return elm$random$Random$Generate(
+			A2(elm$random$Random$map, func, generator));
+	});
+_Platform_effectManagers['Random'] = _Platform_createManager(elm$random$Random$init, elm$random$Random$onEffects, elm$random$Random$onSelfMsg, elm$random$Random$cmdMap);
+var elm$random$Random$command = _Platform_leaf('Random');
+var elm$random$Random$generate = F2(
+	function (tagger, generator) {
+		return elm$random$Random$command(
+			elm$random$Random$Generate(
+				A2(elm$random$Random$map, tagger, generator)));
 	});
 var author$project$Update$update = F2(
 	function (msg, model) {
-		switch (msg.$) {
-			case 'AnimFrame':
-				var millisSinceLastFrame = msg.a;
-				return A2(author$project$Update$updateAnimationValues, model, millisSinceLastFrame);
-			case 'InitMIDI':
-				var isMIDIConnectedBool = msg.a;
-				return A2(author$project$Update$initMidi, model, isMIDIConnectedBool);
-			case 'StartGame':
-				return author$project$Update$startGame(model);
-			case 'GenerateTargetNotes':
-				var midiCodeList = msg.a;
-				return A2(author$project$Update$generateTargetNotes, model, midiCodeList);
-			case 'NoteReleased':
-				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
-			default:
-				var noteCode = msg.a;
-				return A2(author$project$Update$updateNotePressed, model, noteCode);
+		var _n0 = _Utils_Tuple2(msg, model);
+		_n0$6:
+		while (true) {
+			switch (_n0.a.$) {
+				case 'AnimFrame':
+					if (_n0.b.$ === 'Game') {
+						var millisSinceLastFrame = _n0.a.a;
+						var gameModel = _n0.b.a;
+						return _Utils_Tuple2(
+							author$project$Model$Game(
+								A2(author$project$Update$updateAnimationValues, gameModel, millisSinceLastFrame)),
+							elm$core$Platform$Cmd$none);
+					} else {
+						break _n0$6;
+					}
+				case 'InitMIDI':
+					if (_n0.b.$ === 'LoadingScreen') {
+						var isMIDIConnectedBool = _n0.a.a;
+						var _n1 = _n0.b;
+						return _Utils_Tuple2(
+							author$project$Update$initMidi(isMIDIConnectedBool),
+							elm$core$Platform$Cmd$none);
+					} else {
+						break _n0$6;
+					}
+				case 'StartGame':
+					if (_n0.b.$ === 'StartScreen') {
+						var _n2 = _n0.a;
+						var _n3 = _n0.b;
+						return _Utils_Tuple2(
+							author$project$Model$StartScreen,
+							A2(
+								elm$random$Random$generate,
+								author$project$Msg$GenerateTargetNotes,
+								author$project$Note$getRandomMidiList(author$project$ConstantsHelpers$notesPerLevel)));
+					} else {
+						break _n0$6;
+					}
+				case 'GenerateTargetNotes':
+					var midiCodeList = _n0.a.a;
+					return _Utils_Tuple2(
+						author$project$Model$Game(
+							A2(author$project$Update$generateTargetNotes, author$project$Model$initialGameModel, midiCodeList)),
+						elm$core$Platform$Cmd$none);
+				case 'NoteReleased':
+					if (_n0.b.$ === 'Game') {
+						var gameModel = _n0.b.a;
+						return _Utils_Tuple2(
+							author$project$Model$Game(gameModel),
+							elm$core$Platform$Cmd$none);
+					} else {
+						break _n0$6;
+					}
+				default:
+					if (_n0.b.$ === 'Game') {
+						var noteCode = _n0.a.a;
+						var gameModel = _n0.b.a;
+						return _Utils_Tuple2(
+							author$project$Model$Game(
+								A2(author$project$Update$updateNotePressed, gameModel, noteCode)),
+							elm$core$Platform$Cmd$none);
+					} else {
+						break _n0$6;
+					}
+			}
 		}
+		return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
 	});
 var elm$browser$Browser$element = _Browser_element;
 var author$project$Main$main = elm$browser$Browser$element(
 	{init: author$project$Main$init, subscriptions: author$project$Main$subscriptions, update: author$project$Update$update, view: author$project$Main$view});
-_Platform_export({'Main':{'init':author$project$Main$main(elm$json$Json$Decode$int)({"versions":{"elm":"0.19.0"},"types":{"message":"Msg.Msg","aliases":{},"unions":{"Msg.Msg":{"args":[],"tags":{"InitMIDI":["Basics.Bool"],"NotePressed":["Basics.Int"],"NoteReleased":["Basics.Bool"],"GenerateTargetNotes":["List.List Basics.Int"],"StartGame":[],"AnimFrame":["Basics.Float"]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}}}}})}});}(this));
+_Platform_export({'Main':{'init':author$project$Main$main(elm$json$Json$Decode$int)({"versions":{"elm":"0.19.0"},"types":{"message":"Msg.Msg","aliases":{},"unions":{"Msg.Msg":{"args":[],"tags":{"InitMIDI":["Basics.Bool"],"NotePressed":["Basics.Int"],"NoteReleased":["Basics.Bool"],"StartGame":[],"GenerateTargetNotes":["List.List Basics.Int"],"AnimFrame":["Basics.Float"]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}}}}})}});}(this));

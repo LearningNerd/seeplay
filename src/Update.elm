@@ -12,7 +12,7 @@ import Time
 import Json.Encode as E
 
 import ConstantsHelpers
-import Model exposing (Model)
+import Model exposing (Model(..), GameModel, initialGameModel)
 import Note exposing (Note)
 import Ports
 
@@ -27,30 +27,52 @@ import View.Target
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
 
-    case msg of
+    case ( msg, model ) of
 
-        AnimFrame millisSinceLastFrame ->
-          updateAnimationValues model millisSinceLastFrame
+        ( AnimFrame millisSinceLastFrame, Game gameModel ) ->
+            ( Game (updateAnimationValues gameModel millisSinceLastFrame)
+            , Cmd.none
+            )
 
-        InitMIDI isMIDIConnectedBool ->
-          initMidi model isMIDIConnectedBool
-        
-        StartGame ->
-          startGame model
-      
-        -- triggered by init function in Main.elm
-        GenerateTargetNotes midiCodeList ->
-          generateTargetNotes model midiCodeList
 
-        NoteReleased _ -> (model, Cmd.none)
+        ( InitMIDI isMIDIConnectedBool, LoadingScreen ) ->
+            ( initMidi isMIDIConnectedBool
+            , Cmd.none
+            )
 
-        NotePressed noteCode -> 
-          updateNotePressed model noteCode
+
+        -- triggerd by click "start" in start screen
+        -- generate random target notes...
+        ( StartGame, StartScreen ) ->
+            ( StartScreen
+            , Random.generate GenerateTargetNotes (Note.getRandomMidiList ConstantsHelpers.notesPerLevel)
+            )
+
+        -- actually start the game, using the generated notes
+        ( GenerateTargetNotes midiCodeList, _ ) ->
+            ( Game (generateTargetNotes initialGameModel midiCodeList)
+            , Cmd.none
+            )
+
+
+        ( NoteReleased _, Game gameModel ) ->
+            (Game gameModel, Cmd.none)
+
+
+        ( NotePressed noteCode, Game gameModel ) -> 
+            ( Game (updateNotePressed gameModel noteCode)
+            , Cmd.none
+            )
+
+        -- don't change the model for all other scenarios
+        _ ->
+            ( model, Cmd.none )
+          
 
 
 
 -- Animate (this runs roughly every 60 ms
-updateAnimationValues : Model -> Float -> ( Model, Cmd Msg )
+updateAnimationValues : GameModel -> Float -> GameModel
 updateAnimationValues model millisSinceLastFrame =
   let
     -- update timer for jump, and for each sprite frame anim 
@@ -102,7 +124,7 @@ updateAnimationValues model millisSinceLastFrame =
         else
           updateModelStopJumping updatedModelBase
   in
-     ( updatedModel, Cmd.none )
+     updatedModel
 
 
 -- Animation helpers for above...
@@ -138,44 +160,26 @@ scrollTo currentPosition nextTargetNoteIndex =
 
 
 -- Update model based on MIDI event from JS
--- and update state to show game can now be played, if so
-initMidi : Model -> Bool -> ( Model, Cmd Msg )
-initMidi model isMIDIConnectedBool =
+initMidi : Bool -> Model
+initMidi isMIDIConnectedBool =
   let
-      isPlaying =
-        if model.isPlaying && isMIDIConnectedBool == False
-          then False
-          else model.isPlaying
+      newModel = case isMIDIConnectedBool of
+                  True -> StartScreen
+                  False -> LoadingScreen
   in
-    ( { model |
-      isMIDIConnected = Just isMIDIConnectedBool
-      , isPlaying = isPlaying
-      }
-    , Cmd.none
-    )
+    newModel
 
-
--- Initiate timer!
-startGame : Model -> ( Model, Cmd Msg )
-startGame model =
-     ( { model |
-       isPlaying = True
-       }
-     , Cmd.none
-     )
 
 
 -- On page load, and triggered by .....:
 -- initialize array from the given list of randomized MIDI code integers
 -- animate player onto the first note ??
-generateTargetNotes : Model -> List Int -> ( Model, Cmd Msg )
+generateTargetNotes : GameModel -> List Int -> GameModel
 generateTargetNotes model midiCodeList =
   let
       targetNotes = Array.fromList (List.map Note.createNote midiCodeList)
   in
-     ( { model | targetNotes = targetNotes }
-     , Cmd.none
-     )
+     { model | targetNotes = targetNotes }
 
 
 
@@ -202,7 +206,7 @@ convertScoreToJSON session =
 -- Check if note is correct!
     -- if so, scroll anim
 -- Update score and num of incorrect guesses
-updateNotePressed : Model -> Int -> ( Model, Cmd Msg )
+updateNotePressed : GameModel -> Int -> GameModel
 updateNotePressed model noteCode =
   let
     prevMidi = case model.prevMidi of
@@ -230,9 +234,7 @@ updateNotePressed model noteCode =
       else
         updateForIncorrectNote updatedModelBase noteCode
   in
-    ( updatedModel
-    , Cmd.none
-    )
+    updatedModel
 
 
 -- If correct: increase score

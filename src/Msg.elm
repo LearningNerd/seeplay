@@ -6,8 +6,7 @@ type Msg
     = InitMIDI Bool
     | NotePressed Int
     | NoteReleased Bool
-    
+    | StartGame -- triggerd by click in startscreen
     | GenerateTargetNotes (List Int)
-    | StartGame
     | AnimFrame Float
 

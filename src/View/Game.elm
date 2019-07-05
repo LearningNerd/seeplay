@@ -11,11 +11,11 @@ import ConstantsHelpers
 import View.Player exposing (view)
 import View.Target exposing (view)
 import Note exposing (Note)
-import Model exposing (Model)
+import Model exposing (GameModel)
 import Msg exposing (..)
 
 
-view : Model -> Svg Msg
+view : GameModel -> Svg Msg
 view model =
     let
         widthS = String.fromFloat ConstantsHelpers.svgViewTotalWidth
