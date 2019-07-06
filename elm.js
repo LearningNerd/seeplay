@@ -10234,12 +10234,8 @@ var author$project$Note$createNote = function (midiCode) {
 	};
 };
 var author$project$Model$initialGameModel = {
-	answerSpeed: 0,
 	currentNote: elm$core$Maybe$Just(
 		author$project$Note$createNote(65)),
-	incorrectTries: 0,
-	isMIDIConnected: elm$core$Maybe$Nothing,
-	isPlaying: false,
 	itemSpriteIndex: 0,
 	jumpDurationMillis: A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, author$project$ConstantsHelpers$defaultJumpDurationFrames, author$project$ConstantsHelpers$framesPerSecond),
 	millisSinceJumpStarted: A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, author$project$ConstantsHelpers$defaultJumpDurationFrames, author$project$ConstantsHelpers$framesPerSecond),
@@ -10252,11 +10248,8 @@ var author$project$Model$initialGameModel = {
 	playerJumpStartXPosition: author$project$ConstantsHelpers$playerInitialXPosition,
 	playerJumpStartYPosition: author$project$ConstantsHelpers$getNoteYPos(author$project$ConstantsHelpers$playerInitialNote),
 	playerSpriteIndex: 0,
-	prevMidi: elm$core$Maybe$Nothing,
 	score: 0,
 	scrollPosition: 0,
-	sessionId: 0,
-	startTimestamp: elm$core$Maybe$Nothing,
 	targetNotes: elm$core$Array$empty,
 	velocityX: 0,
 	velocityY: 0
@@ -10551,7 +10544,6 @@ var author$project$Update$updateForIncorrectNote = F2(
 		return _Utils_update(
 			model,
 			{
-				incorrectTries: model.incorrectTries + 1,
 				jumpDurationMillis: newJumpDurationMillis,
 				millisSinceJumpStarted: 0,
 				nextTargetYPosition: newNextTargetYPosition,
@@ -10563,22 +10555,12 @@ var author$project$Update$updateForIncorrectNote = F2(
 	});
 var author$project$Update$updateNotePressed = F2(
 	function (model, noteCode) {
-		var prevMidi = function () {
-			var _n0 = model.prevMidi;
-			if (_n0.$ === 'Nothing') {
-				return noteCode;
-			} else {
-				var m = _n0.a;
-				return m;
-			}
-		}();
 		var nextTargetNote = A2(author$project$Update$getNextTargetNote, model.nextTargetNoteIndex, model.targetNotes);
 		var newCurrentNote = author$project$Note$createNote(noteCode);
 		var updatedModelBase = _Utils_update(
 			model,
 			{
-				currentNote: elm$core$Maybe$Just(newCurrentNote),
-				prevMidi: elm$core$Maybe$Just(noteCode)
+				currentNote: elm$core$Maybe$Just(newCurrentNote)
 			});
 		var isCorrect = A2(
 			author$project$Update$getIsCorrect,

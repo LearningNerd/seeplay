@@ -21,19 +21,10 @@ initialModel =
 
 
 type alias GameModel =
-    { isMIDIConnected : Maybe Bool
-    , isPlaying : Bool
-
-    , targetNotes : Array Note
+    { targetNotes : Array Note
     , nextTargetNoteIndex : Int
     , currentNote : Maybe Note
-    , prevMidi : Maybe Int
-    
     , score : Int
-    , startTimestamp : Maybe Time.Posix
-    , answerSpeed : Int -- result of subtracting two times via posixToMillis
-    , incorrectTries : Int
-    , sessionId : Int
 
 ------------- for animation: -------------------
     , playerJumpStartXPosition : Float
@@ -59,19 +50,10 @@ type alias GameModel =
 
 initialGameModel : GameModel
 initialGameModel =
-    { isMIDIConnected = Nothing
-    , isPlaying = False
-    
-    , targetNotes = Array.empty
+    { targetNotes = Array.empty
     , nextTargetNoteIndex = 0
     , currentNote = Just (Note.createNote 65)
-    , prevMidi = Nothing
-    
     , score = 0
-    , startTimestamp = Nothing
-    , answerSpeed = 0
-    , incorrectTries = 0
-    , sessionId = 0
 
 ------------- for animation: -------------------
     , playerJumpStartXPosition = ConstantsHelpers.playerInitialXPosition

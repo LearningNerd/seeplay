@@ -181,22 +181,6 @@ generateTargetNotes model midiCodeList =
 
 
 
--- Edge case: starting the timer when game begins shouldn't update answerSpeed
-getNewAnswerSpeed startTime currentTime =
-  case startTime of
-    Nothing ->
-        0
-    Just t ->
-        (Time.posixToMillis currentTime) - (Time.posixToMillis t)
-
--- Convert Score record into a JSON object Value type
-convertScoreToJSON session =
-  E.object [ ("correctNoteMidi", E.int session.correctNote.midi)
-  , ("answerSpeed", E.int session.answerSpeed)
-  , ("incorrectTries", E.int session.incorrectTries)
-  ]
-
-
 
 -- Update state for previously played note,
 -- for currently pressed note,
@@ -207,9 +191,6 @@ convertScoreToJSON session =
 updateNotePressed : GameModel -> Int -> GameModel
 updateNotePressed model noteCode =
   let
-    prevMidi = case model.prevMidi of
-      Nothing -> noteCode -- the note that was just pressed
-      Just m -> m
 
     -- Get info for the note that's just been pressed
     newCurrentNote = Note.createNote noteCode
@@ -219,9 +200,7 @@ updateNotePressed model noteCode =
 
     -- Always update the current note that was pressed, and the previous note
     updatedModelBase =
-      { model | currentNote = Just newCurrentNote
-      , prevMidi = Just noteCode -- <<<<< wait, this seems wrong =/ fix it later
-      }
+      { model | currentNote = Just newCurrentNote }
 
     -- Check if correct note! and update the model differently for correct/incorrect (see below)
     isCorrect = getIsCorrect nextTargetNote (Just newCurrentNote)
@@ -286,9 +265,8 @@ updateForIncorrectNote model incorrectMidiCodeJustPressed =
     newJumpDurationMillis = ConstantsHelpers.convertFramesToMillisDuration newJumpDurFrames ConstantsHelpers.framesPerSecond
 
   in
-      { model | incorrectTries = model.incorrectTries + 1
-
-      , playerJumpStartXPosition = newPlayerJumpStartXPosition
+      { model |
+        playerJumpStartXPosition = newPlayerJumpStartXPosition
       , playerJumpStartYPosition = newPlayerJumpStartYPosition
 
       , nextTargetYPosition = newNextTargetYPosition
