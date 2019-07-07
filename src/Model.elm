@@ -20,32 +20,46 @@ initialModel =
   LoadingScreen
 
 
+type alias Vector =
+    { x : Float
+    , y: Float
+    }
+
+type alias Player = 
+    { jumpStartPos : Vector
+    , currentPos : Vector
+    , velocity : Vector
+    , jumpDurationMillis : Float
+    }
+
 type alias GameModel =
     { targetNotes : Array Note
     , nextTargetNoteIndex : Int
     , currentNote : Maybe Note
     , score : Int
 
+    , player : Player
+    , nextTargetPos : Vector
+
 ------------- for animation: -------------------
-    , playerJumpStartXPosition : Float
-    , playerJumpStartYPosition : Float
-
-    , playerCurrentXPosition : Float
-    , playerCurrentYPosition : Float
-
-    , nextTargetXPosition : Float
-    , nextTargetYPosition : Float
-    , velocityX : Float
-    , velocityY : Float
-    , jumpDurationMillis : Float
-
     , millisSinceJumpStarted : Float
+
     , scrollPosition : Float
 
     , playerSpriteIndex : Int
     , itemSpriteIndex : Int
     , millisSinceLastSpriteAnimFrame : Float
     }
+
+
+initialPlayerPos = 
+    { x = ConstantsHelpers.playerInitialXPosition
+    , y = ConstantsHelpers.getNoteYPos ConstantsHelpers.playerInitialNote
+    }
+
+
+initialJumpMillis =
+  ConstantsHelpers.longJumpDurMillis
 
 
 initialGameModel : GameModel
@@ -55,26 +69,21 @@ initialGameModel =
     , currentNote = Just (Note.createNote 65)
     , score = 0
 
+    , player =
+        { jumpStartPos = initialPlayerPos
+        , currentPos = initialPlayerPos
+        , velocity = {x = 0, y = 0}
+        , jumpDurationMillis = initialJumpMillis
+        }
+    , nextTargetPos = initialPlayerPos
+
 ------------- for animation: -------------------
-    , playerJumpStartXPosition = ConstantsHelpers.playerInitialXPosition
-    , playerJumpStartYPosition = ConstantsHelpers.getNoteYPos ConstantsHelpers.playerInitialNote
-
-    , playerCurrentXPosition = ConstantsHelpers.playerInitialXPosition
-    , playerCurrentYPosition = ConstantsHelpers.getNoteYPos ConstantsHelpers.playerInitialNote
-
-    , nextTargetXPosition = ConstantsHelpers.playerInitialXPosition
-    , nextTargetYPosition = ConstantsHelpers.getNoteYPos ConstantsHelpers.playerInitialNote
-
-    , velocityX = 0
-    , velocityY = 0
-    , jumpDurationMillis = ConstantsHelpers.convertFramesToMillisDuration ConstantsHelpers.defaultJumpDurationFrames ConstantsHelpers.framesPerSecond
-
-    , millisSinceJumpStarted = ConstantsHelpers.convertFramesToMillisDuration ConstantsHelpers.defaultJumpDurationFrames ConstantsHelpers.framesPerSecond
+    , millisSinceJumpStarted = initialJumpMillis
+    
     , scrollPosition = 0
 
     , playerSpriteIndex = 0
     , itemSpriteIndex = 0
     , millisSinceLastSpriteAnimFrame = 0
     }
-
 

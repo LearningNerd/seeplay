@@ -11,8 +11,9 @@ import Task
 import Time
 import Json.Encode as E
 
-import ConstantsHelpers
-import Model exposing (Model(..), GameModel, initialGameModel)
+import ConstantsHelpers as Const
+import Physics
+import Model exposing (Model(..), GameModel, Player, Vector, initialGameModel)
 import Note exposing (Note)
 import Ports
 
@@ -39,13 +40,14 @@ update msg model =
         case msg of
 
             StartGame ->
-              ( model, Random.generate GenerateTargetNotes (Note.getRandomMidiList ConstantsHelpers.notesPerLevel) )
+              ( model, Random.generate GenerateTargetNotes (Note.getRandomMidiList Const.notesPerLevel) )
 
             GenerateTargetNotes midiCodeList ->
               ( Game (generateTargetNotes initialGameModel midiCodeList), Cmd.none )
 
             _ ->
               ( model, Cmd.none )
+
 
 ---------------------   GAME SCREEN   --------------------
       Game gameModel ->
@@ -56,8 +58,15 @@ update msg model =
               AnimFrame millisSinceLastFrame ->
                 updateAnimationValues gameModel millisSinceLastFrame
 
-              NotePressed noteCode -> 
-                updateNotePressed gameModel noteCode
+
+
+
+              NotePressed midiCode -> 
+                gameModel
+                  |> updateCurrentNote midiCode
+                  |> updateScoreAndTargetIfCorrect
+                  |> updatePlayerTrajectory
+                  |> resetJumpTimer
 
               NoteReleased _ ->
                 gameModel
@@ -66,6 +75,9 @@ update msg model =
                 gameModel
         in
           ( Game newGameModel, Cmd.none )
+
+
+
 
 
 
@@ -81,7 +93,7 @@ updateAnimationValues model millisSinceLastFrame =
 
     -- Update player sprite
     newPlayerSpriteIndex = 
-      if newMillisSinceLastSpriteAnim >= ConstantsHelpers.spriteAnimDelayMillis then
+      if newMillisSinceLastSpriteAnim >= Const.spriteAnimDelayMillis then
          ( remainderBy View.Player.numSpriteFrames (model.playerSpriteIndex + 1) )
       else
         model.playerSpriteIndex -- don't change otherwise
@@ -89,7 +101,7 @@ updateAnimationValues model millisSinceLastFrame =
 
     -- Update coin sprite
     newItemSpriteIndex = 
-      if newMillisSinceLastSpriteAnim >= ConstantsHelpers.spriteAnimDelayMillis then
+      if newMillisSinceLastSpriteAnim >= Const.spriteAnimDelayMillis then
          ( remainderBy View.Target.numSpriteFrames (model.itemSpriteIndex + 1) )
       else
         model.playerSpriteIndex -- don't change otherwise
@@ -98,7 +110,7 @@ updateAnimationValues model millisSinceLastFrame =
           ------- should refactor this =P
     -- Update timer for sprite animation
     newNewMillisSinceLastSpriteAnim = 
-      if newMillisSinceLastSpriteAnim >= ConstantsHelpers.spriteAnimDelayMillis then
+      if newMillisSinceLastSpriteAnim >= Const.spriteAnimDelayMillis then
          0 -- reset when it's time to update the sprite
       else
         model.millisSinceLastSpriteAnimFrame + millisSinceLastFrame -- keep countin
@@ -117,7 +129,7 @@ updateAnimationValues model millisSinceLastFrame =
     -- Only update player position for duration of jump
     -- (this is so it doesn't animate past the target)
     updatedModel =
-        if newMillisSinceJumpStarted < model.jumpDurationMillis then
+        if newMillisSinceJumpStarted < model.player.jumpDurationMillis then
           updateModelContinueJumping updatedModelBase
         else
           updateModelStopJumping updatedModelBase
@@ -125,34 +137,44 @@ updateAnimationValues model millisSinceLastFrame =
      updatedModel
 
 
--- Animation helpers for above...
 
--- Subtract current timestamp
 
 -- Function to update model with current player position
 updateModelContinueJumping model =
-  { model | playerCurrentXPosition =
-        ConstantsHelpers.getCurrentJumpXPosition model.playerJumpStartXPosition model.velocityX model.millisSinceJumpStarted
+  let
+      curPlayer = model.player
 
-  , playerCurrentYPosition =
-        ConstantsHelpers.getCurrentJumpYPosition model.playerJumpStartYPosition model.velocityY ConstantsHelpers.accelYMillis model.millisSinceJumpStarted
-  }
+      newCurPos = 
+        Vector
+        (Physics.getCurrentJumpXPosition curPlayer.jumpStartPos.x curPlayer.velocity.x model.millisSinceJumpStarted)
+        (Physics.getCurrentJumpYPosition curPlayer.jumpStartPos.y curPlayer.velocity.y Const.accelYMillis model.millisSinceJumpStarted)
+
+      newPlayer = { curPlayer | currentPos = newCurPos }
+  in
+      { model | player = newPlayer }
+
+
+
+
 
 -- Update player to "stick" to the target position when animation is done
 updateModelStopJumping model =
-  { model | playerCurrentXPosition = model.nextTargetXPosition        
-  , playerCurrentYPosition = model.nextTargetYPosition
-  }
+  let
+      curPlayer = model.player
+      newPlayer = { curPlayer | currentPos = model.nextTargetPos }
+  in
+      { model | player = newPlayer }
+
 
 
 -- Exponential easing curve; Penner's "standard exponention slide"; Zeno's Paradox for animation :)
 scrollTo currentPosition nextTargetNoteIndex =
   let
-    targetPosition = ConstantsHelpers.leftMargin + ((toFloat nextTargetNoteIndex) * (toFloat ConstantsHelpers.noteXInterval))
+    targetPosition = Const.leftMargin + ((toFloat nextTargetNoteIndex) * (toFloat Const.noteXInterval))
 
     remainingDistance = targetPosition - currentPosition
   in
-    currentPosition + (remainingDistance * ConstantsHelpers.scrollAnimMultiplier)
+    currentPosition + (remainingDistance * Const.scrollAnimMultiplier)
 
 
 
@@ -180,133 +202,81 @@ generateTargetNotes model midiCodeList =
      { model | targetNotes = targetNotes }
 
 
+-- Update player's velocity, jump start position, jump duration milliseconds
+updatePlayerTrajectory : GameModel -> GameModel
+updatePlayerTrajectory gameModel =
+  let
+    newJumpStartPos = gameModel.player.currentPos -- reset!
+
+    newJumpDur =
+      Physics.updateJumpDur gameModel.nextTargetPos gameModel.player.currentPos
+
+    newVelocity = 
+      Physics.updateVelocity newJumpStartPos gameModel.nextTargetPos newJumpDur
+
+    curPlayer = gameModel.player
+    updatedPlayer =
+        { curPlayer | jumpStartPos = newJumpStartPos
+        , velocity = newVelocity
+        , jumpDurationMillis = newJumpDur
+        }
+  in
+      { gameModel | player = updatedPlayer }
 
 
--- Update state for previously played note,
--- for currently pressed note,
--- for next target note
--- Check if note is correct!
-    -- if so, scroll anim
--- Update score and num of incorrect guesses
-updateNotePressed : GameModel -> Int -> GameModel
-updateNotePressed model noteCode =
+resetJumpTimer : GameModel -> GameModel
+resetJumpTimer gameModel =
+  { gameModel | millisSinceJumpStarted = 0 } 
+
+
+updateCurrentNote : Int -> GameModel -> GameModel
+updateCurrentNote midiCode gameModel =
+  let
+      newCurrentNote = Note.createNote midiCode
+  in
+    { gameModel | currentNote = Just newCurrentNote }
+
+
+
+updateScoreAndTargetIfCorrect : GameModel -> GameModel
+updateScoreAndTargetIfCorrect gameModel =
   let
 
-    -- Get info for the note that's just been pressed
-    newCurrentNote = Note.createNote noteCode
+    currentMidiCode =
+      case gameModel.currentNote of
+        Nothing -> 60
+        Just note -> note.midi
 
-    -- Get info for the next target note, also to check if correct or not
-    nextTargetNote = getNextTargetNote model.nextTargetNoteIndex model.targetNotes
+    nextTargetNoteMidi =
+      case (Array.get gameModel.nextTargetNoteIndex gameModel.targetNotes) of
+        Nothing -> 60
+        Just note -> note.midi
 
-    -- Always update the current note that was pressed, and the previous note
-    updatedModelBase =
-      { model | currentNote = Just newCurrentNote }
+    isCorrect = 
+      case gameModel.currentNote of
+          Nothing -> False
+          Just currentNote ->
+              if currentNote.midi == nextTargetNoteMidi then
+                True
+              else
+                False
 
-    -- Check if correct note! and update the model differently for correct/incorrect (see below)
-    isCorrect = getIsCorrect nextTargetNote (Just newCurrentNote)
-
-    updatedModel = 
+    newNextTargetNoteIndex =
       if isCorrect then
-        updateForCorrectNote updatedModelBase nextTargetNote.midi
+        gameModel.nextTargetNoteIndex + 1
       else
-        updateForIncorrectNote updatedModelBase noteCode
+        gameModel.nextTargetNoteIndex
+
+
+-- animation will jump to: next note, or up to incorrect note
+    newTargetPos = 
+        Vector
+          (Const.getNoteXPos (newNextTargetNoteIndex - 1))
+          (Const.getNoteYPos currentMidiCode)
   in
-    updatedModel
+    { gameModel | score = gameModel.score + 1
+    , nextTargetNoteIndex = newNextTargetNoteIndex
+    , nextTargetPos = newTargetPos
+    } 
 
-
--- If correct: increase score
--- and update target etc etc to jump to the next target (which becomes the current position of the player after hte jump animation)
-updateForCorrectNote model nextTargetNoteMidiCode =
-  let
-    newPlayerJumpStartXPosition = model.playerCurrentXPosition
-    newPlayerJumpStartYPosition = model.playerCurrentYPosition
-
-    newNextTargetXPosition = ConstantsHelpers.getNoteXPos model.nextTargetNoteIndex
-    newNextTargetYPosition = ConstantsHelpers.getNoteYPos nextTargetNoteMidiCode
-
-    newJumpDurationMillis = ConstantsHelpers.convertFramesToMillisDuration ConstantsHelpers.defaultJumpDurationFrames ConstantsHelpers.framesPerSecond
-
-  in
-      { model | score = model.score + 1
-      , nextTargetNoteIndex = model.nextTargetNoteIndex + 1
-
-      , playerJumpStartXPosition = newPlayerJumpStartXPosition
-      , playerJumpStartYPosition = newPlayerJumpStartYPosition
-
-      , nextTargetXPosition = newNextTargetXPosition
-      , nextTargetYPosition = newNextTargetYPosition
-
-      , velocityX = 
-          ConstantsHelpers.getRequiredXVelocity newPlayerJumpStartXPosition newNextTargetXPosition newJumpDurationMillis
-
-      , velocityY = 
-          ConstantsHelpers.getRequiredYVelocity newPlayerJumpStartYPosition newNextTargetYPosition ConstantsHelpers.accelYMillis newJumpDurationMillis
-
-      , jumpDurationMillis = newJumpDurationMillis
-      , millisSinceJumpStarted = 0
-      }
-
-
--- If incorrect: increase num of incorrect tries
--- and update next target to be at the new Y position, to jump up/down (but not advancing in the game level)
-updateForIncorrectNote model incorrectMidiCodeJustPressed =
-  let
-    newPlayerJumpStartXPosition = model.playerCurrentXPosition
-    newPlayerJumpStartYPosition = model.playerCurrentYPosition
-
-    newNextTargetYPosition = ConstantsHelpers.getNoteYPos incorrectMidiCodeJustPressed
-
-    distanceToJumpY = Debug.log "distanceToJumpY " (abs (newNextTargetYPosition - model.playerCurrentYPosition))
-
-    multiplyJumpBy = Debug.log "multiplyJumpBy " (distanceToJumpY/ConstantsHelpers.svgViewHeight)
-
-    newJumpDurFrames = Debug.log " newJumpDurFrames " <| ConstantsHelpers.minJumpDurationFrames + ConstantsHelpers.baseJumpDurationFrames * multiplyJumpBy
-
-    newJumpDurationMillis = ConstantsHelpers.convertFramesToMillisDuration newJumpDurFrames ConstantsHelpers.framesPerSecond
-
-  in
-      { model |
-        playerJumpStartXPosition = newPlayerJumpStartXPosition
-      , playerJumpStartYPosition = newPlayerJumpStartYPosition
-
-      , nextTargetYPosition = newNextTargetYPosition
-{--
-      , velocityX = 
-           ConstantsHelpers.getRequiredXVelocity newPlayerJumpStartXPosition newNextTargetXPosition temporaryJumpDurationMillis
-
-      , velocityY = 
-          ConstantsHelpers.getRequiredYVelocity newPlayerJumpStartYPosition newNextTargetYPosition ConstantsHelpers.accelYMillis temporaryJumpDurationMillis
---}
-
-      , velocityX = 
-           ConstantsHelpers.getRequiredXVelocity newPlayerJumpStartXPosition model.nextTargetXPosition newJumpDurationMillis
-
-      , velocityY = 
-          ConstantsHelpers.getRequiredYVelocity newPlayerJumpStartYPosition newNextTargetYPosition ConstantsHelpers.accelYMillis newJumpDurationMillis
-     
-      , jumpDurationMillis = newJumpDurationMillis
-      , millisSinceJumpStarted = 0
-      }
-
-
-
-
-getNextTargetNote index targetNotesArray = 
-  let 
-      next = Array.get index targetNotesArray
-  in
-    case next of
-      Nothing -> Note.createNote 60 -- temporary fix =P last note is always C4 ?
-      Just n -> n
-
-
-getIsCorrect : Note -> Maybe Note -> Bool
-getIsCorrect correctNote currentNote = 
-    case currentNote of
-      Nothing -> False
-      Just n ->
-        if n.midi == correctNote.midi then
-          True
-        else
-          False
 

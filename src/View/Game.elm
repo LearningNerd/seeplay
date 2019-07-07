@@ -24,8 +24,8 @@ view model =
         
         svgListAllNotes = drawAllTargetNotes model.itemSpriteIndex model.nextTargetNoteIndex model.targetNotes
 
-        x = model.playerCurrentXPosition
-        y = model.playerCurrentYPosition
+        x = model.player.currentPos.x
+        y = model.player.currentPos.y
 
         currentNoteDrawing = case model.currentNote of
                                  Nothing -> []

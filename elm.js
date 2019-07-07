@@ -10034,8 +10034,8 @@ var author$project$View$Player$view = F3(
 				]));
 	});
 var author$project$View$Game$view = function (model) {
-	var y = model.playerCurrentYPosition;
-	var x = model.playerCurrentXPosition;
+	var y = model.player.currentPos.y;
+	var x = model.player.currentPos.x;
 	var widthS = elm$core$String$fromFloat(author$project$ConstantsHelpers$svgViewTotalWidth);
 	var svgListAllNotes = A3(author$project$View$Game$drawAllTargetNotes, model.itemSpriteIndex, model.nextTargetNoteIndex, model.targetNotes);
 	var heightS = elm$core$String$fromFloat(author$project$ConstantsHelpers$svgViewTotalHeight);
@@ -10195,10 +10195,16 @@ var author$project$ConstantsHelpers$convertFramesToMillisDuration = F2(
 	function (durationFrames, fps) {
 		return (durationFrames * 1000) / fps;
 	});
-var author$project$ConstantsHelpers$defaultJumpDurationFrames = 35;
 var author$project$ConstantsHelpers$framesPerSecond = 60;
+var author$project$ConstantsHelpers$longJumpDurationFrames = 35;
+var author$project$ConstantsHelpers$longJumpDurMillis = A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, author$project$ConstantsHelpers$longJumpDurationFrames, author$project$ConstantsHelpers$framesPerSecond);
+var author$project$Model$initialJumpMillis = author$project$ConstantsHelpers$longJumpDurMillis;
 var author$project$ConstantsHelpers$playerInitialNote = 67;
 var author$project$ConstantsHelpers$playerInitialXPosition = 0;
+var author$project$Model$initialPlayerPos = {
+	x: author$project$ConstantsHelpers$playerInitialXPosition,
+	y: author$project$ConstantsHelpers$getNoteYPos(author$project$ConstantsHelpers$playerInitialNote)
+};
 var elm$core$Basics$pow = _Basics_pow;
 var author$project$Note$midiToFrequency = function (midiCode) {
 	var semitoneRatio = 1.0594630943592953;
@@ -10237,22 +10243,20 @@ var author$project$Model$initialGameModel = {
 	currentNote: elm$core$Maybe$Just(
 		author$project$Note$createNote(65)),
 	itemSpriteIndex: 0,
-	jumpDurationMillis: A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, author$project$ConstantsHelpers$defaultJumpDurationFrames, author$project$ConstantsHelpers$framesPerSecond),
-	millisSinceJumpStarted: A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, author$project$ConstantsHelpers$defaultJumpDurationFrames, author$project$ConstantsHelpers$framesPerSecond),
+	millisSinceJumpStarted: author$project$Model$initialJumpMillis,
 	millisSinceLastSpriteAnimFrame: 0,
 	nextTargetNoteIndex: 0,
-	nextTargetXPosition: author$project$ConstantsHelpers$playerInitialXPosition,
-	nextTargetYPosition: author$project$ConstantsHelpers$getNoteYPos(author$project$ConstantsHelpers$playerInitialNote),
-	playerCurrentXPosition: author$project$ConstantsHelpers$playerInitialXPosition,
-	playerCurrentYPosition: author$project$ConstantsHelpers$getNoteYPos(author$project$ConstantsHelpers$playerInitialNote),
-	playerJumpStartXPosition: author$project$ConstantsHelpers$playerInitialXPosition,
-	playerJumpStartYPosition: author$project$ConstantsHelpers$getNoteYPos(author$project$ConstantsHelpers$playerInitialNote),
+	nextTargetPos: author$project$Model$initialPlayerPos,
+	player: {
+		currentPos: author$project$Model$initialPlayerPos,
+		jumpDurationMillis: author$project$Model$initialJumpMillis,
+		jumpStartPos: author$project$Model$initialPlayerPos,
+		velocity: {x: 0, y: 0}
+	},
 	playerSpriteIndex: 0,
 	score: 0,
 	scrollPosition: 0,
-	targetNotes: elm$core$Array$empty,
-	velocityX: 0,
-	velocityY: 0
+	targetNotes: elm$core$Array$empty
 };
 var author$project$Msg$GenerateTargetNotes = function (a) {
 	return {$: 'GenerateTargetNotes', a: a};
@@ -10420,6 +10424,11 @@ var author$project$Update$initMidi = function (isMIDIConnectedBool) {
 	}();
 	return newModel;
 };
+var author$project$Update$resetJumpTimer = function (gameModel) {
+	return _Utils_update(
+		gameModel,
+		{millisSinceJumpStarted: 0});
+};
 var author$project$ConstantsHelpers$spriteAnimDelayFrames = 8;
 var author$project$ConstantsHelpers$spriteAnimDelayMillis = A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, author$project$ConstantsHelpers$spriteAnimDelayFrames, author$project$ConstantsHelpers$framesPerSecond);
 var author$project$ConstantsHelpers$scrollAnimMultiplier = 5.0e-2;
@@ -10435,26 +10444,39 @@ var author$project$ConstantsHelpers$convertFramesToMillisAccel = F2(
 		return (accel * (fps / 1000)) * (fps / 1000);
 	});
 var author$project$ConstantsHelpers$accelYMillis = A2(author$project$ConstantsHelpers$convertFramesToMillisAccel, author$project$ConstantsHelpers$accelYFrames, author$project$ConstantsHelpers$framesPerSecond);
-var author$project$ConstantsHelpers$getCurrentJumpXPosition = F3(
+var author$project$Model$Vector = F2(
+	function (x, y) {
+		return {x: x, y: y};
+	});
+var author$project$Physics$getCurrentJumpXPosition = F3(
 	function (startXPos, initialVelocityX, elapsedTime) {
 		return startXPos + (initialVelocityX * elapsedTime);
 	});
-var author$project$ConstantsHelpers$getCurrentJumpYPosition = F4(
+var author$project$Physics$getCurrentJumpYPosition = F4(
 	function (startYPos, initialVelocityY, accelY, elapsedTime) {
 		return ((((0.5 * accelY) * elapsedTime) * elapsedTime) + (initialVelocityY * elapsedTime)) + startYPos;
 	});
 var author$project$Update$updateModelContinueJumping = function (model) {
+	var curPlayer = model.player;
+	var newCurPos = A2(
+		author$project$Model$Vector,
+		A3(author$project$Physics$getCurrentJumpXPosition, curPlayer.jumpStartPos.x, curPlayer.velocity.x, model.millisSinceJumpStarted),
+		A4(author$project$Physics$getCurrentJumpYPosition, curPlayer.jumpStartPos.y, curPlayer.velocity.y, author$project$ConstantsHelpers$accelYMillis, model.millisSinceJumpStarted));
+	var newPlayer = _Utils_update(
+		curPlayer,
+		{currentPos: newCurPos});
 	return _Utils_update(
 		model,
-		{
-			playerCurrentXPosition: A3(author$project$ConstantsHelpers$getCurrentJumpXPosition, model.playerJumpStartXPosition, model.velocityX, model.millisSinceJumpStarted),
-			playerCurrentYPosition: A4(author$project$ConstantsHelpers$getCurrentJumpYPosition, model.playerJumpStartYPosition, model.velocityY, author$project$ConstantsHelpers$accelYMillis, model.millisSinceJumpStarted)
-		});
+		{player: newPlayer});
 };
 var author$project$Update$updateModelStopJumping = function (model) {
+	var curPlayer = model.player;
+	var newPlayer = _Utils_update(
+		curPlayer,
+		{currentPos: model.nextTargetPos});
 	return _Utils_update(
 		model,
-		{playerCurrentXPosition: model.nextTargetXPosition, playerCurrentYPosition: model.nextTargetYPosition});
+		{player: newPlayer});
 };
 var author$project$View$Player$numSpriteFrames = 4;
 var author$project$View$Target$numSpriteFrames = 5;
@@ -10474,101 +10496,85 @@ var author$project$Update$updateAnimationValues = F2(
 				playerSpriteIndex: newPlayerSpriteIndex,
 				scrollPosition: A2(author$project$Update$scrollTo, model.scrollPosition, model.nextTargetNoteIndex)
 			});
-		var updatedModel = (_Utils_cmp(newMillisSinceJumpStarted, model.jumpDurationMillis) < 0) ? author$project$Update$updateModelContinueJumping(updatedModelBase) : author$project$Update$updateModelStopJumping(updatedModelBase);
+		var updatedModel = (_Utils_cmp(newMillisSinceJumpStarted, model.player.jumpDurationMillis) < 0) ? author$project$Update$updateModelContinueJumping(updatedModelBase) : author$project$Update$updateModelStopJumping(updatedModelBase);
 		return updatedModel;
 	});
-var author$project$Update$getIsCorrect = F2(
-	function (correctNote, currentNote) {
-		if (currentNote.$ === 'Nothing') {
-			return false;
-		} else {
-			var n = currentNote.a;
-			return _Utils_eq(n.midi, correctNote.midi) ? true : false;
-		}
-	});
-var author$project$Update$getNextTargetNote = F2(
-	function (index, targetNotesArray) {
-		var next = A2(elm$core$Array$get, index, targetNotesArray);
-		if (next.$ === 'Nothing') {
-			return author$project$Note$createNote(60);
-		} else {
-			var n = next.a;
-			return n;
-		}
-	});
-var author$project$ConstantsHelpers$getRequiredXVelocity = F3(
-	function (startXPos, targetXPos, durationMillis) {
-		return (targetXPos - startXPos) / durationMillis;
-	});
-var author$project$ConstantsHelpers$getRequiredYVelocity = F4(
-	function (startYPos, targetYPos, accelY, durationMillis) {
-		return ((targetYPos - startYPos) - (((0.5 * accelY) * durationMillis) * durationMillis)) / durationMillis;
-	});
-var author$project$Update$updateForCorrectNote = F2(
-	function (model, nextTargetNoteMidiCode) {
-		var newPlayerJumpStartYPosition = model.playerCurrentYPosition;
-		var newPlayerJumpStartXPosition = model.playerCurrentXPosition;
-		var newNextTargetYPosition = author$project$ConstantsHelpers$getNoteYPos(nextTargetNoteMidiCode);
-		var newNextTargetXPosition = author$project$ConstantsHelpers$getNoteXPos(model.nextTargetNoteIndex);
-		var newJumpDurationMillis = A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, author$project$ConstantsHelpers$defaultJumpDurationFrames, author$project$ConstantsHelpers$framesPerSecond);
+var author$project$Update$updateCurrentNote = F2(
+	function (midiCode, gameModel) {
+		var newCurrentNote = author$project$Note$createNote(midiCode);
 		return _Utils_update(
-			model,
-			{
-				jumpDurationMillis: newJumpDurationMillis,
-				millisSinceJumpStarted: 0,
-				nextTargetNoteIndex: model.nextTargetNoteIndex + 1,
-				nextTargetXPosition: newNextTargetXPosition,
-				nextTargetYPosition: newNextTargetYPosition,
-				playerJumpStartXPosition: newPlayerJumpStartXPosition,
-				playerJumpStartYPosition: newPlayerJumpStartYPosition,
-				score: model.score + 1,
-				velocityX: A3(author$project$ConstantsHelpers$getRequiredXVelocity, newPlayerJumpStartXPosition, newNextTargetXPosition, newJumpDurationMillis),
-				velocityY: A4(author$project$ConstantsHelpers$getRequiredYVelocity, newPlayerJumpStartYPosition, newNextTargetYPosition, author$project$ConstantsHelpers$accelYMillis, newJumpDurationMillis)
-			});
-	});
-var author$project$ConstantsHelpers$baseJumpDurationFrames = 20;
-var author$project$ConstantsHelpers$minJumpDurationFrames = 15;
-var elm$core$Debug$log = _Debug_log;
-var author$project$Update$updateForIncorrectNote = F2(
-	function (model, incorrectMidiCodeJustPressed) {
-		var newPlayerJumpStartYPosition = model.playerCurrentYPosition;
-		var newPlayerJumpStartXPosition = model.playerCurrentXPosition;
-		var newNextTargetYPosition = author$project$ConstantsHelpers$getNoteYPos(incorrectMidiCodeJustPressed);
-		var distanceToJumpY = A2(
-			elm$core$Debug$log,
-			'distanceToJumpY ',
-			elm$core$Basics$abs(newNextTargetYPosition - model.playerCurrentYPosition));
-		var multiplyJumpBy = A2(elm$core$Debug$log, 'multiplyJumpBy ', distanceToJumpY / author$project$ConstantsHelpers$svgViewHeight);
-		var newJumpDurFrames = A2(elm$core$Debug$log, ' newJumpDurFrames ', author$project$ConstantsHelpers$minJumpDurationFrames + (author$project$ConstantsHelpers$baseJumpDurationFrames * multiplyJumpBy));
-		var newJumpDurationMillis = A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, newJumpDurFrames, author$project$ConstantsHelpers$framesPerSecond);
-		return _Utils_update(
-			model,
-			{
-				jumpDurationMillis: newJumpDurationMillis,
-				millisSinceJumpStarted: 0,
-				nextTargetYPosition: newNextTargetYPosition,
-				playerJumpStartXPosition: newPlayerJumpStartXPosition,
-				playerJumpStartYPosition: newPlayerJumpStartYPosition,
-				velocityX: A3(author$project$ConstantsHelpers$getRequiredXVelocity, newPlayerJumpStartXPosition, model.nextTargetXPosition, newJumpDurationMillis),
-				velocityY: A4(author$project$ConstantsHelpers$getRequiredYVelocity, newPlayerJumpStartYPosition, newNextTargetYPosition, author$project$ConstantsHelpers$accelYMillis, newJumpDurationMillis)
-			});
-	});
-var author$project$Update$updateNotePressed = F2(
-	function (model, noteCode) {
-		var nextTargetNote = A2(author$project$Update$getNextTargetNote, model.nextTargetNoteIndex, model.targetNotes);
-		var newCurrentNote = author$project$Note$createNote(noteCode);
-		var updatedModelBase = _Utils_update(
-			model,
+			gameModel,
 			{
 				currentNote: elm$core$Maybe$Just(newCurrentNote)
 			});
-		var isCorrect = A2(
-			author$project$Update$getIsCorrect,
-			nextTargetNote,
-			elm$core$Maybe$Just(newCurrentNote));
-		var updatedModel = isCorrect ? A2(author$project$Update$updateForCorrectNote, updatedModelBase, nextTargetNote.midi) : A2(author$project$Update$updateForIncorrectNote, updatedModelBase, noteCode);
-		return updatedModel;
 	});
+var author$project$ConstantsHelpers$baseJumpDurationFrames = 20;
+var author$project$ConstantsHelpers$baseJumpDurMillis = A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, author$project$ConstantsHelpers$baseJumpDurationFrames, author$project$ConstantsHelpers$framesPerSecond);
+var author$project$ConstantsHelpers$shortJumpDurationFrames = 15;
+var author$project$ConstantsHelpers$shortJumpDurMillis = A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, author$project$ConstantsHelpers$shortJumpDurationFrames, author$project$ConstantsHelpers$framesPerSecond);
+var author$project$Physics$updateJumpDur = F2(
+	function (curPos, targetPos) {
+		var isJumpVerticalOnly = !elm$core$Basics$abs(targetPos.x - curPos.x);
+		var minJumpDur = isJumpVerticalOnly ? author$project$ConstantsHelpers$shortJumpDurMillis : author$project$ConstantsHelpers$longJumpDurMillis;
+		var distanceToJumpY = elm$core$Basics$abs(targetPos.y - curPos.y);
+		return minJumpDur + (author$project$ConstantsHelpers$baseJumpDurMillis * (distanceToJumpY / author$project$ConstantsHelpers$svgViewHeight));
+	});
+var author$project$Physics$updateVelocity = F3(
+	function (start, target, dur) {
+		var velX = (target.x - start.x) / dur;
+		var accel = A2(author$project$Model$Vector, 0, author$project$ConstantsHelpers$accelYMillis);
+		var velY = ((target.y - start.y) - (((0.5 * accel.y) * dur) * dur)) / dur;
+		return A2(author$project$Model$Vector, velX, velY);
+	});
+var author$project$Update$updatePlayer = function (gameModel) {
+	var newJumpStartPos = gameModel.player.currentPos;
+	var newJumpDur = A2(author$project$Physics$updateJumpDur, gameModel.nextTargetPos, gameModel.player.currentPos);
+	var newVelocity = A3(author$project$Physics$updateVelocity, newJumpStartPos, gameModel.nextTargetPos, newJumpDur);
+	var curPlayer = gameModel.player;
+	var updatedPlayer = _Utils_update(
+		curPlayer,
+		{jumpDurationMillis: newJumpDur, jumpStartPos: newJumpStartPos, velocity: newVelocity});
+	return _Utils_update(
+		gameModel,
+		{player: updatedPlayer});
+};
+var author$project$Update$updateScoreAndTargetIfCorrect = function (gameModel) {
+	var nextTargetNoteMidi = function () {
+		var _n2 = A2(elm$core$Array$get, gameModel.nextTargetNoteIndex, gameModel.targetNotes);
+		if (_n2.$ === 'Nothing') {
+			return 60;
+		} else {
+			var note = _n2.a;
+			return note.midi;
+		}
+	}();
+	var isCorrect = function () {
+		var _n1 = gameModel.currentNote;
+		if (_n1.$ === 'Nothing') {
+			return false;
+		} else {
+			var currentNote = _n1.a;
+			return _Utils_eq(currentNote.midi, nextTargetNoteMidi) ? true : false;
+		}
+	}();
+	var newNextTargetNoteIndex = isCorrect ? (gameModel.nextTargetNoteIndex + 1) : gameModel.nextTargetNoteIndex;
+	var currentMidiCode = function () {
+		var _n0 = gameModel.currentNote;
+		if (_n0.$ === 'Nothing') {
+			return 60;
+		} else {
+			var note = _n0.a;
+			return note.midi;
+		}
+	}();
+	var newTargetPos = A2(
+		author$project$Model$Vector,
+		author$project$ConstantsHelpers$getNoteXPos(newNextTargetNoteIndex - 1),
+		author$project$ConstantsHelpers$getNoteYPos(currentMidiCode));
+	return _Utils_update(
+		gameModel,
+		{nextTargetNoteIndex: newNextTargetNoteIndex, nextTargetPos: newTargetPos, score: gameModel.score + 1});
+};
 var elm$random$Random$Generate = function (a) {
 	return {$: 'Generate', a: a};
 };
@@ -10684,8 +10690,11 @@ var author$project$Update$update = F2(
 							var millisSinceLastFrame = msg.a;
 							return A2(author$project$Update$updateAnimationValues, gameModel, millisSinceLastFrame);
 						case 'NotePressed':
-							var noteCode = msg.a;
-							return A2(author$project$Update$updateNotePressed, gameModel, noteCode);
+							var midiCode = msg.a;
+							return author$project$Update$resetJumpTimer(
+								author$project$Update$updatePlayer(
+									author$project$Update$updateScoreAndTargetIfCorrect(
+										A2(author$project$Update$updateCurrentNote, midiCode, gameModel))));
 						case 'NoteReleased':
 							return gameModel;
 						default:

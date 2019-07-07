@@ -58,13 +58,23 @@ accelYFrames = 0.6
 accelYMillis = convertFramesToMillisAccel accelYFrames framesPerSecond
 
 -- Complete each jump in x number of frames
-defaultJumpDurationFrames = 35
+longJumpDurationFrames = 35
 
 -- Even the smallest jump takes at least this many frames:
-minJumpDurationFrames = 15 
+shortJumpDurationFrames = 15 
 
 -- The largest jump is minJumpDurationFrames plus this many frames, or as a percentage of total staff height:
 baseJumpDurationFrames = 20
+
+
+longJumpDurMillis = 
+  convertFramesToMillisDuration longJumpDurationFrames framesPerSecond
+
+shortJumpDurMillis = 
+  convertFramesToMillisDuration shortJumpDurationFrames framesPerSecond
+
+baseJumpDurMillis = 
+  convertFramesToMillisDuration baseJumpDurationFrames framesPerSecond
 
 
 -- Update sprite animation frame every X milliseconds
@@ -94,25 +104,4 @@ getNoteYPos midiCode =
     yPosFloat = toFloat (Note.getHeight midiCode)
   in
     topMargin + (yPosFloat * staffLineHeight / 2)
-
-
----------  Yay physics! Simple projectile motion (no air resistance etc)  ---------
-
--- Given start position, target position, vertical acceleration, and total duration,
--- get the required velocity
-getRequiredYVelocity startYPos targetYPos accelY durationMillis =
-  (targetYPos - startYPos - (0.5 * accelY * durationMillis * durationMillis)) / durationMillis
-
--- Given target position, start position, and duration (assume acceleration = 0),
--- get the required velocity
-getRequiredXVelocity startXPos targetXPos durationMillis =
-  (targetXPos - startXPos) / durationMillis
-
--- Calculate current position given start position, time elapsed, initial velocity, and vertical acceleration
-getCurrentJumpYPosition startYPos initialVelocityY accelY elapsedTime =
-  (0.5 * accelY * elapsedTime * elapsedTime) + (initialVelocityY * elapsedTime) + startYPos
-
--- Calculate current position given start position, time elapsed, initial velocity (assuming acceleration = 0)
-getCurrentJumpXPosition startXPos initialVelocityX elapsedTime =
-  startXPos + (initialVelocityX * elapsedTime)
 
