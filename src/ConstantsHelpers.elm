@@ -79,7 +79,7 @@ baseJumpDurMillis =
 
 -- Update sprite animation frame every X milliseconds
 spriteAnimDelayFrames = 8
-spriteAnimDelayMillis = convertFramesToMillisDuration spriteAnimDelayFrames framesPerSecond
+spriteAnimDelayMillis = round <| convertFramesToMillisDuration spriteAnimDelayFrames framesPerSecond
 
 
 --------------------------------------------------------------------------------

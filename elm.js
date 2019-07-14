@@ -5418,8 +5418,8 @@ var author$project$Ports$fakeHandleNoteReleased = _Platform_incomingPort('fakeHa
 var author$project$Ports$handleInitMIDI = _Platform_incomingPort('handleInitMIDI', elm$json$Json$Decode$bool);
 var author$project$Ports$handleNotePressed = _Platform_incomingPort('handleNotePressed', elm$json$Json$Decode$int);
 var author$project$Ports$handleNoteReleased = _Platform_incomingPort('handleNoteReleased', elm$json$Json$Decode$bool);
-var elm$browser$Browser$AnimationManager$Delta = function (a) {
-	return {$: 'Delta', a: a};
+var elm$browser$Browser$AnimationManager$Time = function (a) {
+	return {$: 'Time', a: a};
 };
 var elm$browser$Browser$AnimationManager$State = F3(
 	function (subs, request, oldTime) {
@@ -9804,8 +9804,8 @@ var elm$browser$Browser$AnimationManager$onSelfMsg = F3(
 					elm$core$Platform$sendToSelf(router),
 					elm$browser$Browser$AnimationManager$rAF)));
 	});
-var elm$browser$Browser$AnimationManager$Time = function (a) {
-	return {$: 'Time', a: a};
+var elm$browser$Browser$AnimationManager$Delta = function (a) {
+	return {$: 'Delta', a: a};
 };
 var elm$browser$Browser$AnimationManager$subMap = F2(
 	function (func, sub) {
@@ -9821,11 +9821,11 @@ var elm$browser$Browser$AnimationManager$subMap = F2(
 	});
 _Platform_effectManagers['Browser.AnimationManager'] = _Platform_createManager(elm$browser$Browser$AnimationManager$init, elm$browser$Browser$AnimationManager$onEffects, elm$browser$Browser$AnimationManager$onSelfMsg, 0, elm$browser$Browser$AnimationManager$subMap);
 var elm$browser$Browser$AnimationManager$subscription = _Platform_leaf('Browser.AnimationManager');
-var elm$browser$Browser$AnimationManager$onAnimationFrameDelta = function (tagger) {
+var elm$browser$Browser$AnimationManager$onAnimationFrame = function (tagger) {
 	return elm$browser$Browser$AnimationManager$subscription(
-		elm$browser$Browser$AnimationManager$Delta(tagger));
+		elm$browser$Browser$AnimationManager$Time(tagger));
 };
-var elm$browser$Browser$Events$onAnimationFrameDelta = elm$browser$Browser$AnimationManager$onAnimationFrameDelta;
+var elm$browser$Browser$Events$onAnimationFrame = elm$browser$Browser$AnimationManager$onAnimationFrame;
 var elm$core$Platform$Sub$batch = _Platform_batch;
 var author$project$Main$subscriptions = function (model) {
 	return elm$core$Platform$Sub$batch(
@@ -9837,7 +9837,7 @@ var author$project$Main$subscriptions = function (model) {
 				author$project$Ports$fakeHandleInitMIDI(author$project$Msg$InitMIDI),
 				author$project$Ports$fakeHandleNotePressed(author$project$Msg$NotePressed),
 				author$project$Ports$fakeHandleNoteReleased(author$project$Msg$NoteReleased),
-				elm$browser$Browser$Events$onAnimationFrameDelta(author$project$Msg$AnimFrame)
+				elm$browser$Browser$Events$onAnimationFrame(author$project$Msg$AnimFrame)
 			]));
 };
 var author$project$ConstantsHelpers$scrollOffset = -900;
@@ -10242,15 +10242,16 @@ var author$project$Note$createNote = function (midiCode) {
 var author$project$Model$initialGameModel = {
 	currentNote: elm$core$Maybe$Just(
 		author$project$Note$createNote(65)),
+	currentTime: elm$time$Time$millisToPosix(0),
 	itemSpriteIndex: 0,
-	millisSinceJumpStarted: author$project$Model$initialJumpMillis,
-	millisSinceLastSpriteAnimFrame: 0,
+	nextFrameTime: elm$time$Time$millisToPosix(0),
 	nextTargetNoteIndex: 0,
 	nextTargetPos: author$project$Model$initialPlayerPos,
 	player: {
 		currentPos: author$project$Model$initialPlayerPos,
 		jumpDurationMillis: author$project$Model$initialJumpMillis,
 		jumpStartPos: author$project$Model$initialPlayerPos,
+		jumpStartTime: elm$time$Time$millisToPosix(0),
 		velocity: {x: 0, y: 0}
 	},
 	playerSpriteIndex: 0,
@@ -10424,19 +10425,20 @@ var author$project$Update$initMidi = function (isMIDIConnectedBool) {
 	}();
 	return newModel;
 };
-var author$project$Update$resetJumpTimer = function (gameModel) {
-	return _Utils_update(
-		gameModel,
-		{millisSinceJumpStarted: 0});
-};
-var author$project$ConstantsHelpers$spriteAnimDelayFrames = 8;
-var author$project$ConstantsHelpers$spriteAnimDelayMillis = A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, author$project$ConstantsHelpers$spriteAnimDelayFrames, author$project$ConstantsHelpers$framesPerSecond);
-var author$project$ConstantsHelpers$scrollAnimMultiplier = 5.0e-2;
-var author$project$Update$scrollTo = F2(
-	function (currentPosition, nextTargetNoteIndex) {
-		var targetPosition = author$project$ConstantsHelpers$leftMargin + (nextTargetNoteIndex * author$project$ConstantsHelpers$noteXInterval);
-		var remainingDistance = targetPosition - currentPosition;
-		return currentPosition + (remainingDistance * author$project$ConstantsHelpers$scrollAnimMultiplier);
+var author$project$Update$updateCurTime = F2(
+	function (curTime, model) {
+		return _Utils_update(
+			model,
+			{currentTime: curTime});
+	});
+var author$project$Update$updateCurrentNote = F2(
+	function (midiCode, gameModel) {
+		var newCurrentNote = author$project$Note$createNote(midiCode);
+		return _Utils_update(
+			gameModel,
+			{
+				currentNote: elm$core$Maybe$Just(newCurrentNote)
+			});
 	});
 var author$project$ConstantsHelpers$accelYFrames = 0.6;
 var author$project$ConstantsHelpers$convertFramesToMillisAccel = F2(
@@ -10456,56 +10458,31 @@ var author$project$Physics$getCurrentJumpYPosition = F4(
 	function (startYPos, initialVelocityY, accelY, elapsedTime) {
 		return ((((0.5 * accelY) * elapsedTime) * elapsedTime) + (initialVelocityY * elapsedTime)) + startYPos;
 	});
-var author$project$Update$updateModelContinueJumping = function (model) {
-	var curPlayer = model.player;
-	var newCurPos = A2(
-		author$project$Model$Vector,
-		A3(author$project$Physics$getCurrentJumpXPosition, curPlayer.jumpStartPos.x, curPlayer.velocity.x, model.millisSinceJumpStarted),
-		A4(author$project$Physics$getCurrentJumpYPosition, curPlayer.jumpStartPos.y, curPlayer.velocity.y, author$project$ConstantsHelpers$accelYMillis, model.millisSinceJumpStarted));
-	var newPlayer = _Utils_update(
-		curPlayer,
-		{currentPos: newCurPos});
-	return _Utils_update(
-		model,
-		{player: newPlayer});
+var elm$time$Time$posixToMillis = function (_n0) {
+	var millis = _n0.a;
+	return millis;
 };
-var author$project$Update$updateModelStopJumping = function (model) {
-	var curPlayer = model.player;
-	var newPlayer = _Utils_update(
-		curPlayer,
-		{currentPos: model.nextTargetPos});
-	return _Utils_update(
-		model,
-		{player: newPlayer});
-};
-var author$project$View$Player$numSpriteFrames = 4;
-var author$project$View$Target$numSpriteFrames = 5;
-var author$project$Update$updateAnimationValues = F2(
-	function (model, millisSinceLastFrame) {
-		var newMillisSinceLastSpriteAnim = model.millisSinceLastSpriteAnimFrame + millisSinceLastFrame;
-		var newNewMillisSinceLastSpriteAnim = (_Utils_cmp(newMillisSinceLastSpriteAnim, author$project$ConstantsHelpers$spriteAnimDelayMillis) > -1) ? 0 : (model.millisSinceLastSpriteAnimFrame + millisSinceLastFrame);
-		var newPlayerSpriteIndex = (_Utils_cmp(newMillisSinceLastSpriteAnim, author$project$ConstantsHelpers$spriteAnimDelayMillis) > -1) ? ((model.playerSpriteIndex + 1) % author$project$View$Player$numSpriteFrames) : model.playerSpriteIndex;
-		var newMillisSinceJumpStarted = model.millisSinceJumpStarted + millisSinceLastFrame;
-		var newItemSpriteIndex = (_Utils_cmp(newMillisSinceLastSpriteAnim, author$project$ConstantsHelpers$spriteAnimDelayMillis) > -1) ? ((model.itemSpriteIndex + 1) % author$project$View$Target$numSpriteFrames) : model.playerSpriteIndex;
-		var updatedModelBase = _Utils_update(
+var author$project$Update$updatePlayerPos = F2(
+	function (curTime, model) {
+		var player = model.player;
+		var timeSinceJump = elm$time$Time$posixToMillis(curTime) - elm$time$Time$posixToMillis(player.jumpStartTime);
+		return (_Utils_cmp(timeSinceJump, model.player.jumpDurationMillis) < 0) ? _Utils_update(
 			model,
 			{
-				itemSpriteIndex: newItemSpriteIndex,
-				millisSinceJumpStarted: newMillisSinceJumpStarted,
-				millisSinceLastSpriteAnimFrame: newNewMillisSinceLastSpriteAnim,
-				playerSpriteIndex: newPlayerSpriteIndex,
-				scrollPosition: A2(author$project$Update$scrollTo, model.scrollPosition, model.nextTargetNoteIndex)
-			});
-		var updatedModel = (_Utils_cmp(newMillisSinceJumpStarted, model.player.jumpDurationMillis) < 0) ? author$project$Update$updateModelContinueJumping(updatedModelBase) : author$project$Update$updateModelStopJumping(updatedModelBase);
-		return updatedModel;
-	});
-var author$project$Update$updateCurrentNote = F2(
-	function (midiCode, gameModel) {
-		var newCurrentNote = author$project$Note$createNote(midiCode);
-		return _Utils_update(
-			gameModel,
+				player: _Utils_update(
+					player,
+					{
+						currentPos: A2(
+							author$project$Model$Vector,
+							A3(author$project$Physics$getCurrentJumpXPosition, player.jumpStartPos.x, player.velocity.x, timeSinceJump),
+							A4(author$project$Physics$getCurrentJumpYPosition, player.jumpStartPos.y, player.velocity.y, author$project$ConstantsHelpers$accelYMillis, timeSinceJump))
+					})
+			}) : _Utils_update(
+			model,
 			{
-				currentNote: elm$core$Maybe$Just(newCurrentNote)
+				player: _Utils_update(
+					player,
+					{currentPos: model.nextTargetPos})
 			});
 	});
 var author$project$ConstantsHelpers$baseJumpDurationFrames = 20;
@@ -10526,14 +10503,14 @@ var author$project$Physics$updateVelocity = F3(
 		var velY = ((target.y - start.y) - (((0.5 * accel.y) * dur) * dur)) / dur;
 		return A2(author$project$Model$Vector, velX, velY);
 	});
-var author$project$Update$updatePlayer = function (gameModel) {
+var author$project$Update$updatePlayerTrajectory = function (gameModel) {
 	var newJumpStartPos = gameModel.player.currentPos;
 	var newJumpDur = A2(author$project$Physics$updateJumpDur, gameModel.nextTargetPos, gameModel.player.currentPos);
 	var newVelocity = A3(author$project$Physics$updateVelocity, newJumpStartPos, gameModel.nextTargetPos, newJumpDur);
 	var curPlayer = gameModel.player;
 	var updatedPlayer = _Utils_update(
 		curPlayer,
-		{jumpDurationMillis: newJumpDur, jumpStartPos: newJumpStartPos, velocity: newVelocity});
+		{jumpDurationMillis: newJumpDur, jumpStartPos: newJumpStartPos, jumpStartTime: gameModel.currentTime, velocity: newVelocity});
 	return _Utils_update(
 		gameModel,
 		{player: updatedPlayer});
@@ -10575,6 +10552,39 @@ var author$project$Update$updateScoreAndTargetIfCorrect = function (gameModel) {
 		gameModel,
 		{nextTargetNoteIndex: newNextTargetNoteIndex, nextTargetPos: newTargetPos, score: gameModel.score + 1});
 };
+var author$project$ConstantsHelpers$scrollAnimMultiplier = 5.0e-2;
+var author$project$Update$scrollTo = F2(
+	function (currentPosition, nextTargetNoteIndex) {
+		var targetPosition = author$project$ConstantsHelpers$leftMargin + (nextTargetNoteIndex * author$project$ConstantsHelpers$noteXInterval);
+		var remainingDistance = targetPosition - currentPosition;
+		return currentPosition + (remainingDistance * author$project$ConstantsHelpers$scrollAnimMultiplier);
+	});
+var author$project$Update$updateScrollPos = function (model) {
+	return _Utils_update(
+		model,
+		{
+			scrollPosition: A2(author$project$Update$scrollTo, model.scrollPosition, model.nextTargetNoteIndex)
+		});
+};
+var author$project$ConstantsHelpers$spriteAnimDelayFrames = 8;
+var elm$core$Basics$round = _Basics_round;
+var author$project$ConstantsHelpers$spriteAnimDelayMillis = elm$core$Basics$round(
+	A2(author$project$ConstantsHelpers$convertFramesToMillisDuration, author$project$ConstantsHelpers$spriteAnimDelayFrames, author$project$ConstantsHelpers$framesPerSecond));
+var author$project$View$Player$numSpriteFrames = 4;
+var author$project$View$Target$numSpriteFrames = 5;
+var author$project$Update$updateSprites = F2(
+	function (curTime, model) {
+		return (_Utils_cmp(
+			elm$time$Time$posixToMillis(curTime),
+			elm$time$Time$posixToMillis(model.nextFrameTime)) > -1) ? _Utils_update(
+			model,
+			{
+				itemSpriteIndex: (model.itemSpriteIndex + 1) % author$project$View$Target$numSpriteFrames,
+				nextFrameTime: elm$time$Time$millisToPosix(
+					elm$time$Time$posixToMillis(curTime) + author$project$ConstantsHelpers$spriteAnimDelayMillis),
+				playerSpriteIndex: (model.playerSpriteIndex + 1) % author$project$View$Player$numSpriteFrames
+			}) : model;
+	});
 var elm$random$Random$Generate = function (a) {
 	return {$: 'Generate', a: a};
 };
@@ -10599,10 +10609,6 @@ var elm$time$Time$Zone = F2(
 	});
 var elm$time$Time$customZone = elm$time$Time$Zone;
 var elm$time$Time$now = _Time_now(elm$time$Time$millisToPosix);
-var elm$time$Time$posixToMillis = function (_n0) {
-	var millis = _n0.a;
-	return millis;
-};
 var elm$random$Random$init = A2(
 	elm$core$Task$andThen,
 	function (time) {
@@ -10687,14 +10693,20 @@ var author$project$Update$update = F2(
 				var newGameModel = function () {
 					switch (msg.$) {
 						case 'AnimFrame':
-							var millisSinceLastFrame = msg.a;
-							return A2(author$project$Update$updateAnimationValues, gameModel, millisSinceLastFrame);
+							var curTime = msg.a;
+							return author$project$Update$updateScrollPos(
+								A2(
+									author$project$Update$updatePlayerPos,
+									curTime,
+									A2(
+										author$project$Update$updateSprites,
+										curTime,
+										A2(author$project$Update$updateCurTime, curTime, gameModel))));
 						case 'NotePressed':
 							var midiCode = msg.a;
-							return author$project$Update$resetJumpTimer(
-								author$project$Update$updatePlayer(
-									author$project$Update$updateScoreAndTargetIfCorrect(
-										A2(author$project$Update$updateCurrentNote, midiCode, gameModel))));
+							return author$project$Update$updatePlayerTrajectory(
+								author$project$Update$updateScoreAndTargetIfCorrect(
+									A2(author$project$Update$updateCurrentNote, midiCode, gameModel)));
 						case 'NoteReleased':
 							return gameModel;
 						default:
@@ -10709,4 +10721,4 @@ var author$project$Update$update = F2(
 var elm$browser$Browser$element = _Browser_element;
 var author$project$Main$main = elm$browser$Browser$element(
 	{init: author$project$Main$init, subscriptions: author$project$Main$subscriptions, update: author$project$Update$update, view: author$project$Main$view});
-_Platform_export({'Main':{'init':author$project$Main$main(elm$json$Json$Decode$int)({"versions":{"elm":"0.19.0"},"types":{"message":"Msg.Msg","aliases":{},"unions":{"Msg.Msg":{"args":[],"tags":{"InitMIDI":["Basics.Bool"],"NotePressed":["Basics.Int"],"NoteReleased":["Basics.Bool"],"StartGame":[],"GenerateTargetNotes":["List.List Basics.Int"],"AnimFrame":["Basics.Float"]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}}}}})}});}(this));
+_Platform_export({'Main':{'init':author$project$Main$main(elm$json$Json$Decode$int)({"versions":{"elm":"0.19.0"},"types":{"message":"Msg.Msg","aliases":{},"unions":{"Msg.Msg":{"args":[],"tags":{"InitMIDI":["Basics.Bool"],"NotePressed":["Basics.Int"],"NoteReleased":["Basics.Bool"],"StartGame":[],"GenerateTargetNotes":["List.List Basics.Int"],"AnimFrame":["Time.Posix"]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}}}}})}});}(this));

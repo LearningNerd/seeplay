@@ -8,5 +8,5 @@ type Msg
     | NoteReleased Bool
     | StartGame -- triggerd by click in startscreen
     | GenerateTargetNotes (List Int)
-    | AnimFrame Float
+    | AnimFrame Time.Posix
 

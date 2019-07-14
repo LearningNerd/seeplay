@@ -30,6 +30,7 @@ type alias Player =
     , currentPos : Vector
     , velocity : Vector
     , jumpDurationMillis : Float
+    , jumpStartTime : Time.Posix
     }
 
 type alias GameModel =
@@ -42,13 +43,12 @@ type alias GameModel =
     , nextTargetPos : Vector
 
 ------------- for animation: -------------------
-    , millisSinceJumpStarted : Float
-
+    , currentTime : Time.Posix
     , scrollPosition : Float
 
     , playerSpriteIndex : Int
     , itemSpriteIndex : Int
-    , millisSinceLastSpriteAnimFrame : Float
+    , nextFrameTime : Time.Posix -- timestamp of next sprite frame redraw
     }
 
 
@@ -74,16 +74,19 @@ initialGameModel =
         , currentPos = initialPlayerPos
         , velocity = {x = 0, y = 0}
         , jumpDurationMillis = initialJumpMillis
+        , jumpStartTime = Time.millisToPosix 0 
         }
     , nextTargetPos = initialPlayerPos
 
 ------------- for animation: -------------------
-    , millisSinceJumpStarted = initialJumpMillis
+    
+    , currentTime = Time.millisToPosix 0 
+        -- create initial model on game start instead????
     
     , scrollPosition = 0
 
     , playerSpriteIndex = 0
     , itemSpriteIndex = 0
-    , millisSinceLastSpriteAnimFrame = 0
+    , nextFrameTime = Time.millisToPosix 0 
     }
 

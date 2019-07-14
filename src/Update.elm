@@ -55,18 +55,19 @@ update msg model =
           newGameModel = 
             case msg of
       
-              AnimFrame millisSinceLastFrame ->
-                updateAnimationValues gameModel millisSinceLastFrame
-
-
-
+              AnimFrame curTime ->
+                gameModel
+                  |> updateCurTime curTime
+                  |> updateSprites curTime
+                  |> updatePlayerPos curTime
+                  |> updateScrollPos
 
               NotePressed midiCode -> 
                 gameModel
                   |> updateCurrentNote midiCode
                   |> updateScoreAndTargetIfCorrect
                   |> updatePlayerTrajectory
-                  |> resetJumpTimer
+
 
               NoteReleased _ ->
                 gameModel
@@ -78,93 +79,29 @@ update msg model =
 
 
 
+updateCurTime : Time.Posix -> GameModel -> GameModel
+updateCurTime curTime model =
+  { model | currentTime = curTime }
 
 
-
--- Animate (this runs roughly every 60 ms
-updateAnimationValues : GameModel -> Float -> GameModel
-updateAnimationValues model millisSinceLastFrame =
-  let
-    -- update timer for jump, and for each sprite frame anim 
-    newMillisSinceJumpStarted = model.millisSinceJumpStarted + millisSinceLastFrame
-    
-    newMillisSinceLastSpriteAnim = model.millisSinceLastSpriteAnimFrame + millisSinceLastFrame
-
-
-    -- Update player sprite
-    newPlayerSpriteIndex = 
-      if newMillisSinceLastSpriteAnim >= Const.spriteAnimDelayMillis then
-         ( remainderBy View.Player.numSpriteFrames (model.playerSpriteIndex + 1) )
-      else
-        model.playerSpriteIndex -- don't change otherwise
-
-
-    -- Update coin sprite
-    newItemSpriteIndex = 
-      if newMillisSinceLastSpriteAnim >= Const.spriteAnimDelayMillis then
-         ( remainderBy View.Target.numSpriteFrames (model.itemSpriteIndex + 1) )
-      else
-        model.playerSpriteIndex -- don't change otherwise
-
-
-          ------- should refactor this =P
-    -- Update timer for sprite animation
-    newNewMillisSinceLastSpriteAnim = 
-      if newMillisSinceLastSpriteAnim >= Const.spriteAnimDelayMillis then
-         0 -- reset when it's time to update the sprite
-      else
-        model.millisSinceLastSpriteAnimFrame + millisSinceLastFrame -- keep countin
-
-
-
-    -- Always update time since jump started, since last sprite anim, and scroll position
-    updatedModelBase =
-        { model | millisSinceJumpStarted = newMillisSinceJumpStarted
-        , millisSinceLastSpriteAnimFrame = newNewMillisSinceLastSpriteAnim
-        , scrollPosition = scrollTo model.scrollPosition model.nextTargetNoteIndex
-        , playerSpriteIndex = newPlayerSpriteIndex
-        , itemSpriteIndex = newItemSpriteIndex
+-- Update index of each game sprite (currently just 2 directly in the gameModel) AND set next frame timestamp
+updateSprites : Time.Posix -> GameModel -> GameModel
+updateSprites curTime model =
+    if (Time.posixToMillis curTime) >= (Time.posixToMillis model.nextFrameTime) then
+        { model
+        | playerSpriteIndex = ( remainderBy View.Player.numSpriteFrames (model.playerSpriteIndex + 1) )
+        , itemSpriteIndex = ( remainderBy View.Target.numSpriteFrames (model.itemSpriteIndex + 1) )
+        , nextFrameTime = 
+            Time.millisToPosix 
+            <| (Time.posixToMillis curTime) + Const.spriteAnimDelayMillis
         }
-
-    -- Only update player position for duration of jump
-    -- (this is so it doesn't animate past the target)
-    updatedModel =
-        if newMillisSinceJumpStarted < model.player.jumpDurationMillis then
-          updateModelContinueJumping updatedModelBase
-        else
-          updateModelStopJumping updatedModelBase
-  in
-     updatedModel
+    else
+        model
 
 
-
-
--- Function to update model with current player position
-updateModelContinueJumping model =
-  let
-      curPlayer = model.player
-
-      newCurPos = 
-        Vector
-        (Physics.getCurrentJumpXPosition curPlayer.jumpStartPos.x curPlayer.velocity.x model.millisSinceJumpStarted)
-        (Physics.getCurrentJumpYPosition curPlayer.jumpStartPos.y curPlayer.velocity.y Const.accelYMillis model.millisSinceJumpStarted)
-
-      newPlayer = { curPlayer | currentPos = newCurPos }
-  in
-      { model | player = newPlayer }
-
-
-
-
-
--- Update player to "stick" to the target position when animation is done
-updateModelStopJumping model =
-  let
-      curPlayer = model.player
-      newPlayer = { curPlayer | currentPos = model.nextTargetPos }
-  in
-      { model | player = newPlayer }
-
+updateScrollPos : GameModel -> GameModel
+updateScrollPos model =
+  { model | scrollPosition = scrollTo model.scrollPosition model.nextTargetNoteIndex }
 
 
 -- Exponential easing curve; Penner's "standard exponention slide"; Zeno's Paradox for animation :)
@@ -175,6 +112,32 @@ scrollTo currentPosition nextTargetNoteIndex =
     remainingDistance = targetPosition - currentPosition
   in
     currentPosition + (remainingDistance * Const.scrollAnimMultiplier)
+
+
+
+-- Either continue jumping, or when jump duration is complete,
+-- stick to the target position
+-- *** and update jumpStartTime !
+updatePlayerPos : Time.Posix -> GameModel -> GameModel
+updatePlayerPos curTime ({player} as model) =
+  let
+    timeSinceJump = toFloat <| (Time.posixToMillis curTime) - (Time.posixToMillis player.jumpStartTime)
+  in
+    if timeSinceJump < model.player.jumpDurationMillis then
+     { model | player =
+        { player | currentPos = 
+            Vector
+            (Physics.getCurrentJumpXPosition player.jumpStartPos.x player.velocity.x timeSinceJump)
+            (Physics.getCurrentJumpYPosition player.jumpStartPos.y player.velocity.y Const.accelYMillis timeSinceJump)
+        }
+      }
+  else
+    -- Update player to "stick" to the target position when jump anim is done
+    { model | player = 
+      { player | 
+        currentPos = model.nextTargetPos
+      }
+    }
 
 
 
@@ -202,7 +165,7 @@ generateTargetNotes model midiCodeList =
      { model | targetNotes = targetNotes }
 
 
--- Update player's velocity, jump start position, jump duration milliseconds
+-- Update player's velocity, jump start position, jump duration milliseconds, and jump start time
 updatePlayerTrajectory : GameModel -> GameModel
 updatePlayerTrajectory gameModel =
   let
@@ -219,14 +182,10 @@ updatePlayerTrajectory gameModel =
         { curPlayer | jumpStartPos = newJumpStartPos
         , velocity = newVelocity
         , jumpDurationMillis = newJumpDur
+        , jumpStartTime = gameModel.currentTime
         }
   in
       { gameModel | player = updatedPlayer }
-
-
-resetJumpTimer : GameModel -> GameModel
-resetJumpTimer gameModel =
-  { gameModel | millisSinceJumpStarted = 0 } 
 
 
 updateCurrentNote : Int -> GameModel -> GameModel
