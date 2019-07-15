@@ -1,76 +1,113 @@
 module View.Game exposing (view)
 
-import Model exposing (Model, Margins)
-import Msg exposing (..)
 import Html as HTML exposing (..)
 import Html.Attributes as A exposing (..)
 import Html.Events exposing (..)
 import Svg exposing (..)
 import Svg.Attributes as S exposing (..)
+import Array exposing (..)
 
-import View.Note
+import ConstantsHelpers
+import View.Player exposing (view)
+import View.Target exposing (view)
+import Note exposing (Note)
+import Model exposing (GameModel)
+import Msg exposing (..)
 
-view : Model -> Html Msg
+
+view : GameModel -> Svg Msg
 view model =
-    svgView model 500 200 { top = 50, left = 50, bottom = 50, right = 50 }
-
-
-svgView : Model -> Float -> Float -> Margins -> Svg Msg
-svgView model width height margins =
     let
-        lineHeight =
-            height / 6
+        widthS = String.fromFloat ConstantsHelpers.svgViewTotalWidth
 
-        widthS =
-            String.fromFloat (width + margins.left + margins.right)
-
-        heightS =
-            String.fromFloat (height + margins.top + margins.bottom)
+        heightS = String.fromFloat ConstantsHelpers.svgViewTotalHeight
         
-        drawNoteFunc = View.Note.drawNote width lineHeight margins
+        svgListAllNotes = drawAllTargetNotes model.itemSpriteIndex model.nextTargetNoteIndex model.targetNotes
+
+        x = model.player.currentPos.x
+        y = model.player.currentPos.y
+
         currentNoteDrawing = case model.currentNote of
                                  Nothing -> []
-                                 Just n -> [ drawNoteFunc n model.currentNoteStyle ]
+                                 Just currentNote -> 
+                                   [View.Player.view x y model.playerSpriteIndex]
+
+        -- animate viewBox to scroll game level with all notes drawn inside
+        -- updated: draw the current note inside the game level?
+        gameLevelSvg = svg [
+            S.viewBox (String.fromFloat (model.scrollPosition + ConstantsHelpers.scrollOffset) ++ " 0 " ++ widthS ++ " " ++ heightS)
+            , S.width widthS
+            , S.height heightS
+            , S.x "0", S.y "0"
+          ] (svgListAllNotes ++ currentNoteDrawing)
+    
     in
-    svg
+      svg
         [ S.width widthS
         , S.height heightS
         , S.viewBox ("0 0 " ++ widthS ++ " " ++ heightS)
         , S.class "center"
         ]
-        ((staff width lineHeight margins ++ [drawNoteFunc model.correctNote model.correctNoteStyle])
-            ++ currentNoteDrawing ++ [ trebleClef 50 237 ]
-        )
+        (
+          -- draw 5 staff lines
+          (List.map drawStaffLine (List.range 1 5))
+           ++ [gameLevelSvg]
+           ++ [trebleClef]
+        ) 
 
 
-trebleClef x y =
-    let
-        xS =
-            String.fromFloat x
 
-        yS =
-            String.fromFloat y
-    in
-    text_ [ S.x xS, S.y yS, S.class "treble" ] [ HTML.text "𝄞" ]
-
-
-staffLines : Float -> Float -> Margins -> Int -> Svg msg
-staffLines staffWidth lineHeight margins yPos =
+drawStaffLine yPos =
     let
         lineYString =
-            String.fromFloat (margins.top + (toFloat yPos * lineHeight))
+            String.fromFloat (ConstantsHelpers.topMargin + (toFloat yPos * ConstantsHelpers.staffLineHeight))
     in
     line
-        [ S.x1 (String.fromFloat margins.left)
+        [ S.x1 "0"
         , S.y1 lineYString
-        , S.x2 (String.fromFloat (margins.left + staffWidth))
+        , S.x2 (String.fromFloat (ConstantsHelpers.leftMargin + ConstantsHelpers.svgViewWidth))
+--        , S.x2 (String.fromFloat staffWidth)
         , S.y2 lineYString
         , S.stroke "black"
         ]
         []
 
 
-staff : Float -> Float -> Margins -> List (Svg msg)
-staff staffWidth lineHeight margins =
-    List.map (staffLines staffWidth lineHeight margins) (List.range 1 5)
+
+trebleClef =
+    let
+        xS =
+            String.fromFloat ConstantsHelpers.trebleLeftMargin
+
+        yS =
+            String.fromFloat (ConstantsHelpers.topMargin + (ConstantsHelpers.staffLineHeight * 5.75))
+
+        fontSizeS = String.fromFloat (ConstantsHelpers.svgViewWidth * 0.4214)
+    in
+    text_ [ S.x xS, S.y yS, S.fontSize fontSizeS ] [ HTML.text "𝄞" ]
+
+
+
+drawAllTargetNotes : Int -> Int -> Array Note -> List (Svg msg)
+drawAllTargetNotes spriteIndex targetNoteIndex notes =
+    let 
+        noteList = Array.toList notes
+    in
+      List.indexedMap (drawTargetNote spriteIndex targetNoteIndex) noteList 
+
+drawTargetNote : Int -> Int -> Int -> Note -> Svg msg
+drawTargetNote spriteIndex targetNoteIndex xPosIndex note =
+    let
+        y = ConstantsHelpers.getNoteYPos note.midi
+
+        x = ConstantsHelpers.getNoteXPos xPosIndex
+
+        spriteImage = 
+          if xPosIndex > (targetNoteIndex - 1) then -- future notes are "next targets"
+            ConstantsHelpers.nextTargetSpriteImage
+          else
+            ConstantsHelpers.correctTargetSpriteImage -- prev/cur notes are correct
+
+    in
+      View.Target.view x y spriteIndex spriteImage
 

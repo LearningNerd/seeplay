@@ -4,14 +4,22 @@ module Note exposing (..)
 import Array exposing (..)
 import Random
 
+import Msg exposing (Msg)
+
+
 type alias Note =
     { noteName : NoteName -- ("C", 4)
     , midi : Int -- from 21 to 108, for piano
     , frequency : Float
+    
+
+    -- , animState : Animation.Messenger.State Msg
     }
+
 
 type alias NoteName =
     ( String, Int )
+
 
 createNote : Int -> Note
 createNote midiCode =
@@ -19,6 +27,43 @@ createNote midiCode =
     , midi = clamp 21 108 midiCode -- assuming piano MIDI!
     , frequency = midiToFrequency midiCode
     }
+
+
+getHeight midiCode = 
+  case midiCode of
+    60 -> 11
+    62 -> 10
+    64 -> 9
+    65 -> 8
+    67 -> 7
+    69 -> 6
+    71 -> 5
+    72 -> 4
+    74 -> 3
+    76 -> 2
+    77 -> 1
+    79 -> 0
+    _ -> 12
+
+
+-- Generate list of [num] random midi codes
+getRandomMidiList : Int -> Random.Generator (List Int)
+getRandomMidiList num =
+    Random.list num <| Random.uniform 60 [64, 67]
+{--
+  Random.list num <| Random.uniform 60 [ 62
+   , 64
+   , 65
+   , 67
+   , 69
+   , 71
+   , 72
+   , 74
+   , 76
+   , 77
+   , 79
+   ]
+--}
 
 getRandomMidi : Random.Generator Int
 getRandomMidi =

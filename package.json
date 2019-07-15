@@ -1,0 +1,26 @@
+{
+  "name": "seeplay",
+  "version": "1.0.0",
+  "description": "*Learn to sight-read sheet music! SeePlay teaches you to hear with your eyes and play from your heart.* 👀🎹💖",
+  "main": "elm.js",
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "pngjs": "^3.4.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LearningNerd/seeplay.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LearningNerd/seeplay/issues"
+  },
+  "homepage": "https://github.com/LearningNerd/seeplay#readme"
+}

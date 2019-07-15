@@ -1,58 +1,92 @@
 module Model exposing (..)
 
-
+import Dict exposing (Dict)
+import Array exposing (..)
 import Time
+
 import Msg exposing (..)
+import ConstantsHelpers
 import Note exposing (Note)
 import Color
-import Animations
-import Animation
-import Animation.Messenger
 
 
-type alias Model =
-    { isMIDIConnected : Maybe Bool
-    , isPlaying : Bool
-    , correctNote : Note
-    , currentNote : Maybe Note
-    , score : Int
-    , startTimestamp : Maybe Time.Posix
-    , answerSpeed : Int -- result of subtracting two times via posixToMillis
-    , incorrectTries : Int
-    , scoreList : List Score -- store a list of score records for each practice session ... goes into local storage
-    , testCurrentTimestamp : Maybe Time.Posix
-    , sessionId : Int
-    , style : Animation.Messenger.State Msg
-    , currentNoteStyle : Animation.Messenger.State Msg
-    , correctNoteStyle : Animation.Messenger.State Msg
-    }
-
-type alias Score =
-  { correctNote : Note -- midi code of the Note (not the Note itself!)
-  , answerSpeed : Int
-  , incorrectTries : Int
-  }
-
--- For views ... not sure where to put this =P
-type alias Margins =
-    { top : Float, right : Float, bottom : Float, left : Float }
-
+type Model = 
+  LoadingScreen
+  | StartScreen
+  | Game GameModel
 
 initialModel : Model
 initialModel =
-    { isMIDIConnected = Nothing
-    , isPlaying = False
-    , correctNote = Note.createNote 60
-    , currentNote = Nothing
+  LoadingScreen
+
+
+type alias Vector =
+    { x : Float
+    , y: Float
+    }
+
+type alias Player = 
+    { jumpStartPos : Vector
+    , currentPos : Vector
+    , velocity : Vector
+    , jumpDurationMillis : Float
+    , jumpStartTime : Time.Posix
+    }
+
+type alias GameModel =
+    { targetNotes : Array Note
+    , nextTargetNoteIndex : Int
+    , currentNote : Maybe Note
+    , score : Int
+
+    , player : Player
+    , nextTargetPos : Vector
+
+------------- for animation: -------------------
+    , currentTime : Time.Posix
+    , scrollPosition : Float
+
+    , playerSpriteIndex : Int
+    , itemSpriteIndex : Int
+    , nextFrameTime : Time.Posix -- timestamp of next sprite frame redraw
+    }
+
+
+initialPlayerPos = 
+    { x = ConstantsHelpers.playerInitialXPosition
+    , y = ConstantsHelpers.getNoteYPos ConstantsHelpers.playerInitialNote
+    }
+
+
+initialJumpMillis =
+  ConstantsHelpers.longJumpDurMillis
+
+
+initialGameModel : GameModel
+initialGameModel =
+    { targetNotes = Array.empty
+    , nextTargetNoteIndex = 0
+    , currentNote = Just (Note.createNote 65)
     , score = 0
-    , startTimestamp = Nothing
-    , answerSpeed = 0
-    , incorrectTries = 0
-    , scoreList = []
-    , testCurrentTimestamp = Nothing
-    , sessionId = 0
-    , style = Animation.style [ Animation.opacity 1.0 ]
-    , currentNoteStyle = Animations.initialCurrentNoteStyle
-    , correctNoteStyle = Animations.initialCorrectNoteStyle
+
+    , player =
+        { jumpStartPos = initialPlayerPos
+        , currentPos = initialPlayerPos
+        , velocity = {x = 0, y = 0}
+        , jumpDurationMillis = initialJumpMillis
+        , jumpStartTime = Time.millisToPosix 0 
+        }
+    , nextTargetPos = initialPlayerPos
+
+------------- for animation: -------------------
+    
+    , currentTime = Time.millisToPosix 0 
+        -- create initial model on game start instead????
+    
+    , scrollPosition = 0
+
+    , playerSpriteIndex = 0
+    , itemSpriteIndex = 0
+    , nextFrameTime = Time.millisToPosix 0 
     }
 

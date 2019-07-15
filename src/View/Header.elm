@@ -1,9 +1,11 @@
 module View.Header exposing (view)
 
-import Model exposing (Model)
-import Msg exposing (..)
 import Html as HTML exposing (..)
 import Html.Attributes as A exposing (..)
+
+import Model exposing (Model)
+import Msg exposing (..)
+
 
 view : Model -> Html Msg
 view model = 

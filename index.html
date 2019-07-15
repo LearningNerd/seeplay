@@ -25,7 +25,7 @@
         flags: sessionId
       });
 
-      app.ports.cache.subscribe(function(data) {
+      app.ports.saveLocalData.subscribe(function(data) {
         localStorage.setItem(sessionId, JSON.stringify(data));
       });
     </script>
