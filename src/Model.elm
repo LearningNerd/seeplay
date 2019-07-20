@@ -54,7 +54,7 @@ type alias GameModel =
 
 initialPlayerPos = 
     { x = ConstantsHelpers.playerInitialXPosition
-    , y = ConstantsHelpers.getNoteYPos ConstantsHelpers.playerInitialNote
+    , y = Note.getNoteY ConstantsHelpers.playerInitialNote
     }
 
 

@@ -7,7 +7,7 @@ import Svg exposing (..)
 import Svg.Attributes as S exposing (..)
 import Array exposing (..)
 
-import ConstantsHelpers
+import ConstantsHelpers as Const
 import View.Player exposing (view)
 import View.Target exposing (view)
 import Note exposing (Note)
@@ -18,24 +18,28 @@ import Msg exposing (..)
 view : GameModel -> Svg Msg
 view model =
     let
-        widthS = String.fromFloat ConstantsHelpers.svgViewTotalWidth
+        widthS = String.fromFloat Const.svgViewTotalWidth
 
-        heightS = String.fromFloat ConstantsHelpers.svgViewTotalHeight
+        heightS = String.fromFloat Const.svgViewTotalHeight
         
         svgListAllNotes = drawAllTargetNotes model.itemSpriteIndex model.nextTargetNoteIndex model.targetNotes
 
         x = model.player.currentPos.x
         y = model.player.currentPos.y
 
-        currentNoteDrawing = case model.currentNote of
-                                 Nothing -> []
-                                 Just currentNote -> 
-                                   [View.Player.view x y model.playerSpriteIndex]
+        currentNoteDrawing =
+            case model.currentNote of
+                Nothing ->
+                  []
+                Just currentNote -> 
+                  [View.Player.view x y model.playerSpriteIndex]
 
         -- animate viewBox to scroll game level with all notes drawn inside
         -- updated: draw the current note inside the game level?
-        gameLevelSvg = svg [
-            S.viewBox (String.fromFloat (model.scrollPosition + ConstantsHelpers.scrollOffset) ++ " 0 " ++ widthS ++ " " ++ heightS)
+        gameLevelSvg = 
+          svg
+          [
+            S.viewBox (String.fromFloat (model.scrollPosition + Const.scrollOffset) ++ " 0 " ++ widthS ++ " " ++ heightS)
             , S.width widthS
             , S.height heightS
             , S.x "0", S.y "0"
@@ -60,12 +64,12 @@ view model =
 drawStaffLine yPos =
     let
         lineYString =
-            String.fromFloat (ConstantsHelpers.topMargin + (toFloat yPos * ConstantsHelpers.staffLineHeight))
+            String.fromFloat (Const.topMargin + (toFloat yPos * Const.staffLineHeight))
     in
     line
         [ S.x1 "0"
         , S.y1 lineYString
-        , S.x2 (String.fromFloat (ConstantsHelpers.leftMargin + ConstantsHelpers.svgViewWidth))
+        , S.x2 (String.fromFloat (Const.leftMargin + Const.svgViewWidth))
 --        , S.x2 (String.fromFloat staffWidth)
         , S.y2 lineYString
         , S.stroke "black"
@@ -77,36 +81,37 @@ drawStaffLine yPos =
 trebleClef =
     let
         xS =
-            String.fromFloat ConstantsHelpers.trebleLeftMargin
+            String.fromFloat Const.trebleLeftMargin
 
         yS =
-            String.fromFloat (ConstantsHelpers.topMargin + (ConstantsHelpers.staffLineHeight * 5.75))
+            String.fromFloat (Const.topMargin + (Const.staffLineHeight * 5.75))
 
-        fontSizeS = String.fromFloat (ConstantsHelpers.svgViewWidth * 0.4214)
+        fontSizeS = String.fromFloat (Const.svgViewWidth * 0.4214)
     in
     text_ [ S.x xS, S.y yS, S.fontSize fontSizeS ] [ HTML.text "𝄞" ]
 
 
 
 drawAllTargetNotes : Int -> Int -> Array Note -> List (Svg msg)
-drawAllTargetNotes spriteIndex targetNoteIndex notes =
+drawAllTargetNotes spriteIndex nextTargetNoteIndex notes =
     let 
         noteList = Array.toList notes
     in
-      List.indexedMap (drawTargetNote spriteIndex targetNoteIndex) noteList 
+      List.indexedMap (drawTargetNote spriteIndex nextTargetNoteIndex) noteList 
+
 
 drawTargetNote : Int -> Int -> Int -> Note -> Svg msg
-drawTargetNote spriteIndex targetNoteIndex xPosIndex note =
+drawTargetNote spriteIndex nextTargetNoteIndex xPosIndex note =
     let
-        y = ConstantsHelpers.getNoteYPos note.midi
+        y = Note.getNoteY note.midi
 
-        x = ConstantsHelpers.getNoteXPos xPosIndex
+        x = Note.getNoteX xPosIndex
 
         spriteImage = 
-          if xPosIndex > (targetNoteIndex - 1) then -- future notes are "next targets"
-            ConstantsHelpers.nextTargetSpriteImage
+          if xPosIndex > (nextTargetNoteIndex - 1) then -- future notes are "next targets"
+            Const.nextTargetSpriteImage
           else
-            ConstantsHelpers.correctTargetSpriteImage -- prev/cur notes are correct
+            Const.correctTargetSpriteImage -- prev/cur notes are correct
 
     in
       View.Target.view x y spriteIndex spriteImage

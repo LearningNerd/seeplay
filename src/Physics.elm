@@ -2,7 +2,9 @@ module Physics exposing (..)
 
 
 import Model exposing (Vector)
-import ConstantsHelpers as Const exposing (accelYMillis, getNoteYPos, svgViewHeight, shortJumpDurMillis, baseJumpDurMillis, longJumpDurMillis)
+import ConstantsHelpers as Const exposing (accelYMillis, svgViewHeight, shortJumpDurMillis, baseJumpDurMillis, longJumpDurMillis)
+import Note
+
 
 -- Given start pos, target pos, duration, vert acceleration
 -- return new velocity for the next jump
@@ -45,8 +47,8 @@ updateJumpDur curPos targetPos =
 
 updateTargetPos midiCode noteIndex =
   let
-    newX = Const.getNoteXPos noteIndex
-    newY = Const.getNoteYPos midiCode
+    newX = Note.getNoteX noteIndex
+    newY = Note.getNoteY midiCode
   in
      Vector newX newY
 

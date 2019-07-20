@@ -1,8 +1,6 @@
 module ConstantsHelpers exposing (..)
 
 
-import Note exposing (Note)
-
 --------------------------------------------------------------------------------
 ------------          Constants
 --------------------------------------------------------------------------------
@@ -95,13 +93,4 @@ convertFramesToMillisDuration durationFrames fps =
   durationFrames * 1000/fps
 
 
-getNoteXPos noteIndex =
-  leftMargin + ((toFloat noteIndex) * (toFloat noteXInterval) )
-
-
-getNoteYPos midiCode =
-  let
-    yPosFloat = toFloat (Note.getHeight midiCode)
-  in
-    topMargin + (yPosFloat * staffLineHeight / 2)
 

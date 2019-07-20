@@ -3,7 +3,7 @@ module Note exposing (..)
 
 import Array exposing (..)
 import Random
-
+import ConstantsHelpers as Const
 import Msg exposing (Msg)
 
 
@@ -11,9 +11,6 @@ type alias Note =
     { noteName : NoteName -- ("C", 4)
     , midi : Int -- from 21 to 108, for piano
     , frequency : Float
-    
-
-    -- , animState : Animation.Messenger.State Msg
     }
 
 
@@ -29,21 +26,53 @@ createNote midiCode =
     }
 
 
-getHeight midiCode = 
-  case midiCode of
-    60 -> 11
-    62 -> 10
-    64 -> 9
-    65 -> 8
-    67 -> 7
-    69 -> 6
-    71 -> 5
-    72 -> 4
-    74 -> 3
-    76 -> 2
-    77 -> 1
-    79 -> 0
-    _ -> 12
+
+getNoteHeightIndex midiCode = 
+  let
+      -- Map 21 (lowest piano key, A0) to 0, shift all values
+      semitoneIndex = remainderBy 12 (midiCode - 21)
+    -- Map the chromatic scale (12 semitones) to the diatonic scale (8)
+      diatonicIndex = 
+        case semitoneIndex of
+            0 -> 0 -- A
+            1 -> 0 -- A#
+
+            2 -> 1 -- B
+
+            3 -> 2 -- C
+            4 -> 2 -- C#
+
+            5 -> 3 -- D
+            6 -> 3 -- D#
+
+            7 -> 4 -- E
+
+            8 -> 5 -- F
+            9 -> 5 -- F#
+
+            10 -> 6 -- G
+            11 -> 6 -- G#
+
+            _ -> 0
+
+      octaveMultiple = (midiCode - 21) // 12
+  in
+      diatonicIndex + (octaveMultiple * 7)
+
+
+-- position 0 is midiCode 21, at the lowest end of the staff
+getNoteY midiCode =
+  let
+    noteHeightIndex = getNoteHeightIndex midiCode
+  in
+    Const.topMargin + ( (toFloat noteHeightIndex) * Const.staffLineHeight / 2)
+
+
+
+getNoteX noteIndex =
+  Const.leftMargin + ((toFloat noteIndex) * (toFloat Const.noteXInterval) )
+
+
 
 
 -- Generate list of [num] random midi codes

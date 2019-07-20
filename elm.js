@@ -9850,46 +9850,51 @@ var author$project$ConstantsHelpers$rightMargin = 0;
 var author$project$ConstantsHelpers$svgViewWidth = 1400;
 var author$project$ConstantsHelpers$svgViewTotalWidth = (author$project$ConstantsHelpers$svgViewWidth + author$project$ConstantsHelpers$leftMargin) + author$project$ConstantsHelpers$rightMargin;
 var author$project$ConstantsHelpers$correctTargetSpriteImage = 'img/happycloud-59w-44h-5i.png';
+var author$project$ConstantsHelpers$nextTargetSpriteImage = 'img/raincloud-59w-44h-5i.png';
 var author$project$ConstantsHelpers$noteXInterval = 300;
-var author$project$ConstantsHelpers$getNoteXPos = function (noteIndex) {
+var author$project$Note$getNoteX = function (noteIndex) {
 	return author$project$ConstantsHelpers$leftMargin + (noteIndex * author$project$ConstantsHelpers$noteXInterval);
 };
 var author$project$ConstantsHelpers$staffLineHeight = author$project$ConstantsHelpers$svgViewHeight / 6;
-var author$project$Note$getHeight = function (midiCode) {
-	switch (midiCode) {
-		case 60:
-			return 11;
-		case 62:
-			return 10;
-		case 64:
-			return 9;
-		case 65:
-			return 8;
-		case 67:
-			return 7;
-		case 69:
-			return 6;
-		case 71:
-			return 5;
-		case 72:
-			return 4;
-		case 74:
-			return 3;
-		case 76:
-			return 2;
-		case 77:
-			return 1;
-		case 79:
-			return 0;
-		default:
-			return 12;
-	}
+var author$project$Note$getNoteHeightIndex = function (midiCode) {
+	var semitoneIndex = (midiCode - 21) % 12;
+	var octaveMultiple = ((midiCode - 21) / 12) | 0;
+	var diatonicIndex = function () {
+		switch (semitoneIndex) {
+			case 0:
+				return 0;
+			case 1:
+				return 0;
+			case 2:
+				return 1;
+			case 3:
+				return 2;
+			case 4:
+				return 2;
+			case 5:
+				return 3;
+			case 6:
+				return 3;
+			case 7:
+				return 4;
+			case 8:
+				return 5;
+			case 9:
+				return 5;
+			case 10:
+				return 6;
+			case 11:
+				return 6;
+			default:
+				return 0;
+		}
+	}();
+	return diatonicIndex + (octaveMultiple * 7);
 };
-var author$project$ConstantsHelpers$getNoteYPos = function (midiCode) {
-	var yPosFloat = author$project$Note$getHeight(midiCode);
-	return author$project$ConstantsHelpers$topMargin + ((yPosFloat * author$project$ConstantsHelpers$staffLineHeight) / 2);
+var author$project$Note$getNoteY = function (midiCode) {
+	var noteHeightIndex = author$project$Note$getNoteHeightIndex(midiCode);
+	return author$project$ConstantsHelpers$topMargin + ((noteHeightIndex * author$project$ConstantsHelpers$staffLineHeight) / 2);
 };
-var author$project$ConstantsHelpers$nextTargetSpriteImage = 'img/raincloud-59w-44h-5i.png';
 var author$project$View$Target$baseSpriteHeight = 44;
 var author$project$View$Target$baseSpriteWidth = 59;
 var author$project$View$Target$spriteHeight = author$project$ConstantsHelpers$staffLineHeight * 1;
@@ -9943,18 +9948,18 @@ var author$project$View$Target$view = F4(
 				]));
 	});
 var author$project$View$Game$drawTargetNote = F4(
-	function (spriteIndex, targetNoteIndex, xPosIndex, note) {
-		var y = author$project$ConstantsHelpers$getNoteYPos(note.midi);
-		var x = author$project$ConstantsHelpers$getNoteXPos(xPosIndex);
-		var spriteImage = (_Utils_cmp(xPosIndex, targetNoteIndex - 1) > 0) ? author$project$ConstantsHelpers$nextTargetSpriteImage : author$project$ConstantsHelpers$correctTargetSpriteImage;
+	function (spriteIndex, nextTargetNoteIndex, xPosIndex, note) {
+		var y = author$project$Note$getNoteY(note.midi);
+		var x = author$project$Note$getNoteX(xPosIndex);
+		var spriteImage = (_Utils_cmp(xPosIndex, nextTargetNoteIndex - 1) > 0) ? author$project$ConstantsHelpers$nextTargetSpriteImage : author$project$ConstantsHelpers$correctTargetSpriteImage;
 		return A4(author$project$View$Target$view, x, y, spriteIndex, spriteImage);
 	});
 var author$project$View$Game$drawAllTargetNotes = F3(
-	function (spriteIndex, targetNoteIndex, notes) {
+	function (spriteIndex, nextTargetNoteIndex, notes) {
 		var noteList = elm$core$Array$toList(notes);
 		return A2(
 			elm$core$List$indexedMap,
-			A2(author$project$View$Game$drawTargetNote, spriteIndex, targetNoteIndex),
+			A2(author$project$View$Game$drawTargetNote, spriteIndex, nextTargetNoteIndex),
 			noteList);
 	});
 var elm$svg$Svg$line = elm$svg$Svg$trustedNode('line');
@@ -10203,7 +10208,7 @@ var author$project$ConstantsHelpers$playerInitialNote = 67;
 var author$project$ConstantsHelpers$playerInitialXPosition = 0;
 var author$project$Model$initialPlayerPos = {
 	x: author$project$ConstantsHelpers$playerInitialXPosition,
-	y: author$project$ConstantsHelpers$getNoteYPos(author$project$ConstantsHelpers$playerInitialNote)
+	y: author$project$Note$getNoteY(author$project$ConstantsHelpers$playerInitialNote)
 };
 var elm$core$Basics$pow = _Basics_pow;
 var author$project$Note$midiToFrequency = function (midiCode) {
@@ -10546,8 +10551,8 @@ var author$project$Update$updateScoreAndTargetIfCorrect = function (gameModel) {
 	}();
 	var newTargetPos = A2(
 		author$project$Model$Vector,
-		author$project$ConstantsHelpers$getNoteXPos(newNextTargetNoteIndex - 1),
-		author$project$ConstantsHelpers$getNoteYPos(currentMidiCode));
+		author$project$Note$getNoteX(newNextTargetNoteIndex - 1),
+		author$project$Note$getNoteY(currentMidiCode));
 	return _Utils_update(
 		gameModel,
 		{nextTargetNoteIndex: newNextTargetNoteIndex, nextTargetPos: newTargetPos, score: gameModel.score + 1});

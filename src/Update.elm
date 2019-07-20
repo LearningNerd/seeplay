@@ -230,8 +230,8 @@ updateScoreAndTargetIfCorrect gameModel =
 -- animation will jump to: next note, or up to incorrect note
     newTargetPos = 
         Vector
-          (Const.getNoteXPos (newNextTargetNoteIndex - 1))
-          (Const.getNoteYPos currentMidiCode)
+          (Note.getNoteX (newNextTargetNoteIndex - 1))
+          (Note.getNoteY currentMidiCode)
   in
     { gameModel | score = gameModel.score + 1
     , nextTargetNoteIndex = newNextTargetNoteIndex
