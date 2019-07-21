@@ -63,9 +63,24 @@ getNoteHeightIndex midiCode =
 -- position 0 is midiCode 21, at the lowest end of the staff
 getNoteY midiCode =
   let
-    noteHeightIndex = getNoteHeightIndex midiCode
+    noteHeightIndex = (getNoteHeightIndex midiCode)
+    -- x = Debug.log "totalheight" Const.svgViewTotalHeight
+    -- y = Debug.log "lineheight/2" (Const.staffLineHeight/2)
+    -- z = Debug.log "noteHeightIndex" noteHeightIndex
+
+    -- b = Debug.log "noteHeightIndex * staffLineHeight/2   " ((toFloat noteHeightIndex) * Const.staffLineHeight / 2)
+
+    -- a = Const.topMargin +
+        -- ( Const.svgViewTotalHeight - 
+          -- ((toFloat noteHeightIndex) * Const.staffLineHeight / 2)
+        -- )
+    -- zzz = Debug.log "totalheight - ^   " a
+
   in
-    Const.topMargin + ( (toFloat noteHeightIndex) * Const.staffLineHeight / 2)
+    Const.topMargin +
+    ( Const.svgViewTotalHeight - 
+      ((toFloat noteHeightIndex) * Const.staffLineHeight / 2)
+    )
 
 
 
@@ -78,7 +93,10 @@ getNoteX noteIndex =
 -- Generate list of [num] random midi codes
 getRandomMidiList : Int -> Random.Generator (List Int)
 getRandomMidiList num =
-    Random.list num <| Random.uniform 60 [64, 67]
+    -- Random.list num <| Random.uniform 60 [64, 67]
+
+    -- BASS TO TREBLE (no ledger lines), including middle C
+    Random.list num <| Random.uniform 41 (List.range 42 80)
 {--
   Random.list num <| Random.uniform 60 [ 62
    , 64

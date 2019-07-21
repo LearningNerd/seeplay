@@ -9,13 +9,13 @@ notesPerLevel = 100
 
 noteXInterval = 300
 
-svgViewWidth = 1400
-svgViewHeight = 400
+svgViewWidth = 5300
+svgViewHeight = 2600
 
-staffLineHeight = svgViewHeight / 6
+staffLineHeight = svgViewHeight / 26
 
-topMargin = 50
-bottomMargin = 50
+topMargin = 0
+bottomMargin = 0
 leftMargin = 300 ---- shifts target notes, not player
 rightMargin = 0
 

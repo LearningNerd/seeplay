@@ -44,11 +44,9 @@ view model =
         Game gameModel -> View.Game.view gameModel
   in
     div [ ]
-        [ View.Header.view model
-        , main_ [A.class "gameContainer"]
-            [ Html.p [] [] -- ..why empty p???
-            , currentView
-            ]
+        [ 
+        View.Header.view model
+        , main_ [A.class "gameContainer"] [currentView]
         ]
 
  

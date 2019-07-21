@@ -9841,13 +9841,13 @@ var author$project$Main$subscriptions = function (model) {
 			]));
 };
 var author$project$ConstantsHelpers$scrollOffset = -900;
-var author$project$ConstantsHelpers$bottomMargin = 50;
-var author$project$ConstantsHelpers$svgViewHeight = 400;
-var author$project$ConstantsHelpers$topMargin = 50;
+var author$project$ConstantsHelpers$bottomMargin = 0;
+var author$project$ConstantsHelpers$svgViewHeight = 2600;
+var author$project$ConstantsHelpers$topMargin = 0;
 var author$project$ConstantsHelpers$svgViewTotalHeight = (author$project$ConstantsHelpers$svgViewHeight + author$project$ConstantsHelpers$topMargin) + author$project$ConstantsHelpers$bottomMargin;
 var author$project$ConstantsHelpers$leftMargin = 300;
 var author$project$ConstantsHelpers$rightMargin = 0;
-var author$project$ConstantsHelpers$svgViewWidth = 1400;
+var author$project$ConstantsHelpers$svgViewWidth = 5300;
 var author$project$ConstantsHelpers$svgViewTotalWidth = (author$project$ConstantsHelpers$svgViewWidth + author$project$ConstantsHelpers$leftMargin) + author$project$ConstantsHelpers$rightMargin;
 var author$project$ConstantsHelpers$correctTargetSpriteImage = 'img/happycloud-59w-44h-5i.png';
 var author$project$ConstantsHelpers$nextTargetSpriteImage = 'img/raincloud-59w-44h-5i.png';
@@ -9855,7 +9855,7 @@ var author$project$ConstantsHelpers$noteXInterval = 300;
 var author$project$Note$getNoteX = function (noteIndex) {
 	return author$project$ConstantsHelpers$leftMargin + (noteIndex * author$project$ConstantsHelpers$noteXInterval);
 };
-var author$project$ConstantsHelpers$staffLineHeight = author$project$ConstantsHelpers$svgViewHeight / 6;
+var author$project$ConstantsHelpers$staffLineHeight = author$project$ConstantsHelpers$svgViewHeight / 26;
 var author$project$Note$getNoteHeightIndex = function (midiCode) {
 	var semitoneIndex = (midiCode - 21) % 12;
 	var octaveMultiple = ((midiCode - 21) / 12) | 0;
@@ -9893,7 +9893,7 @@ var author$project$Note$getNoteHeightIndex = function (midiCode) {
 };
 var author$project$Note$getNoteY = function (midiCode) {
 	var noteHeightIndex = author$project$Note$getNoteHeightIndex(midiCode);
-	return author$project$ConstantsHelpers$topMargin + ((noteHeightIndex * author$project$ConstantsHelpers$staffLineHeight) / 2);
+	return author$project$ConstantsHelpers$topMargin + (author$project$ConstantsHelpers$svgViewTotalHeight - ((noteHeightIndex * author$project$ConstantsHelpers$staffLineHeight) / 2));
 };
 var author$project$View$Target$baseSpriteHeight = 44;
 var author$project$View$Target$baseSpriteWidth = 59;
@@ -9962,47 +9962,6 @@ var author$project$View$Game$drawAllTargetNotes = F3(
 			A2(author$project$View$Game$drawTargetNote, spriteIndex, nextTargetNoteIndex),
 			noteList);
 	});
-var elm$svg$Svg$line = elm$svg$Svg$trustedNode('line');
-var elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
-var elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
-var elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
-var elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
-var elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
-var author$project$View$Game$drawStaffLine = function (yPos) {
-	var lineYString = elm$core$String$fromFloat(author$project$ConstantsHelpers$topMargin + (yPos * author$project$ConstantsHelpers$staffLineHeight));
-	return A2(
-		elm$svg$Svg$line,
-		_List_fromArray(
-			[
-				elm$svg$Svg$Attributes$x1('0'),
-				elm$svg$Svg$Attributes$y1(lineYString),
-				elm$svg$Svg$Attributes$x2(
-				elm$core$String$fromFloat(author$project$ConstantsHelpers$leftMargin + author$project$ConstantsHelpers$svgViewWidth)),
-				elm$svg$Svg$Attributes$y2(lineYString),
-				elm$svg$Svg$Attributes$stroke('black')
-			]),
-		_List_Nil);
-};
-var author$project$ConstantsHelpers$trebleLeftMargin = 20;
-var elm$svg$Svg$text_ = elm$svg$Svg$trustedNode('text');
-var elm$svg$Svg$Attributes$fontSize = _VirtualDom_attribute('font-size');
-var author$project$View$Game$trebleClef = function () {
-	var yS = elm$core$String$fromFloat(author$project$ConstantsHelpers$topMargin + (author$project$ConstantsHelpers$staffLineHeight * 5.75));
-	var xS = elm$core$String$fromFloat(author$project$ConstantsHelpers$trebleLeftMargin);
-	var fontSizeS = elm$core$String$fromFloat(author$project$ConstantsHelpers$svgViewWidth * 0.4214);
-	return A2(
-		elm$svg$Svg$text_,
-		_List_fromArray(
-			[
-				elm$svg$Svg$Attributes$x(xS),
-				elm$svg$Svg$Attributes$y(yS),
-				elm$svg$Svg$Attributes$fontSize(fontSizeS)
-			]),
-		_List_fromArray(
-			[
-				elm$html$Html$text('𝄞')
-			]));
-}();
 var author$project$View$Player$baseSpriteHeight = 11;
 var author$project$View$Player$baseSpriteWidth = 12;
 var author$project$View$Player$spriteHeight = author$project$ConstantsHelpers$staffLineHeight * 0.5;
@@ -10038,6 +9997,53 @@ var author$project$View$Player$view = F3(
 					_List_Nil)
 				]));
 	});
+var elm$svg$Svg$line = elm$svg$Svg$trustedNode('line');
+var elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
+var elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
+var elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
+var elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
+var elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
+var author$project$View$Staff$drawStaffLine = F2(
+	function (colorString, yPos) {
+		var lineYString = elm$core$String$fromFloat(author$project$ConstantsHelpers$topMargin + (yPos * author$project$ConstantsHelpers$staffLineHeight));
+		return A2(
+			elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					elm$svg$Svg$Attributes$x1('0'),
+					elm$svg$Svg$Attributes$y1(lineYString),
+					elm$svg$Svg$Attributes$x2(
+					elm$core$String$fromFloat(author$project$ConstantsHelpers$svgViewTotalWidth)),
+					elm$svg$Svg$Attributes$y2(lineYString),
+					elm$svg$Svg$Attributes$stroke(colorString)
+				]),
+			_List_Nil);
+	});
+var author$project$View$Staff$view = _Utils_ap(
+	A2(
+		elm$core$List$map,
+		author$project$View$Staff$drawStaffLine('white'),
+		A2(elm$core$List$range, 1, 9)),
+	_Utils_ap(
+		A2(
+			elm$core$List$map,
+			author$project$View$Staff$drawStaffLine('black'),
+			A2(elm$core$List$range, 10, 14)),
+		_Utils_ap(
+			A2(
+				elm$core$List$map,
+				author$project$View$Staff$drawStaffLine('white'),
+				_List_fromArray(
+					[15])),
+			_Utils_ap(
+				A2(
+					elm$core$List$map,
+					author$project$View$Staff$drawStaffLine('black'),
+					A2(elm$core$List$range, 16, 20)),
+				A2(
+					elm$core$List$map,
+					author$project$View$Staff$drawStaffLine('white'),
+					A2(elm$core$List$range, 21, 26))))));
 var author$project$View$Game$view = function (model) {
 	var y = model.player.currentPos.y;
 	var x = model.player.currentPos.x;
@@ -10072,21 +10078,13 @@ var author$project$View$Game$view = function (model) {
 		elm$svg$Svg$svg,
 		_List_fromArray(
 			[
-				elm$svg$Svg$Attributes$width(widthS),
-				elm$svg$Svg$Attributes$height(heightS),
 				elm$svg$Svg$Attributes$viewBox('0 0 ' + (widthS + (' ' + heightS))),
 				elm$svg$Svg$Attributes$class('center')
 			]),
 		_Utils_ap(
-			A2(
-				elm$core$List$map,
-				author$project$View$Game$drawStaffLine,
-				A2(elm$core$List$range, 1, 5)),
-			_Utils_ap(
-				_List_fromArray(
-					[gameLevelSvg]),
-				_List_fromArray(
-					[author$project$View$Game$trebleClef]))));
+			author$project$View$Staff$view,
+			_List_fromArray(
+				[gameLevelSvg])));
 };
 var elm$html$Html$h1 = _VirtualDom_node('h1');
 var elm$html$Html$header = _VirtualDom_node('header');
@@ -10186,10 +10184,7 @@ var author$project$Main$view = function (model) {
 						elm$html$Html$Attributes$class('gameContainer')
 					]),
 				_List_fromArray(
-					[
-						A2(elm$html$Html$p, _List_Nil, _List_Nil),
-						currentView
-					]))
+					[currentView]))
 			]));
 };
 var author$project$ConstantsHelpers$notesPerLevel = 100;
@@ -10407,9 +10402,8 @@ var author$project$Note$getRandomMidiList = function (num) {
 		num,
 		A2(
 			elm$random$Random$uniform,
-			60,
-			_List_fromArray(
-				[64, 67])));
+			41,
+			A2(elm$core$List$range, 42, 80)));
 };
 var author$project$Update$generateTargetNotes = F2(
 	function (model, midiCodeList) {
