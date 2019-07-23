@@ -9857,6 +9857,7 @@ var author$project$Note$getNoteX = function (noteIndex) {
 };
 var author$project$ConstantsHelpers$staffLineHeight = author$project$ConstantsHelpers$svgViewHeight / 26;
 var author$project$Note$getNoteHeightIndex = function (midiCode) {
+	var shiftBassClef = (midiCode < 60) ? (-3) : 0;
 	var semitoneIndex = (midiCode - 21) % 12;
 	var octaveMultiple = ((midiCode - 21) / 12) | 0;
 	var diatonicIndex = function () {
@@ -9889,7 +9890,7 @@ var author$project$Note$getNoteHeightIndex = function (midiCode) {
 				return 0;
 		}
 	}();
-	return diatonicIndex + (octaveMultiple * 7);
+	return (shiftBassClef + diatonicIndex) + (octaveMultiple * 7);
 };
 var author$project$Note$getNoteY = function (midiCode) {
 	var noteHeightIndex = author$project$Note$getNoteHeightIndex(midiCode);
@@ -10033,17 +10034,16 @@ var author$project$View$Staff$view = _Utils_ap(
 			A2(
 				elm$core$List$map,
 				author$project$View$Staff$drawStaffLine('white'),
-				_List_fromArray(
-					[15])),
+				A2(elm$core$List$range, 15, 17)),
 			_Utils_ap(
 				A2(
 					elm$core$List$map,
 					author$project$View$Staff$drawStaffLine('black'),
-					A2(elm$core$List$range, 16, 20)),
+					A2(elm$core$List$range, 18, 21)),
 				A2(
 					elm$core$List$map,
 					author$project$View$Staff$drawStaffLine('white'),
-					A2(elm$core$List$range, 21, 26))))));
+					A2(elm$core$List$range, 22, 27))))));
 var author$project$View$Game$view = function (model) {
 	var y = model.player.currentPos.y;
 	var x = model.player.currentPos.x;

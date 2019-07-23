@@ -31,7 +31,28 @@ getNoteHeightIndex midiCode =
   let
       -- Map 21 (lowest piano key, A0) to 0, shift all values
       semitoneIndex = remainderBy 12 (midiCode - 21)
-    -- Map the chromatic scale (12 semitones) to the diatonic scale (8)
+
+      -- ****************************
+      -- ****************************
+      -- ****************************
+      -- ****************************
+      
+      -- If in the bass clef, shift position down by 3 units
+      -- (right now, that's anything below middle C, midi code 60)
+      -- note: pos here is bottom to top, where 0 is the lowest,
+      -- so the offset is negative (it gets flipped when translating to pixel values)
+      shiftBassClef =
+        if midiCode < 60 then
+           -3
+        else
+          0
+
+      -- ****************************
+      -- ****************************
+      -- ****************************
+      -- ****************************
+
+      -- Map the chromatic scale (12 semitones) to the diatonic scale (8)
       diatonicIndex = 
         case semitoneIndex of
             0 -> 0 -- A
@@ -57,7 +78,7 @@ getNoteHeightIndex midiCode =
 
       octaveMultiple = (midiCode - 21) // 12
   in
-      diatonicIndex + (octaveMultiple * 7)
+      shiftBassClef + diatonicIndex + (octaveMultiple * 7)
 
 
 -- position 0 is midiCode 21, at the lowest end of the staff

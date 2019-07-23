@@ -20,11 +20,6 @@ import Msg exposing (..)
 view : List (Svg Msg)
 view =
   (
-    -- List.map drawStaffLine (List.range 1 5)
-    -- -- -- skip 3 spaces .... total: 13
-    -- ++ List.map drawStaffLine (List.range 8 12)
-
-
     ---------------   treble ledger lines
     ---------------   pos 51 to 35
     List.map (drawStaffLine "white") (List.range 1 9)
@@ -33,26 +28,23 @@ view =
     ---------------   pos 64  to 33
     List.map (drawStaffLine "black") (List.range 10 14)
     ++
-    ---------------   MIDDLE C 
+    ---------------   MIDDLE C and gap between treble and bass clefs
     ---------------   pos 23 (MIDI 60)
-    List.map (drawStaffLine "white") [15]
+    List.map (drawStaffLine "white") (List.range 15 17)
     ++
     ---------------   BASS
     ---------------   pos 21 to 13
-    List.map (drawStaffLine "black") (List.range 16 20)
+    List.map (drawStaffLine "black") (List.range 18 21)
     ++
     ---------------   bass ledger lines
     ---------------   pos 11 to 1
-    List.map (drawStaffLine "white") (List.range 21 26)
+    List.map (drawStaffLine "white") (List.range 22 27)
   )
 
 -- remove for now, need to redo as an SVG shape instead of text
     -- and size/position it dynamically....
     -- .... same for bass clef
     -- ++ [trebleClef]
-
-
-
 
 
 drawStaffLine colorString yPos =
@@ -71,7 +63,6 @@ drawStaffLine colorString yPos =
         []
 
 
-
 trebleClef =
     let
         xS =
@@ -83,5 +74,4 @@ trebleClef =
         fontSizeS = String.fromFloat (Const.svgViewWidth * 0.4214)
     in
     text_ [ S.x xS, S.y yS, S.fontSize fontSizeS ] [ HTML.text "𝄞" ]
-
 
