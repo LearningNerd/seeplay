@@ -9898,11 +9898,28 @@ var author$project$Note$getNoteY = function (midiCode) {
 };
 var author$project$View$Target$baseSpriteHeight = 44;
 var author$project$View$Target$baseSpriteWidth = 59;
+var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var elm$svg$Svg$line = elm$svg$Svg$trustedNode('line');
+var elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
+var elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
+var elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
+var elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
+var elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
+var author$project$View$Target$lineTest = A2(
+	elm$svg$Svg$line,
+	_List_fromArray(
+		[
+			elm$svg$Svg$Attributes$x1('0'),
+			elm$svg$Svg$Attributes$y1('20'),
+			elm$svg$Svg$Attributes$x2('500'),
+			elm$svg$Svg$Attributes$y2('20'),
+			elm$svg$Svg$Attributes$stroke('black')
+		]),
+	_List_Nil);
 var author$project$View$Target$spriteHeight = author$project$ConstantsHelpers$staffLineHeight * 1;
 var author$project$View$Target$widthToHeightRatio = author$project$View$Target$baseSpriteWidth / author$project$View$Target$baseSpriteHeight;
 var author$project$View$Target$spriteWidth = (author$project$ConstantsHelpers$staffLineHeight * 1) * author$project$View$Target$widthToHeightRatio;
 var elm$core$String$fromFloat = _String_fromNumber;
-var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
 var elm$svg$Svg$image = elm$svg$Svg$trustedNode('image');
 var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
 var elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
@@ -9945,7 +9962,8 @@ var author$project$View$Target$view = F4(
 						[
 							elm$svg$Svg$Attributes$xlinkHref(spriteImage)
 						]),
-					_List_Nil)
+					_List_Nil),
+					author$project$View$Target$lineTest
 				]));
 	});
 var author$project$View$Game$drawTargetNote = F4(
@@ -9998,12 +10016,6 @@ var author$project$View$Player$view = F3(
 					_List_Nil)
 				]));
 	});
-var elm$svg$Svg$line = elm$svg$Svg$trustedNode('line');
-var elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
-var elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
-var elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
-var elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
-var elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
 var author$project$View$Staff$drawStaffLine = F2(
 	function (colorString, yPos) {
 		var lineYString = elm$core$String$fromFloat(author$project$ConstantsHelpers$topMargin + (yPos * author$project$ConstantsHelpers$staffLineHeight));

@@ -44,3 +44,14 @@ view xPos yPos spriteIndex spriteImage =
     ]
     [ image [xlinkHref spriteImage] [] ]
 
+
+lineTest xPosFloat yPosString =
+    line
+        [ x1 (String.fromFloat xPosFloat)
+        , y1 yPosString
+        , x2 (String.fromFloat (xPosFloat + 50))
+        , y2 yPosString
+        , stroke "black"
+        ]
+        []
+
