@@ -32,11 +32,7 @@ getNoteHeightIndex midiCode =
       -- Map 21 (lowest piano key, A0) to 0, shift all values
       semitoneIndex = remainderBy 12 (midiCode - 21)
 
-      -- ****************************
-      -- ****************************
-      -- ****************************
-      -- ****************************
-      
+
       -- If in the bass clef, shift position down by 3 units
       -- (right now, that's anything below middle C, midi code 60)
       -- note: pos here is bottom to top, where 0 is the lowest,
@@ -47,11 +43,6 @@ getNoteHeightIndex midiCode =
            -4
         else
           0
-
-      -- ****************************
-      -- ****************************
-      -- ****************************
-      -- ****************************
 
       -- Map the chromatic scale (12 semitones) to the diatonic scale (8)
       diatonicIndex = 
@@ -80,6 +71,31 @@ getNoteHeightIndex midiCode =
       octaveMultiple = (midiCode - 21) // 12
   in
       shiftBassClef + diatonicIndex + (octaveMultiple * 7)
+
+
+-- Given the note height index (from getNoteHeightIndex),
+-- return a list of note height indeces of each ledger line
+-- to be drawn for a given note
+getLedgerLineHeightIndeces noteHeightIndex =
+  let
+    trebleLedgerLines = [35, 37, 39, 41, 43, 45, 47, 49, 51]
+    bassLedgerLines = [11, 9, 7, 5, 3, 1]
+    middleC = [23]
+  in
+      if noteHeightIndex > 34 then
+         trebleLedgerLines
+            |> List.take (1 + (noteHeightIndex - 35) // 2)
+
+      else if noteHeightIndex < 12 then
+         bassLedgerLines
+            |> List.take (1 + (11 - noteHeightIndex) // 2)
+      
+      else if noteHeightIndex == 23 then
+        middleC
+
+      else
+        []
+
 
 
 -- position 0 is midiCode 21, at the lowest end of the staff
