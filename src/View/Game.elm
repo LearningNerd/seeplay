@@ -60,27 +60,24 @@ view model =
 
 
 
-drawAllTargetNotes : Int -> Int -> Array Note -> List (Svg msg)
+drawAllTargetNotes : Int -> Int -> Array Note -> List (Svg Msg)
 drawAllTargetNotes spriteIndex nextTargetNoteIndex notes =
     let 
         noteList = Array.toList notes
     in
-      List.indexedMap (drawTargetNote spriteIndex nextTargetNoteIndex) noteList 
+      List.concat <| List.indexedMap (drawTargetNote spriteIndex nextTargetNoteIndex) noteList 
 
 
-drawTargetNote : Int -> Int -> Int -> Note -> Svg msg
+-- Return a list containing the note sprite AND ledger line
+-- (if applicable)
+drawTargetNote : Int -> Int -> Int -> Note -> List (Svg Msg)
 drawTargetNote spriteIndex nextTargetNoteIndex xPosIndex note =
     let
-        y = Note.getNoteY note.midi
-
-        x = Note.getNoteX xPosIndex
-
         spriteImage = 
           if xPosIndex > (nextTargetNoteIndex - 1) then -- future notes are "next targets"
             Const.nextTargetSpriteImage
           else
             Const.correctTargetSpriteImage -- prev/cur notes are correct
-
     in
-      View.Target.view x y spriteIndex spriteImage
+      View.Target.view xPosIndex note.midi spriteIndex spriteImage
 

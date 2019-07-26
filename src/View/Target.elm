@@ -3,6 +3,8 @@ module View.Target exposing (view, numSpriteFrames)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import ConstantsHelpers
+import Msg exposing (Msg)
+import Note
 
 
 {-- coin sprite dimensions:
@@ -28,29 +30,47 @@ spriteWidth = (ConstantsHelpers.staffLineHeight * 0.8) * widthToHeightRatio
 spriteHeight = ConstantsHelpers.staffLineHeight * 0.8
 --}
 
-view xPos yPos spriteIndex spriteImage =
+view : Int -> Int -> Int -> String -> List (Svg Msg)
+view xPosIndex midiCode spriteIndex spriteImage =
   let
+    xPos = Note.getNoteX xPosIndex
+    yPos = Note.getNoteY midiCode
+
+    xOffset = -25
+    yOffset = 5
+    xP = xPos + xOffset -- center it...?
+    yP = yPos + yOffset
+
     viewBoxStartXString = String.fromInt (spriteIndex * baseSpriteWidth)
-    xS = String.fromFloat (xPos - 25) -- center it...?
-    yS = String.fromFloat (yPos + 5)
+
+    ledgerLineMiddleC = 
+        if midiCode == 60 then
+          (lineTest xP yP)
+        else
+           text ""
+
   in
-    svg
-    [ viewBox (viewBoxStartXString ++ " 0 " ++ String.fromFloat baseSpriteWidth ++ " " ++ String.fromFloat baseSpriteHeight)
-    , width (String.fromFloat spriteWidth)
-    , height (String.fromFloat spriteHeight)
-    , x xS
-    , y yS
-    , class "sprite"
+    [
+      ledgerLineMiddleC
+      , svg
+      [ viewBox (viewBoxStartXString ++ " 0 " ++ String.fromFloat baseSpriteWidth ++ " " ++ String.fromFloat baseSpriteHeight)
+      , width (String.fromFloat spriteWidth)
+      , height (String.fromFloat spriteHeight)
+      , x (String.fromFloat xP)
+      , y (String.fromFloat yP)
+      , class "sprite"
+      ] [ image [xlinkHref spriteImage] [] ]
     ]
-    [ image [xlinkHref spriteImage] [] ]
 
-
-lineTest xPosFloat yPosString =
+-- where xPos and yPos are the top-left corner of the sprite
+lineTest : Float -> Float -> Svg Msg
+lineTest xPos yPos =
     line
-        [ x1 (String.fromFloat xPosFloat)
-        , y1 yPosString
-        , x2 (String.fromFloat (xPosFloat + 50))
-        , y2 yPosString
+        [ x1 (String.fromFloat (xPos - spriteWidth/2))
+        , y1 (String.fromFloat (yPos + spriteHeight/2))
+
+        , x2 (String.fromFloat (xPos + spriteWidth + spriteWidth/2))
+        , y2 (String.fromFloat (yPos + spriteHeight/2))
         , stroke "black"
         ]
         []

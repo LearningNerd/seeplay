@@ -9852,12 +9852,12 @@ var author$project$ConstantsHelpers$svgViewTotalWidth = (author$project$Constant
 var author$project$ConstantsHelpers$correctTargetSpriteImage = 'img/happycloud-59w-44h-5i.png';
 var author$project$ConstantsHelpers$nextTargetSpriteImage = 'img/raincloud-59w-44h-5i.png';
 var author$project$ConstantsHelpers$noteXInterval = 300;
-var author$project$Note$getNoteX = function (noteIndex) {
-	return author$project$ConstantsHelpers$leftMargin + (noteIndex * author$project$ConstantsHelpers$noteXInterval);
+var author$project$Note$getNoteX = function (xPosIndex) {
+	return author$project$ConstantsHelpers$leftMargin + (xPosIndex * author$project$ConstantsHelpers$noteXInterval);
 };
 var author$project$ConstantsHelpers$staffLineHeight = author$project$ConstantsHelpers$svgViewHeight / 26;
 var author$project$Note$getNoteHeightIndex = function (midiCode) {
-	var shiftBassClef = (midiCode < 60) ? (-3) : 0;
+	var shiftBassClef = (midiCode < 60) ? (-4) : 0;
 	var semitoneIndex = (midiCode - 21) % 12;
 	var octaveMultiple = ((midiCode - 21) / 12) | 0;
 	var diatonicIndex = function () {
@@ -9898,6 +9898,10 @@ var author$project$Note$getNoteY = function (midiCode) {
 };
 var author$project$View$Target$baseSpriteHeight = 44;
 var author$project$View$Target$baseSpriteWidth = 59;
+var author$project$View$Target$spriteHeight = author$project$ConstantsHelpers$staffLineHeight * 1;
+var author$project$View$Target$widthToHeightRatio = author$project$View$Target$baseSpriteWidth / author$project$View$Target$baseSpriteHeight;
+var author$project$View$Target$spriteWidth = (author$project$ConstantsHelpers$staffLineHeight * 1) * author$project$View$Target$widthToHeightRatio;
+var elm$core$String$fromFloat = _String_fromNumber;
 var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
 var elm$svg$Svg$line = elm$svg$Svg$trustedNode('line');
 var elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
@@ -9905,23 +9909,27 @@ var elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
 var elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
 var elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
 var elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
-var author$project$View$Target$lineTest = A2(
-	elm$svg$Svg$line,
-	_List_fromArray(
-		[
-			elm$svg$Svg$Attributes$x1('0'),
-			elm$svg$Svg$Attributes$y1('20'),
-			elm$svg$Svg$Attributes$x2('500'),
-			elm$svg$Svg$Attributes$y2('20'),
-			elm$svg$Svg$Attributes$stroke('black')
-		]),
-	_List_Nil);
-var author$project$View$Target$spriteHeight = author$project$ConstantsHelpers$staffLineHeight * 1;
-var author$project$View$Target$widthToHeightRatio = author$project$View$Target$baseSpriteWidth / author$project$View$Target$baseSpriteHeight;
-var author$project$View$Target$spriteWidth = (author$project$ConstantsHelpers$staffLineHeight * 1) * author$project$View$Target$widthToHeightRatio;
-var elm$core$String$fromFloat = _String_fromNumber;
+var author$project$View$Target$lineTest = F2(
+	function (xPos, yPos) {
+		return A2(
+			elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					elm$svg$Svg$Attributes$x1(
+					elm$core$String$fromFloat(xPos - (author$project$View$Target$spriteWidth / 2))),
+					elm$svg$Svg$Attributes$y1(
+					elm$core$String$fromFloat(yPos + (author$project$View$Target$spriteHeight / 2))),
+					elm$svg$Svg$Attributes$x2(
+					elm$core$String$fromFloat((xPos + author$project$View$Target$spriteWidth) + (author$project$View$Target$spriteWidth / 2))),
+					elm$svg$Svg$Attributes$y2(
+					elm$core$String$fromFloat(yPos + (author$project$View$Target$spriteHeight / 2))),
+					elm$svg$Svg$Attributes$stroke('black')
+				]),
+			_List_Nil);
+	});
 var elm$svg$Svg$image = elm$svg$Svg$trustedNode('image');
 var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
+var elm$svg$Svg$text = elm$virtual_dom$VirtualDom$text;
 var elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
 var elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
 var elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
@@ -9936,50 +9944,59 @@ var elm$svg$Svg$Attributes$xlinkHref = function (value) {
 };
 var elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
 var author$project$View$Target$view = F4(
-	function (xPos, yPos, spriteIndex, spriteImage) {
-		var yS = elm$core$String$fromFloat(yPos + 5);
-		var xS = elm$core$String$fromFloat(xPos - 25);
+	function (xPosIndex, midiCode, spriteIndex, spriteImage) {
+		var yPos = author$project$Note$getNoteY(midiCode);
+		var yOffset = 5;
+		var yP = yPos + yOffset;
+		var xPos = author$project$Note$getNoteX(xPosIndex);
+		var xOffset = -25;
+		var xP = xPos + xOffset;
 		var viewBoxStartXString = elm$core$String$fromInt(spriteIndex * author$project$View$Target$baseSpriteWidth);
-		return A2(
-			elm$svg$Svg$svg,
-			_List_fromArray(
-				[
-					elm$svg$Svg$Attributes$viewBox(
-					viewBoxStartXString + (' 0 ' + (elm$core$String$fromFloat(author$project$View$Target$baseSpriteWidth) + (' ' + elm$core$String$fromFloat(author$project$View$Target$baseSpriteHeight))))),
-					elm$svg$Svg$Attributes$width(
-					elm$core$String$fromFloat(author$project$View$Target$spriteWidth)),
-					elm$svg$Svg$Attributes$height(
-					elm$core$String$fromFloat(author$project$View$Target$spriteHeight)),
-					elm$svg$Svg$Attributes$x(xS),
-					elm$svg$Svg$Attributes$y(yS),
-					elm$svg$Svg$Attributes$class('sprite')
-				]),
-			_List_fromArray(
-				[
-					A2(
-					elm$svg$Svg$image,
-					_List_fromArray(
-						[
-							elm$svg$Svg$Attributes$xlinkHref(spriteImage)
-						]),
-					_List_Nil),
-					author$project$View$Target$lineTest
-				]));
+		var ledgerLineMiddleC = (midiCode === 60) ? A2(author$project$View$Target$lineTest, xP, yP) : elm$svg$Svg$text('');
+		return _List_fromArray(
+			[
+				ledgerLineMiddleC,
+				A2(
+				elm$svg$Svg$svg,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$viewBox(
+						viewBoxStartXString + (' 0 ' + (elm$core$String$fromFloat(author$project$View$Target$baseSpriteWidth) + (' ' + elm$core$String$fromFloat(author$project$View$Target$baseSpriteHeight))))),
+						elm$svg$Svg$Attributes$width(
+						elm$core$String$fromFloat(author$project$View$Target$spriteWidth)),
+						elm$svg$Svg$Attributes$height(
+						elm$core$String$fromFloat(author$project$View$Target$spriteHeight)),
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromFloat(xP)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromFloat(yP)),
+						elm$svg$Svg$Attributes$class('sprite')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						elm$svg$Svg$image,
+						_List_fromArray(
+							[
+								elm$svg$Svg$Attributes$xlinkHref(spriteImage)
+							]),
+						_List_Nil)
+					]))
+			]);
 	});
 var author$project$View$Game$drawTargetNote = F4(
 	function (spriteIndex, nextTargetNoteIndex, xPosIndex, note) {
-		var y = author$project$Note$getNoteY(note.midi);
-		var x = author$project$Note$getNoteX(xPosIndex);
 		var spriteImage = (_Utils_cmp(xPosIndex, nextTargetNoteIndex - 1) > 0) ? author$project$ConstantsHelpers$nextTargetSpriteImage : author$project$ConstantsHelpers$correctTargetSpriteImage;
-		return A4(author$project$View$Target$view, x, y, spriteIndex, spriteImage);
+		return A4(author$project$View$Target$view, xPosIndex, note.midi, spriteIndex, spriteImage);
 	});
 var author$project$View$Game$drawAllTargetNotes = F3(
 	function (spriteIndex, nextTargetNoteIndex, notes) {
 		var noteList = elm$core$Array$toList(notes);
-		return A2(
-			elm$core$List$indexedMap,
-			A2(author$project$View$Game$drawTargetNote, spriteIndex, nextTargetNoteIndex),
-			noteList);
+		return elm$core$List$concat(
+			A2(
+				elm$core$List$indexedMap,
+				A2(author$project$View$Game$drawTargetNote, spriteIndex, nextTargetNoteIndex),
+				noteList));
 	});
 var author$project$View$Player$baseSpriteHeight = 11;
 var author$project$View$Player$baseSpriteWidth = 12;
@@ -10226,7 +10243,7 @@ var author$project$Note$midiToFrequency = function (midiCode) {
 var author$project$Note$midiToNoteName = function (midiCode) {
 	var pitchClasses = elm$core$Array$fromList(
 		_List_fromArray(
-			['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']));
+			['C', 'C#/Db', 'D', 'D#/Eb', 'E', 'F', 'F#/Gb', 'G', 'G#/Ab', 'A', 'A#/Bb', 'B']));
 	var octave = ((midiCode / 12) | 0) - 1;
 	var index = midiCode % 12;
 	var pitchClass = function () {

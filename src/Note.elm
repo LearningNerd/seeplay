@@ -41,9 +41,10 @@ getNoteHeightIndex midiCode =
       -- (right now, that's anything below middle C, midi code 60)
       -- note: pos here is bottom to top, where 0 is the lowest,
       -- so the offset is negative (it gets flipped when translating to pixel values)
+
       shiftBassClef =
         if midiCode < 60 then
-           -3
+           -4
         else
           0
 
@@ -105,8 +106,8 @@ getNoteY midiCode =
 
 
 
-getNoteX noteIndex =
-  Const.leftMargin + ((toFloat noteIndex) * (toFloat Const.noteXInterval) )
+getNoteX xPosIndex =
+  Const.leftMargin + ((toFloat xPosIndex) * (toFloat Const.noteXInterval) )
 
 
 
@@ -115,6 +116,7 @@ getNoteX noteIndex =
 getRandomMidiList : Int -> Random.Generator (List Int)
 getRandomMidiList num =
     -- Random.list num <| Random.uniform 60 [64, 67]
+    -- Random.list num <| Random.uniform 59 [53, 54, 55, 56, 57, 58]
 
     -- BASS TO TREBLE (no ledger lines), including middle C
     Random.list num <| Random.uniform 41 (List.range 42 80)
@@ -154,7 +156,7 @@ midiToNoteName midiCode =
     let
         pitchClasses =
             Array.fromList
-                [ "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B" ]
+                [ "C", "C#/Db", "D", "D#/Eb", "E", "F", "F#/Gb", "G", "G#/Ab", "A", "A#/Bb", "B" ]
 
         index =
             remainderBy 12 midiCode
