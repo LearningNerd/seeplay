@@ -9851,11 +9851,141 @@ var author$project$ConstantsHelpers$svgViewWidth = 5300;
 var author$project$ConstantsHelpers$svgViewTotalWidth = (author$project$ConstantsHelpers$svgViewWidth + author$project$ConstantsHelpers$leftMargin) + author$project$ConstantsHelpers$rightMargin;
 var author$project$ConstantsHelpers$correctTargetSpriteImage = 'img/happycloud-59w-44h-5i.png';
 var author$project$ConstantsHelpers$nextTargetSpriteImage = 'img/raincloud-59w-44h-5i.png';
-var author$project$ConstantsHelpers$noteXInterval = 300;
-var author$project$Note$getNoteX = function (xPosIndex) {
-	return author$project$ConstantsHelpers$leftMargin + (xPosIndex * author$project$ConstantsHelpers$noteXInterval);
+var elm$core$List$takeReverse = F3(
+	function (n, list, kept) {
+		takeReverse:
+		while (true) {
+			if (n <= 0) {
+				return kept;
+			} else {
+				if (!list.b) {
+					return kept;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs,
+						$temp$kept = A2(elm$core$List$cons, x, kept);
+					n = $temp$n;
+					list = $temp$list;
+					kept = $temp$kept;
+					continue takeReverse;
+				}
+			}
+		}
+	});
+var elm$core$List$takeTailRec = F2(
+	function (n, list) {
+		return elm$core$List$reverse(
+			A3(elm$core$List$takeReverse, n, list, _List_Nil));
+	});
+var elm$core$List$takeFast = F3(
+	function (ctr, n, list) {
+		if (n <= 0) {
+			return _List_Nil;
+		} else {
+			var _n0 = _Utils_Tuple2(n, list);
+			_n0$1:
+			while (true) {
+				_n0$5:
+				while (true) {
+					if (!_n0.b.b) {
+						return list;
+					} else {
+						if (_n0.b.b.b) {
+							switch (_n0.a) {
+								case 1:
+									break _n0$1;
+								case 2:
+									var _n2 = _n0.b;
+									var x = _n2.a;
+									var _n3 = _n2.b;
+									var y = _n3.a;
+									return _List_fromArray(
+										[x, y]);
+								case 3:
+									if (_n0.b.b.b.b) {
+										var _n4 = _n0.b;
+										var x = _n4.a;
+										var _n5 = _n4.b;
+										var y = _n5.a;
+										var _n6 = _n5.b;
+										var z = _n6.a;
+										return _List_fromArray(
+											[x, y, z]);
+									} else {
+										break _n0$5;
+									}
+								default:
+									if (_n0.b.b.b.b && _n0.b.b.b.b.b) {
+										var _n7 = _n0.b;
+										var x = _n7.a;
+										var _n8 = _n7.b;
+										var y = _n8.a;
+										var _n9 = _n8.b;
+										var z = _n9.a;
+										var _n10 = _n9.b;
+										var w = _n10.a;
+										var tl = _n10.b;
+										return (ctr > 1000) ? A2(
+											elm$core$List$cons,
+											x,
+											A2(
+												elm$core$List$cons,
+												y,
+												A2(
+													elm$core$List$cons,
+													z,
+													A2(
+														elm$core$List$cons,
+														w,
+														A2(elm$core$List$takeTailRec, n - 4, tl))))) : A2(
+											elm$core$List$cons,
+											x,
+											A2(
+												elm$core$List$cons,
+												y,
+												A2(
+													elm$core$List$cons,
+													z,
+													A2(
+														elm$core$List$cons,
+														w,
+														A3(elm$core$List$takeFast, ctr + 1, n - 4, tl)))));
+									} else {
+										break _n0$5;
+									}
+							}
+						} else {
+							if (_n0.a === 1) {
+								break _n0$1;
+							} else {
+								break _n0$5;
+							}
+						}
+					}
+				}
+				return list;
+			}
+			var _n1 = _n0.b;
+			var x = _n1.a;
+			return _List_fromArray(
+				[x]);
+		}
+	});
+var elm$core$List$take = F2(
+	function (n, list) {
+		return A3(elm$core$List$takeFast, 0, n, list);
+	});
+var author$project$Note$getLedgerLineHeightIndeces = function (noteHeightIndex) {
+	var trebleLedgerLines = _List_fromArray(
+		[35, 37, 39, 41, 43, 45, 47, 49, 51]);
+	var middleC = _List_fromArray(
+		[23]);
+	var bassLedgerLines = _List_fromArray(
+		[11, 9, 7, 5, 3, 1]);
+	return (noteHeightIndex > 34) ? A2(elm$core$List$take, 1 + (((noteHeightIndex - 35) / 2) | 0), trebleLedgerLines) : ((noteHeightIndex < 12) ? A2(elm$core$List$take, 1 + (((11 - noteHeightIndex) / 2) | 0), bassLedgerLines) : ((noteHeightIndex === 23) ? middleC : _List_Nil));
 };
-var author$project$ConstantsHelpers$staffLineHeight = author$project$ConstantsHelpers$svgViewHeight / 26;
 var author$project$Note$getNoteHeightIndex = function (midiCode) {
 	var shiftBassClef = (midiCode < 60) ? (-4) : 0;
 	var semitoneIndex = (midiCode - 21) % 12;
@@ -9892,9 +10022,22 @@ var author$project$Note$getNoteHeightIndex = function (midiCode) {
 	}();
 	return (shiftBassClef + diatonicIndex) + (octaveMultiple * 7);
 };
+var author$project$ConstantsHelpers$staffLineHeight = author$project$ConstantsHelpers$svgViewHeight / 26;
+var author$project$Note$getYPos = function (heightIndex) {
+	return author$project$ConstantsHelpers$topMargin + (author$project$ConstantsHelpers$svgViewTotalHeight - ((heightIndex * author$project$ConstantsHelpers$staffLineHeight) / 2));
+};
+var author$project$Note$getLedgerLineYPositions = function (midiCode) {
+	var lineHeightIndeces = author$project$Note$getLedgerLineHeightIndeces(
+		author$project$Note$getNoteHeightIndex(midiCode));
+	return A2(elm$core$List$map, author$project$Note$getYPos, lineHeightIndeces);
+};
+var author$project$ConstantsHelpers$noteXInterval = 300;
+var author$project$Note$getNoteX = function (xPosIndex) {
+	return author$project$ConstantsHelpers$leftMargin + (xPosIndex * author$project$ConstantsHelpers$noteXInterval);
+};
 var author$project$Note$getNoteY = function (midiCode) {
 	var noteHeightIndex = author$project$Note$getNoteHeightIndex(midiCode);
-	return author$project$ConstantsHelpers$topMargin + (author$project$ConstantsHelpers$svgViewTotalHeight - ((noteHeightIndex * author$project$ConstantsHelpers$staffLineHeight) / 2));
+	return author$project$Note$getYPos(noteHeightIndex);
 };
 var author$project$View$Target$baseSpriteHeight = 44;
 var author$project$View$Target$baseSpriteWidth = 59;
@@ -9927,6 +10070,7 @@ var author$project$View$Target$lineTest = F2(
 				]),
 			_List_Nil);
 	});
+var elm$core$Debug$log = _Debug_log;
 var elm$svg$Svg$image = elm$svg$Svg$trustedNode('image');
 var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
 var elm$svg$Svg$text = elm$virtual_dom$VirtualDom$text;
@@ -9952,37 +10096,43 @@ var author$project$View$Target$view = F4(
 		var xOffset = -25;
 		var xP = xPos + xOffset;
 		var viewBoxStartXString = elm$core$String$fromInt(spriteIndex * author$project$View$Target$baseSpriteWidth);
+		var ledgerLineYPositions = author$project$Note$getLedgerLineYPositions(midiCode);
+		var xyz = A2(elm$core$Debug$log, 'ledgerLiiines', ledgerLineYPositions);
 		var ledgerLineMiddleC = (midiCode === 60) ? A2(author$project$View$Target$lineTest, xP, yP) : elm$svg$Svg$text('');
-		return _List_fromArray(
-			[
-				ledgerLineMiddleC,
-				A2(
-				elm$svg$Svg$svg,
-				_List_fromArray(
-					[
-						elm$svg$Svg$Attributes$viewBox(
-						viewBoxStartXString + (' 0 ' + (elm$core$String$fromFloat(author$project$View$Target$baseSpriteWidth) + (' ' + elm$core$String$fromFloat(author$project$View$Target$baseSpriteHeight))))),
-						elm$svg$Svg$Attributes$width(
-						elm$core$String$fromFloat(author$project$View$Target$spriteWidth)),
-						elm$svg$Svg$Attributes$height(
-						elm$core$String$fromFloat(author$project$View$Target$spriteHeight)),
-						elm$svg$Svg$Attributes$x(
-						elm$core$String$fromFloat(xP)),
-						elm$svg$Svg$Attributes$y(
-						elm$core$String$fromFloat(yP)),
-						elm$svg$Svg$Attributes$class('sprite')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						elm$svg$Svg$image,
-						_List_fromArray(
-							[
-								elm$svg$Svg$Attributes$xlinkHref(spriteImage)
-							]),
-						_List_Nil)
-					]))
-			]);
+		return _Utils_ap(
+			A2(
+				elm$core$List$map,
+				author$project$View$Target$lineTest(xP),
+				ledgerLineYPositions),
+			_List_fromArray(
+				[
+					A2(
+					elm$svg$Svg$svg,
+					_List_fromArray(
+						[
+							elm$svg$Svg$Attributes$viewBox(
+							viewBoxStartXString + (' 0 ' + (elm$core$String$fromFloat(author$project$View$Target$baseSpriteWidth) + (' ' + elm$core$String$fromFloat(author$project$View$Target$baseSpriteHeight))))),
+							elm$svg$Svg$Attributes$width(
+							elm$core$String$fromFloat(author$project$View$Target$spriteWidth)),
+							elm$svg$Svg$Attributes$height(
+							elm$core$String$fromFloat(author$project$View$Target$spriteHeight)),
+							elm$svg$Svg$Attributes$x(
+							elm$core$String$fromFloat(xP)),
+							elm$svg$Svg$Attributes$y(
+							elm$core$String$fromFloat(yP)),
+							elm$svg$Svg$Attributes$class('sprite')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							elm$svg$Svg$image,
+							_List_fromArray(
+								[
+									elm$svg$Svg$Attributes$xlinkHref(spriteImage)
+								]),
+							_List_Nil)
+						]))
+				]));
 	});
 var author$project$View$Game$drawTargetNote = F4(
 	function (spriteIndex, nextTargetNoteIndex, xPosIndex, note) {
@@ -10431,8 +10581,8 @@ var author$project$Note$getRandomMidiList = function (num) {
 		num,
 		A2(
 			elm$random$Random$uniform,
-			41,
-			A2(elm$core$List$range, 42, 80)));
+			21,
+			A2(elm$core$List$range, 22, 108)));
 };
 var author$project$Update$generateTargetNotes = F2(
 	function (model, midiCodeList) {

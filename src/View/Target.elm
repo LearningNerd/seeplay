@@ -43,6 +43,10 @@ view xPosIndex midiCode spriteIndex spriteImage =
 
     viewBoxStartXString = String.fromInt (spriteIndex * baseSpriteWidth)
 
+    ledgerLineYPositions = Note.getLedgerLineYPositions midiCode
+
+    xyz = Debug.log "ledgerLiiines" ledgerLineYPositions
+
     ledgerLineMiddleC = 
         if midiCode == 60 then
           (lineTest xP yP)
@@ -50,17 +54,17 @@ view xPosIndex midiCode spriteIndex spriteImage =
            text ""
 
   in
-    [
-      ledgerLineMiddleC
-      , svg
-      [ viewBox (viewBoxStartXString ++ " 0 " ++ String.fromFloat baseSpriteWidth ++ " " ++ String.fromFloat baseSpriteHeight)
-      , width (String.fromFloat spriteWidth)
-      , height (String.fromFloat spriteHeight)
-      , x (String.fromFloat xP)
-      , y (String.fromFloat yP)
-      , class "sprite"
-      ] [ image [xlinkHref spriteImage] [] ]
+    ( (List.map (lineTest xP) ledgerLineYPositions) ++
+      [ svg
+        [ viewBox (viewBoxStartXString ++ " 0 " ++ String.fromFloat baseSpriteWidth ++ " " ++ String.fromFloat baseSpriteHeight)
+        , width (String.fromFloat spriteWidth)
+        , height (String.fromFloat spriteHeight)
+        , x (String.fromFloat xP)
+        , y (String.fromFloat yP)
+        , class "sprite"
+        ] [ image [xlinkHref spriteImage] [] ]
     ]
+  )
 
 -- where xPos and yPos are the top-left corner of the sprite
 lineTest : Float -> Float -> Svg Msg

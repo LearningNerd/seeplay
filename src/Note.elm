@@ -73,6 +73,8 @@ getNoteHeightIndex midiCode =
       shiftBassClef + diatonicIndex + (octaveMultiple * 7)
 
 
+
+
 -- Given the note height index (from getNoteHeightIndex),
 -- return a list of note height indeces of each ledger line
 -- to be drawn for a given note
@@ -97,6 +99,23 @@ getLedgerLineHeightIndeces noteHeightIndex =
         []
 
 
+getYPos heightIndex =
+    Const.topMargin +
+    ( Const.svgViewTotalHeight - 
+      ((toFloat heightIndex) * Const.staffLineHeight / 2)
+    )
+
+
+
+getLedgerLineYPositions midiCode =
+  let
+    lineHeightIndeces = 
+      getLedgerLineHeightIndeces
+        <| getNoteHeightIndex midiCode
+  in
+    List.map getYPos lineHeightIndeces
+
+
 
 -- position 0 is midiCode 21, at the lowest end of the staff
 getNoteY midiCode =
@@ -115,11 +134,7 @@ getNoteY midiCode =
     -- zzz = Debug.log "totalheight - ^   " a
 
   in
-    Const.topMargin +
-    ( Const.svgViewTotalHeight - 
-      ((toFloat noteHeightIndex) * Const.staffLineHeight / 2)
-    )
-
+    getYPos noteHeightIndex
 
 
 getNoteX xPosIndex =
@@ -134,8 +149,17 @@ getRandomMidiList num =
     -- Random.list num <| Random.uniform 60 [64, 67]
     -- Random.list num <| Random.uniform 59 [53, 54, 55, 56, 57, 58]
 
+    -- Just checking a couple ledger lines
+    -- Random.list num <| Random.uniform 81 [86, 88]
+
+
     -- BASS TO TREBLE (no ledger lines), including middle C
-    Random.list num <| Random.uniform 41 (List.range 42 80)
+    -- Random.list num <| Random.uniform 41 (List.range 42 80)
+
+    
+    -- EVERYTHIIIIIING!
+    Random.list num <| Random.uniform 21 (List.range 22 108)
+
 {--
   Random.list num <| Random.uniform 60 [ 62
    , 64
