@@ -43,7 +43,9 @@ update msg model =
               ( model, Random.generate GenerateTargetNotes (Note.getRandomMidiList Const.notesPerLevel) )
 
             GenerateTargetNotes midiCodeList ->
-              ( Game (generateTargetNotes initialGameModel midiCodeList), Cmd.none )
+              -- ( Game (generateTargetNotes initialGameModel midiCodeList), Cmd.none )
+              -- HARD-CODED LIST OF NOTES FOR NOW
+              ( Game (generateTargetNotes initialGameModel Const.hardCodedNotes), Cmd.none )
 
             _ ->
               ( model, Cmd.none )

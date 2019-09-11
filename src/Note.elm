@@ -38,11 +38,15 @@ getNoteHeightIndex midiCode =
       -- note: pos here is bottom to top, where 0 is the lowest,
       -- so the offset is negative (it gets flipped when translating to pixel values)
 
+{--
       shiftBassClef =
         if midiCode < 60 then
            -4
         else
           0
+--}
+      -- for now, no extra gap between clefs
+      shiftBassClef = 0
 
       -- Map the chromatic scale (12 semitones) to the diatonic scale (8)
       diatonicIndex = 
@@ -69,10 +73,17 @@ getNoteHeightIndex midiCode =
             _ -> 0
 
       octaveMultiple = (midiCode - 21) // 12
+
+      originalHeightIndex = shiftBassClef + diatonicIndex + (octaveMultiple * 7)
   in
-      shiftBassClef + diatonicIndex + (octaveMultiple * 7)
-
-
+      if midiCode > 102 then -- 15ma
+        originalHeightIndex - 14
+      else if midiCode > 90 then -- 8va
+        originalHeightIndex - 7
+      else if midiCode > 30 then -- all normal notes
+        originalHeightIndex
+      else -- 8vb, any note 30 or lower, down to midi code 21... move visually "up" 7 spaces
+        originalHeightIndex + 7
 
 
 -- Given the note height index (from getNoteHeightIndex),
@@ -80,8 +91,8 @@ getNoteHeightIndex midiCode =
 -- to be drawn for a given note
 getLedgerLineHeightIndeces noteHeightIndex =
   let
-    trebleLedgerLines = [35, 37, 39, 41, 43, 45, 47, 49, 51]
-    bassLedgerLines = [11, 9, 7, 5, 3, 1]
+    trebleLedgerLines = [35, 37, 39]
+    bassLedgerLines = [11, 9, 7]
     middleC = [23]
   in
       if noteHeightIndex > 34 then
@@ -100,11 +111,14 @@ getLedgerLineHeightIndeces noteHeightIndex =
 
 
 getYPos heightIndex =
+  let
+      -- By not drawing all bottom ledger lines (using 8vb instead), all height indeces visually shift up)
+      visualHeightIndex = heightIndex - 4
+  in
     Const.topMargin +
     ( Const.svgViewTotalHeight - 
-      ((toFloat heightIndex) * Const.staffLineHeight / 2)
+      ((toFloat visualHeightIndex) * Const.staffLineHeight / 2)
     )
-
 
 
 getLedgerLineYPositions midiCode =
@@ -146,6 +160,8 @@ getNoteX xPosIndex =
 -- Generate list of [num] random midi codes
 getRandomMidiList : Int -> Random.Generator (List Int)
 getRandomMidiList num =
+    -- Random.list num <| Random.uniform 21 [22, 23]
+    Random.list num <| Random.uniform 67 [67]
     -- Random.list num <| Random.uniform 60 [64, 67]
     -- Random.list num <| Random.uniform 59 [53, 54, 55, 56, 57, 58]
 
@@ -158,7 +174,7 @@ getRandomMidiList num =
 
     
     -- EVERYTHIIIIIING!
-    Random.list num <| Random.uniform 21 (List.range 22 108)
+    -- Random.list num <| Random.uniform 21 (List.range 22 108)
 
 {--
   Random.list num <| Random.uniform 60 [ 62

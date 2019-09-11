@@ -46,12 +46,13 @@ view xPosIndex midiCode spriteIndex spriteImage =
     ledgerLineYPositions = Note.getLedgerLineYPositions midiCode
 
     xyz = Debug.log "ledgerLiiines" ledgerLineYPositions
-
+{--
     ledgerLineMiddleC = 
         if midiCode == 60 then
           (lineTest xP yP)
         else
            text ""
+--}
 
   in
     ( (List.map (lineTest xP) ledgerLineYPositions) ++

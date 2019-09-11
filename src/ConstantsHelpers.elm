@@ -5,6 +5,18 @@ module ConstantsHelpers exposing (..)
 ------------          Constants
 --------------------------------------------------------------------------------
 
+-- FOR TESTING, hard-coded array of notes:
+trebleNotesList = [62, 64, 65, 67, 69, 71, 72, 74, 76, 77,79,80]
+tLedgerNotesList = [81,83,85,86,88,89,90]
+t8va15maNotesList = [91,93,95,96,98,100,101,103,105,107,108]
+middleC = [60,61]
+bassNotesList = [41,43,45,47,48,50,52,53,55,57,59]
+bLedgerNotesList = [31,33,35,36,38,40]
+b8vbNotesList = [21,23,24,26,28,29,31,33,35,36,38,40]
+hardCodedNotes = t8va15maNotesList
+
+---------------------------------------------
+
 notesPerLevel = 100
 
 noteXInterval = 300
@@ -12,7 +24,7 @@ noteXInterval = 300
 svgViewWidth = 5300
 svgViewHeight = 2600
 
-staffLineHeight = svgViewHeight / 26
+staffLineHeight = svgViewHeight / 18
 
 topMargin = 0
 bottomMargin = 0

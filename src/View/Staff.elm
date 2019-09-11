@@ -21,24 +21,24 @@ view : List (Svg Msg)
 view =
   (
     ---------------   treble ledger lines
-    ---------------   pos 51 to 35
-    List.map (drawStaffLine "white") (List.range 1 9)
-    ++ 
+    ---------------   pos 51 to 35 -- **** update this
+--    List.map (drawStaffLine "red") (List.range 1 3) -- just 3 now with 8va/15ma!
+    -- ++ 
     ---------------   TREBLE
-    ---------------   pos 64  to 33
-    List.map (drawStaffLine "black") (List.range 10 14)
+    ---------------   pos 64  to 33 -- **** update this
+    List.map (drawStaffLine "black") (List.range 4 8)
     ++
     ---------------   MIDDLE C and gap between treble and bass clefs
-    ---------------   pos 23 (MIDI 60)
-    List.map (drawStaffLine "white") (List.range 15 17)
-    ++
+    ---------------   pos 23 (MIDI 60)  -- **** update this
+--    List.map (drawStaffLine "red") [9]
+    -- ++
     ---------------   BASS
-    ---------------   pos 21 to 13
-    List.map (drawStaffLine "black") (List.range 18 21)
-    ++
+    ---------------   pos 21 to 13 -- **** update this
+    List.map (drawStaffLine "black") (List.range 10 14)
+    -- ++
     ---------------   bass ledger lines
-    ---------------   pos 11 to 1
-    List.map (drawStaffLine "white") (List.range 22 27)
+    ---------------   pos 11 to 1 -- **** update this
+    -- List.map (drawStaffLine "red") (List.range 15 17) -- just 3 with 8vb
   )
 
 -- remove for now, need to redo as an SVG shape instead of text
