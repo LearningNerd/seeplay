@@ -153,7 +153,7 @@ getNoteX xPosIndex =
 
 
 
-
+-- TODO: Update this function to be based on the definition of the current level ... take a Level type as input maybe?
 -- Generate list of [num] random midi codes
 getRandomMidiList : Int -> Random.Generator (List Int)
 getRandomMidiList num =

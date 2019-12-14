@@ -53,31 +53,39 @@ update msg model =
 
 ---------------------   GAME SCREEN   --------------------
       Game gameModel ->
-        let
-          newGameModel = 
             case msg of
       
               AnimFrame curTime ->
-                gameModel
-                  |> updateCurTime curTime
-                  |> updateSprites curTime
-                  |> updatePlayerPos curTime
-                  |> updateScrollPos
+                let
+                  newGameModel = 
+                    gameModel
+                      |> updateCurTime curTime
+                      |> updateSprites curTime
+                      |> updatePlayerPos curTime
+                      |> updateScrollPos
+                in
+                   ( Game newGameModel, Cmd.none )
+
 
               NotePressed midiCode -> 
-                gameModel
-                  |> updateCurrentNote midiCode
-                  |> updateScoreAndTargetIfCorrect
-                  |> updatePlayerTrajectory
+                let
+                  newGameModel =
+                    gameModel
+                      |> updateCurrentNote midiCode
+                      |> updateScoreAndTargetIfCorrect
+                      |> updatePlayerTrajectory
+                in
+                   ( Game newGameModel, Cmd.none )
+
+
+              -- TODO: check for last note; switch to LevelCompleteScreen
 
 
               NoteReleased _ ->
-                gameModel
+                ( Game gameModel, Cmd.none )
 
               _ ->
-                gameModel
-        in
-          ( Game newGameModel, Cmd.none )
+                ( Game gameModel, Cmd.none )
 
 
 

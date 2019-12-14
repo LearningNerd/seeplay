@@ -42,6 +42,7 @@ view model =
         LoadingScreen -> View.MidiStatus.view model
         StartScreen -> View.StartScreen.view
         Game gameModel -> View.Game.view gameModel
+        -- TODO: LevelCompleteScreen type and view, triggered when level is complete; click to start next one
   in
     div [ ]
         [ 
