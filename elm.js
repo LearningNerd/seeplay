@@ -10110,9 +10110,9 @@ var $author$project$Note$getRandomMidiList = function (num) {
 			_List_fromArray(
 				[67])));
 };
-var $author$project$ConstantsHelpers$middleC = _List_fromArray(
-	[60, 61]);
-var $author$project$ConstantsHelpers$hardCodedNotes = $author$project$ConstantsHelpers$middleC;
+var $author$project$ConstantsHelpers$t8va15maNotesList = _List_fromArray(
+	[91, 93, 95, 96, 98, 100, 101, 103, 105, 107, 108]);
+var $author$project$ConstantsHelpers$hardCodedNotes = $author$project$ConstantsHelpers$t8va15maNotesList;
 var $author$project$Model$StartScreen = {$: 'StartScreen'};
 var $author$project$Update$initMidi = function (isMIDIConnectedBool) {
 	var newModel = function () {
@@ -10132,6 +10132,9 @@ var $author$project$ConstantsHelpers$framesPerSecond = 60;
 var $author$project$ConstantsHelpers$longJumpDurationFrames = 35;
 var $author$project$ConstantsHelpers$longJumpDurMillis = A2($author$project$ConstantsHelpers$convertFramesToMillisDuration, $author$project$ConstantsHelpers$longJumpDurationFrames, $author$project$ConstantsHelpers$framesPerSecond);
 var $author$project$Model$initialJumpMillis = $author$project$ConstantsHelpers$longJumpDurMillis;
+var $author$project$Note$getOctaveShift = function (midiCode) {
+	return (midiCode > 102) ? '15ma' : ((midiCode > 90) ? '8va' : ((midiCode > 30) ? '' : '8vb'));
+};
 var $author$project$Note$getNoteHeightIndex = function (midiCode) {
 	var shiftBassClef = 0;
 	var semitoneIndex = (midiCode - 21) % 12;
@@ -10167,7 +10170,17 @@ var $author$project$Note$getNoteHeightIndex = function (midiCode) {
 		}
 	}();
 	var originalHeightIndex = (shiftBassClef + diatonicIndex) + (octaveMultiple * 7);
-	return (midiCode > 102) ? (originalHeightIndex - 14) : ((midiCode > 90) ? (originalHeightIndex - 7) : ((midiCode > 30) ? originalHeightIndex : (originalHeightIndex + 7)));
+	var _v0 = $author$project$Note$getOctaveShift(midiCode);
+	switch (_v0) {
+		case '15ma':
+			return originalHeightIndex - 14;
+		case '8va':
+			return originalHeightIndex - 7;
+		case '8vb':
+			return originalHeightIndex + 7;
+		default:
+			return originalHeightIndex;
+	}
 };
 var $author$project$ConstantsHelpers$svgViewHeight = 2600;
 var $author$project$ConstantsHelpers$staffLineHeight = $author$project$ConstantsHelpers$svgViewHeight / 18;
@@ -10437,6 +10450,34 @@ var $author$project$ConstantsHelpers$nextTargetSpriteImage = 'img/raincloud-59w-
 var $author$project$View$Target$baseSpriteHeight = 44;
 var $author$project$View$Target$baseSpriteWidth = 59;
 var $elm$core$String$fromFloat = _String_fromNumber;
+var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var $elm$svg$Svg$line = $elm$svg$Svg$trustedNode('line');
+var $author$project$View$Target$spriteHeight = $author$project$ConstantsHelpers$staffLineHeight * 1;
+var $author$project$View$Target$widthToHeightRatio = $author$project$View$Target$baseSpriteWidth / $author$project$View$Target$baseSpriteHeight;
+var $author$project$View$Target$spriteWidth = ($author$project$ConstantsHelpers$staffLineHeight * 1) * $author$project$View$Target$widthToHeightRatio;
+var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
+var $elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
+var $elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
+var $elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
+var $elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
+var $author$project$View$Target$drawLedgerLine = F2(
+	function (xPos, yPos) {
+		return A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1(
+					$elm$core$String$fromFloat(xPos - ($author$project$View$Target$spriteWidth / 2))),
+					$elm$svg$Svg$Attributes$y1(
+					$elm$core$String$fromFloat(yPos + ($author$project$View$Target$spriteHeight / 2))),
+					$elm$svg$Svg$Attributes$x2(
+					$elm$core$String$fromFloat((xPos + $author$project$View$Target$spriteWidth) + ($author$project$View$Target$spriteWidth / 2))),
+					$elm$svg$Svg$Attributes$y2(
+					$elm$core$String$fromFloat(yPos + ($author$project$View$Target$spriteHeight / 2))),
+					$elm$svg$Svg$Attributes$stroke('black')
+				]),
+			_List_Nil);
+	});
 var $elm$core$List$takeReverse = F3(
 	function (n, list, kept) {
 		takeReverse:
@@ -10578,37 +10619,11 @@ var $author$project$Note$getLedgerLineYPositions = function (midiCode) {
 	return A2($elm$core$List$map, $author$project$Note$getYPos, lineHeightIndeces);
 };
 var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
-var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
 var $elm$svg$Svg$image = $elm$svg$Svg$trustedNode('image');
-var $elm$svg$Svg$line = $elm$svg$Svg$trustedNode('line');
-var $author$project$View$Target$spriteHeight = $author$project$ConstantsHelpers$staffLineHeight * 1;
-var $author$project$View$Target$widthToHeightRatio = $author$project$View$Target$baseSpriteWidth / $author$project$View$Target$baseSpriteHeight;
-var $author$project$View$Target$spriteWidth = ($author$project$ConstantsHelpers$staffLineHeight * 1) * $author$project$View$Target$widthToHeightRatio;
-var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
-var $elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
-var $elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
-var $elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
-var $elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
-var $author$project$View$Target$lineTest = F2(
-	function (xPos, yPos) {
-		return A2(
-			$elm$svg$Svg$line,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$x1(
-					$elm$core$String$fromFloat(xPos - ($author$project$View$Target$spriteWidth / 2))),
-					$elm$svg$Svg$Attributes$y1(
-					$elm$core$String$fromFloat(yPos + ($author$project$View$Target$spriteHeight / 2))),
-					$elm$svg$Svg$Attributes$x2(
-					$elm$core$String$fromFloat((xPos + $author$project$View$Target$spriteWidth) + ($author$project$View$Target$spriteWidth / 2))),
-					$elm$svg$Svg$Attributes$y2(
-					$elm$core$String$fromFloat(yPos + ($author$project$View$Target$spriteHeight / 2))),
-					$elm$svg$Svg$Attributes$stroke('black')
-				]),
-			_List_Nil);
-	});
-var $elm$core$Debug$log = _Debug_log;
 var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
+var $elm$svg$Svg$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$svg$Svg$Attributes$textAnchor = _VirtualDom_attribute('text-anchor');
+var $elm$svg$Svg$text_ = $elm$svg$Svg$trustedNode('text');
 var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
 var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
 var $elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
@@ -10629,42 +10644,60 @@ var $author$project$View$Target$view = F4(
 		var xOffset = -25;
 		var xP = xPos + xOffset;
 		var viewBoxStartXString = $elm$core$String$fromInt(spriteIndex * $author$project$View$Target$baseSpriteWidth);
-		var ledgerLineYPositions = $author$project$Note$getLedgerLineYPositions(midiCode);
-		var xyz = A2($elm$core$Debug$log, 'ledgerLiiines', ledgerLineYPositions);
-		return _Utils_ap(
-			A2(
-				$elm$core$List$map,
-				$author$project$View$Target$lineTest(xP),
-				ledgerLineYPositions),
+		var octaveShift = A2(
+			$elm$svg$Svg$text_,
 			_List_fromArray(
 				[
-					A2(
-					$elm$svg$Svg$svg,
-					_List_fromArray(
-						[
-							$elm$svg$Svg$Attributes$viewBox(
-							viewBoxStartXString + (' 0 ' + ($elm$core$String$fromFloat($author$project$View$Target$baseSpriteWidth) + (' ' + $elm$core$String$fromFloat($author$project$View$Target$baseSpriteHeight))))),
-							$elm$svg$Svg$Attributes$width(
-							$elm$core$String$fromFloat($author$project$View$Target$spriteWidth)),
-							$elm$svg$Svg$Attributes$height(
-							$elm$core$String$fromFloat($author$project$View$Target$spriteHeight)),
-							$elm$svg$Svg$Attributes$x(
-							$elm$core$String$fromFloat(xP)),
-							$elm$svg$Svg$Attributes$y(
-							$elm$core$String$fromFloat(yP)),
-							$elm$svg$Svg$Attributes$class('sprite')
-						]),
-					_List_fromArray(
-						[
-							A2(
-							$elm$svg$Svg$image,
-							_List_fromArray(
-								[
-									$elm$svg$Svg$Attributes$xlinkHref(spriteImage)
-								]),
-							_List_Nil)
-						]))
+					$elm$svg$Svg$Attributes$x(
+					$elm$core$String$fromFloat(xP + ($author$project$View$Target$spriteWidth / 2))),
+					$elm$svg$Svg$Attributes$y(
+					$elm$core$String$fromFloat(yP - 15)),
+					$elm$svg$Svg$Attributes$textAnchor('middle'),
+					$elm$svg$Svg$Attributes$class('octaveShift')
+				]),
+			_List_fromArray(
+				[
+					$elm$svg$Svg$text(
+					$author$project$Note$getOctaveShift(midiCode))
 				]));
+		var ledgerLineYPositions = $author$project$Note$getLedgerLineYPositions(midiCode);
+		return _Utils_ap(
+			_List_fromArray(
+				[octaveShift]),
+			_Utils_ap(
+				A2(
+					$elm$core$List$map,
+					$author$project$View$Target$drawLedgerLine(xP),
+					ledgerLineYPositions),
+				_List_fromArray(
+					[
+						A2(
+						$elm$svg$Svg$svg,
+						_List_fromArray(
+							[
+								$elm$svg$Svg$Attributes$viewBox(
+								viewBoxStartXString + (' 0 ' + ($elm$core$String$fromFloat($author$project$View$Target$baseSpriteWidth) + (' ' + $elm$core$String$fromFloat($author$project$View$Target$baseSpriteHeight))))),
+								$elm$svg$Svg$Attributes$width(
+								$elm$core$String$fromFloat($author$project$View$Target$spriteWidth)),
+								$elm$svg$Svg$Attributes$height(
+								$elm$core$String$fromFloat($author$project$View$Target$spriteHeight)),
+								$elm$svg$Svg$Attributes$x(
+								$elm$core$String$fromFloat(xP)),
+								$elm$svg$Svg$Attributes$y(
+								$elm$core$String$fromFloat(yP)),
+								$elm$svg$Svg$Attributes$class('sprite')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$svg$Svg$image,
+								_List_fromArray(
+									[
+										$elm$svg$Svg$Attributes$xlinkHref(spriteImage)
+									]),
+								_List_Nil)
+							]))
+					])));
 	});
 var $author$project$View$Game$drawTargetNote = F4(
 	function (spriteIndex, nextTargetNoteIndex, xPosIndex, note) {

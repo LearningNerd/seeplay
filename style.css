@@ -62,6 +62,12 @@ h1 {
   font-size: 280px;
 }
 
+.octaveShift {
+  font-size: 60px;
+  font-family: cursive;
+  fill: #666;
+}
+
 .testControls {
   position: absolute;
   bottom: 0;

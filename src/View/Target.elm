@@ -45,17 +45,25 @@ view xPosIndex midiCode spriteIndex spriteImage =
 
     ledgerLineYPositions = Note.getLedgerLineYPositions midiCode
 
-    xyz = Debug.log "ledgerLiiines" ledgerLineYPositions
+    octaveShift = 
+      text_
+        [ x (String.fromFloat (xP + spriteWidth/2))
+        , y (String.fromFloat (yP - 15) )
+        , textAnchor "middle"
+        , class "octaveShift"
+        ]
+        [text (Note.getOctaveShift midiCode)] 
+
 {--
     ledgerLineMiddleC = 
         if midiCode == 60 then
-          (lineTest xP yP)
+          (drawLedgerLine xP yP)
         else
            text ""
 --}
 
   in
-    ( (List.map (lineTest xP) ledgerLineYPositions) ++
+    ( [octaveShift] ++ (List.map (drawLedgerLine xP) ledgerLineYPositions) ++
       [ svg
         [ viewBox (viewBoxStartXString ++ " 0 " ++ String.fromFloat baseSpriteWidth ++ " " ++ String.fromFloat baseSpriteHeight)
         , width (String.fromFloat spriteWidth)
@@ -68,8 +76,8 @@ view xPosIndex midiCode spriteIndex spriteImage =
   )
 
 -- where xPos and yPos are the top-left corner of the sprite
-lineTest : Float -> Float -> Svg Msg
-lineTest xPos yPos =
+drawLedgerLine: Float -> Float -> Svg Msg
+drawLedgerLine xPos yPos =
     line
         [ x1 (String.fromFloat (xPos - spriteWidth/2))
         , y1 (String.fromFloat (yPos + spriteHeight/2))

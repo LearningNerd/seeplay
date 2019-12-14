@@ -17,7 +17,6 @@ type alias Note =
 type alias NoteName =
     ( String, Int )
 
-
 createNote : Int -> Note
 createNote midiCode =
     { noteName = midiToNoteName midiCode
@@ -25,6 +24,16 @@ createNote midiCode =
     , frequency = midiToFrequency midiCode
     }
 
+getOctaveShift : Int -> String
+getOctaveShift midiCode =
+  if midiCode > 102 then -- 15ma
+    "15ma"
+  else if midiCode > 90 then -- 8va
+    "8va"
+  else if midiCode > 30 then -- all normal notes
+    ""
+  else 
+    "8vb"
 
 
 getNoteHeightIndex midiCode = 
@@ -76,15 +85,15 @@ getNoteHeightIndex midiCode =
 
       originalHeightIndex = shiftBassClef + diatonicIndex + (octaveMultiple * 7)
   in
-      if midiCode > 102 then -- 15ma
-        originalHeightIndex - 14
-      else if midiCode > 90 then -- 8va
-        originalHeightIndex - 7
-      else if midiCode > 30 then -- all normal notes
-        originalHeightIndex
-      else -- 8vb, any note 30 or lower, down to midi code 21... move visually "up" 7 spaces
+     case (getOctaveShift midiCode) of
+       "15ma" ->
+          originalHeightIndex - 14
+       "8va" ->
+          originalHeightIndex - 7
+       "8vb" ->
         originalHeightIndex + 7
-
+       _ ->
+         originalHeightIndex
 
 -- Given the note height index (from getNoteHeightIndex),
 -- return a list of note height indeces of each ledger line
@@ -135,18 +144,6 @@ getLedgerLineYPositions midiCode =
 getNoteY midiCode =
   let
     noteHeightIndex = (getNoteHeightIndex midiCode)
-    -- x = Debug.log "totalheight" Const.svgViewTotalHeight
-    -- y = Debug.log "lineheight/2" (Const.staffLineHeight/2)
-    -- z = Debug.log "noteHeightIndex" noteHeightIndex
-
-    -- b = Debug.log "noteHeightIndex * staffLineHeight/2   " ((toFloat noteHeightIndex) * Const.staffLineHeight / 2)
-
-    -- a = Const.topMargin +
-        -- ( Const.svgViewTotalHeight - 
-          -- ((toFloat noteHeightIndex) * Const.staffLineHeight / 2)
-        -- )
-    -- zzz = Debug.log "totalheight - ^   " a
-
   in
     getYPos noteHeightIndex
 
