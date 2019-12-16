@@ -9847,6 +9847,9 @@ var $author$project$Model$Game = function (a) {
 var $author$project$Msg$GenerateTargetNotes = function (a) {
 	return {$: 'GenerateTargetNotes', a: a};
 };
+var $author$project$Model$StartLevelScreen = function (a) {
+	return {$: 'StartLevelScreen', a: a};
+};
 var $elm$random$Random$Generate = function (a) {
 	return {$: 'Generate', a: a};
 };
@@ -10110,14 +10113,12 @@ var $author$project$Note$getRandomMidiList = function (num) {
 			_List_fromArray(
 				[67])));
 };
-var $author$project$ConstantsHelpers$t8va15maNotesList = _List_fromArray(
-	[91, 93, 95, 96, 98, 100, 101, 103, 105, 107, 108]);
-var $author$project$ConstantsHelpers$hardCodedNotes = $author$project$ConstantsHelpers$t8va15maNotesList;
-var $author$project$Model$StartScreen = {$: 'StartScreen'};
+var $author$project$ConstantsHelpers$hardCodedNotes = _List_fromArray(
+	[60, 67, 60]);
 var $author$project$Update$initMidi = function (isMIDIConnectedBool) {
 	var newModel = function () {
 		if (isMIDIConnectedBool) {
-			return $author$project$Model$StartScreen;
+			return $author$project$Model$StartLevelScreen(0);
 		} else {
 			return $author$project$Model$LoadingScreen;
 		}
@@ -10206,6 +10207,7 @@ var $author$project$Model$initialGameModel = {
 		$author$project$Note$createNote(65)),
 	currentTime: $elm$time$Time$millisToPosix(0),
 	itemSpriteIndex: 0,
+	levelIndex: 0,
 	nextFrameTime: $elm$time$Time$millisToPosix(0),
 	nextTargetNoteIndex: 0,
 	nextTargetPos: $author$project$Model$initialPlayerPos,
@@ -10220,6 +10222,12 @@ var $author$project$Model$initialGameModel = {
 	score: 0,
 	scrollPosition: 0,
 	targetNotes: $elm$core$Array$empty
+};
+var $author$project$Update$isLevelComplete = function (gameModel) {
+	var isComplete = (_Utils_cmp(
+		gameModel.nextTargetNoteIndex,
+		$elm$core$Array$length(gameModel.targetNotes)) > -1) ? true : false;
+	return isComplete;
 };
 var $author$project$ConstantsHelpers$notesPerLevel = 100;
 var $author$project$Update$updateCurTime = F2(
@@ -10395,7 +10403,8 @@ var $author$project$Update$update = F2(
 				} else {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
-			case 'StartScreen':
+			case 'StartLevelScreen':
+				var levelIndex = model.a;
 				switch (msg.$) {
 					case 'StartGame':
 						return _Utils_Tuple2(
@@ -10406,41 +10415,48 @@ var $author$project$Update$update = F2(
 								$author$project$Note$getRandomMidiList($author$project$ConstantsHelpers$notesPerLevel)));
 					case 'GenerateTargetNotes':
 						var midiCodeList = msg.a;
+						var newGameModel = _Utils_update(
+							$author$project$Model$initialGameModel,
+							{levelIndex: levelIndex + 1});
 						return _Utils_Tuple2(
 							$author$project$Model$Game(
-								A2($author$project$Update$generateTargetNotes, $author$project$Model$initialGameModel, $author$project$ConstantsHelpers$hardCodedNotes)),
+								A2($author$project$Update$generateTargetNotes, newGameModel, $author$project$ConstantsHelpers$hardCodedNotes)),
 							$elm$core$Platform$Cmd$none);
 					default:
 						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
 			default:
 				var gameModel = model.a;
-				var newGameModel = function () {
-					switch (msg.$) {
-						case 'AnimFrame':
-							var curTime = msg.a;
-							return $author$project$Update$updateScrollPos(
+				switch (msg.$) {
+					case 'AnimFrame':
+						var curTime = msg.a;
+						var newGameModel = $author$project$Update$updateScrollPos(
+							A2(
+								$author$project$Update$updatePlayerPos,
+								curTime,
 								A2(
-									$author$project$Update$updatePlayerPos,
+									$author$project$Update$updateSprites,
 									curTime,
-									A2(
-										$author$project$Update$updateSprites,
-										curTime,
-										A2($author$project$Update$updateCurTime, curTime, gameModel))));
-						case 'NotePressed':
-							var midiCode = msg.a;
-							return $author$project$Update$updatePlayerTrajectory(
-								$author$project$Update$updateScoreAndTargetIfCorrect(
-									A2($author$project$Update$updateCurrentNote, midiCode, gameModel)));
-						case 'NoteReleased':
-							return gameModel;
-						default:
-							return gameModel;
-					}
-				}();
-				return _Utils_Tuple2(
-					$author$project$Model$Game(newGameModel),
-					$elm$core$Platform$Cmd$none);
+									A2($author$project$Update$updateCurTime, curTime, gameModel))));
+						return _Utils_Tuple2(
+							$author$project$Model$Game(newGameModel),
+							$elm$core$Platform$Cmd$none);
+					case 'NotePressed':
+						var midiCode = msg.a;
+						var newGameModel = $author$project$Update$updatePlayerTrajectory(
+							$author$project$Update$updateScoreAndTargetIfCorrect(
+								A2($author$project$Update$updateCurrentNote, midiCode, gameModel)));
+						var nextModel = $author$project$Update$isLevelComplete(newGameModel) ? $author$project$Model$StartLevelScreen(newGameModel.levelIndex) : $author$project$Model$Game(newGameModel);
+						return _Utils_Tuple2(nextModel, $elm$core$Platform$Cmd$none);
+					case 'NoteReleased':
+						return _Utils_Tuple2(
+							$author$project$Model$Game(gameModel),
+							$elm$core$Platform$Cmd$none);
+					default:
+						return _Utils_Tuple2(
+							$author$project$Model$Game(gameModel),
+							$elm$core$Platform$Cmd$none);
+				}
 		}
 	});
 var $elm$html$Html$main_ = _VirtualDom_node('main');
@@ -10871,7 +10887,7 @@ var $author$project$View$MidiStatus$view = function (model) {
 			]));
 };
 var $author$project$Msg$StartGame = {$: 'StartGame'};
-var $author$project$View$StartScreen$view = A2(
+var $author$project$View$StartLevelScreen$view = A2(
 	$elm$html$Html$div,
 	_List_fromArray(
 		[
@@ -10896,8 +10912,9 @@ var $author$project$Main$view = function (model) {
 		switch (model.$) {
 			case 'LoadingScreen':
 				return $author$project$View$MidiStatus$view(model);
-			case 'StartScreen':
-				return $author$project$View$StartScreen$view;
+			case 'StartLevelScreen':
+				var levelIndex = model.a;
+				return $author$project$View$StartLevelScreen$view;
 			default:
 				var gameModel = model.a;
 				return $author$project$View$Game$view(gameModel);

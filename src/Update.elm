@@ -36,8 +36,10 @@ update msg model =
               ( model, Cmd.none )
 
 ---------------------   START SCREEN   --------------------
-      StartScreen ->
+      StartLevelScreen levelIndex ->
         case msg of
+
+            -- TODO: Generate the notes based on levelIndex !!!
 
             StartGame ->
               ( model, Random.generate GenerateTargetNotes (Note.getRandomMidiList Const.notesPerLevel) )
@@ -45,11 +47,16 @@ update msg model =
             GenerateTargetNotes midiCodeList ->
               -- ( Game (generateTargetNotes initialGameModel midiCodeList), Cmd.none )
               -- HARD-CODED LIST OF NOTES FOR NOW
-              ( Game (generateTargetNotes initialGameModel Const.hardCodedNotes), Cmd.none )
+              let
+                  -- Init the NEXT game level 
+                  -- NOTE: When game is first started, levelIndex will increment from 0 to 1 so the first level is actually 1
+                  -- TODO: Have a button to play next level OR repeat the current ... or other actions =P
+                  newGameModel = { initialGameModel | levelIndex = levelIndex + 1}
+              in
+                ( Game (generateTargetNotes newGameModel Const.hardCodedNotes), Cmd.none )
 
             _ ->
               ( model, Cmd.none )
-
 
 ---------------------   GAME SCREEN   --------------------
       Game gameModel ->
@@ -74,11 +81,15 @@ update msg model =
                       |> updateCurrentNote midiCode
                       |> updateScoreAndTargetIfCorrect
                       |> updatePlayerTrajectory
+
+                  nextModel = 
+                    if (isLevelComplete newGameModel) then
+                      -- Show screen with the prev level index. (Later: show recap of score etc etc)
+                      StartLevelScreen newGameModel.levelIndex
+                    else
+                      Game newGameModel
                 in
-                   ( Game newGameModel, Cmd.none )
-
-
-              -- TODO: check for last note; switch to LevelCompleteScreen
+                   ( nextModel, Cmd.none )
 
 
               NoteReleased _ ->
@@ -157,7 +168,7 @@ initMidi : Bool -> Model
 initMidi isMIDIConnectedBool =
   let
       newModel = case isMIDIConnectedBool of
-                  True -> StartScreen
+                  True -> StartLevelScreen 0
                   False -> LoadingScreen
   in
     newModel
@@ -248,4 +259,17 @@ updateScoreAndTargetIfCorrect gameModel =
     , nextTargetPos = newTargetPos
     } 
 
+-- NOTE: nextTargetNoteIndex only advances on playing correct note,
+-- so this can only return true when playing the last correct note
+isLevelComplete : GameModel -> Bool
+isLevelComplete gameModel =
+  let
+    isComplete = 
+        if gameModel.nextTargetNoteIndex >= (Array.length gameModel.targetNotes) then
+           True
+        else
+           False
+  in
+    isComplete 
+    -- { gameModel | levelIndex = levelIndex + 1 }
 

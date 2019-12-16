@@ -1,4 +1,4 @@
-module View.StartScreen exposing (..)
+module View.StartLevelScreen exposing (..)
 
 import Html as HTML exposing (..)
 import Html.Attributes as A exposing (..)

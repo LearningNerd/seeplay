@@ -12,9 +12,8 @@ import Color
 
 type Model = 
   LoadingScreen
-  | StartScreen
+  | StartLevelScreen Int
   | Game GameModel
-  -- TODO: add LevelCompleteScreen ...
 
 initialModel : Model
 initialModel =
@@ -39,7 +38,7 @@ type alias GameModel =
     , nextTargetNoteIndex : Int
     , currentNote : Maybe Note
     , score : Int
-    , level : Int
+    , levelIndex : Int
 
     , player : Player
     , nextTargetPos : Vector
@@ -70,7 +69,7 @@ initialGameModel =
     , nextTargetNoteIndex = 0
     , currentNote = Just (Note.createNote 65)
     , score = 0
-    , level = 0
+    , levelIndex = 0
 
     , player =
         { jumpStartPos = initialPlayerPos

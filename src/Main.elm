@@ -23,7 +23,7 @@ import Ports
 
 import View.Header
 import View.MidiStatus
-import View.StartScreen
+import View.StartLevelScreen
 import View.Game
 -- TEST:
 import View.Target
@@ -40,9 +40,8 @@ view model =
     currentView = 
       case model of
         LoadingScreen -> View.MidiStatus.view model
-        StartScreen -> View.StartScreen.view
+        StartLevelScreen levelIndex -> View.StartLevelScreen.view
         Game gameModel -> View.Game.view gameModel
-        -- TODO: LevelCompleteScreen type and view, triggered when level is complete; click to start next one
   in
     div [ ]
         [ 
