@@ -4,7 +4,6 @@ module Note exposing (..)
 import Array exposing (..)
 import Random
 import ConstantsHelpers as Const
-import Msg exposing (Msg)
 
 
 type alias Note =
@@ -152,41 +151,6 @@ getNoteX xPosIndex =
   Const.leftMargin + ((toFloat xPosIndex) * (toFloat Const.noteXInterval) )
 
 
-
--- TODO: Update this function to be based on the definition of the current level ... take a Level type as input maybe?
--- Generate list of [num] random midi codes
-getRandomMidiList : Int -> Random.Generator (List Int)
-getRandomMidiList num =
-    -- Random.list num <| Random.uniform 21 [22, 23]
-    Random.list num <| Random.uniform 67 [67]
-    -- Random.list num <| Random.uniform 60 [64, 67]
-    -- Random.list num <| Random.uniform 59 [53, 54, 55, 56, 57, 58]
-
-    -- Just checking a couple ledger lines
-    -- Random.list num <| Random.uniform 81 [86, 88]
-
-
-    -- BASS TO TREBLE (no ledger lines), including middle C
-    -- Random.list num <| Random.uniform 41 (List.range 42 80)
-
-    
-    -- EVERYTHIIIIIING!
-    -- Random.list num <| Random.uniform 21 (List.range 22 108)
-
-{--
-  Random.list num <| Random.uniform 60 [ 62
-   , 64
-   , 65
-   , 67
-   , 69
-   , 71
-   , 72
-   , 74
-   , 76
-   , 77
-   , 79
-   ]
---}
 
 getRandomMidi : Random.Generator Int
 getRandomMidi =

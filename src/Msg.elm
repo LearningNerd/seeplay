@@ -1,6 +1,7 @@
 module Msg exposing (Msg(..))
 
 import Time
+import Level exposing (Level)
 
 type Msg
     = InitMIDI Bool

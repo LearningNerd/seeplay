@@ -1,6 +1,23 @@
 module ConstantsHelpers exposing (..)
 
 
+import Array exposing (..)
+--------------------------------------------------------------------------------
+------------          Levels
+--------------------------------------------------------------------------------
+
+levels =
+  Array.fromList
+    [ { rootMidi = 60, maxInterval = 1 }
+    , { rootMidi = 60, maxInterval = 2 }
+    , { rootMidi = 67, maxInterval = 1 }
+    , { rootMidi = 67, maxInterval = 2 }
+    , { rootMidi = 60, maxInterval = 3 }
+    , { rootMidi = 67, maxInterval = 3 }
+    , { rootMidi = 60, maxInterval = 4 }
+    , { rootMidi = 67, maxInterval = 4 }
+    ]
+
 --------------------------------------------------------------------------------
 ------------          Constants
 --------------------------------------------------------------------------------

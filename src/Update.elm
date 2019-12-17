@@ -15,6 +15,7 @@ import ConstantsHelpers as Const
 import Physics
 import Model exposing (Model(..), GameModel, Player, Vector, initialGameModel)
 import Note exposing (Note)
+import Level exposing (Level)
 import Ports
 
 import View.Player
@@ -42,18 +43,35 @@ update msg model =
             -- TODO: Generate the notes based on levelIndex !!!
 
             StartGame ->
-              ( model, Random.generate GenerateTargetNotes (Note.getRandomMidiList Const.notesPerLevel) )
+              let
+                  newGameModel = { initialGameModel | levelIndex = levelIndex + 1}
 
-            GenerateTargetNotes midiCodeList ->
-              -- ( Game (generateTargetNotes initialGameModel midiCodeList), Cmd.none )
-              -- HARD-CODED LIST OF NOTES FOR NOW
+                  nextGameLevel = case (Array.get newGameModel.levelIndex Const.levels) of
+                    Nothing ->
+                      { rootMidi = 60, maxInterval = 1 }
+                    Just level ->
+                      level
+              in
+                ( Game newGameModel
+                , Random.generate GenerateTargetNotes (generateRandomTargetNotes Const.notesPerLevel nextGameLevel)
+                )
+
+
+            -- TODO: how to keep track of the current level though??? to generate the notes the way I want to... 
+
+            GenerateTargetNotes midiList ->
               let
                   -- Init the NEXT game level 
                   -- NOTE: When game is first started, levelIndex will increment from 0 to 1 so the first level is actually 1
                   -- TODO: Have a button to play next level OR repeat the current ... or other actions =P
-                  newGameModel = { initialGameModel | levelIndex = levelIndex + 1}
+                  newGameModel =
+                    { initialGameModel |
+                      targetNotes =
+                        Array.fromList
+                          <| List.map Note.createNote midiList
+                    }
               in
-                ( Game (generateTargetNotes newGameModel Const.hardCodedNotes), Cmd.none )
+                ( Game newGameModel, Cmd.none )
 
             _ ->
               ( model, Cmd.none )
@@ -175,17 +193,6 @@ initMidi isMIDIConnectedBool =
 
 
 
--- On page load, and triggered by .....:
--- initialize array from the given list of randomized MIDI code integers
--- animate player onto the first note ??
-generateTargetNotes : GameModel -> List Int -> GameModel
-generateTargetNotes model midiCodeList =
-  let
-      targetNotes = Array.fromList (List.map Note.createNote midiCodeList)
-  in
-     { model | targetNotes = targetNotes }
-
-
 -- Update player's velocity, jump start position, jump duration milliseconds, and jump start time
 updatePlayerTrajectory : GameModel -> GameModel
 updatePlayerTrajectory gameModel =
@@ -272,4 +279,45 @@ isLevelComplete gameModel =
   in
     isComplete 
     -- { gameModel | levelIndex = levelIndex + 1 }
+
+
+-- Generate list of [num] random midi codes
+generateRandomTargetNotes : Int -> Level -> Random.Generator (List Int)
+generateRandomTargetNotes listLength gameLevel =
+  let
+      minValue = gameLevel.rootMidi - gameLevel.maxInterval
+      maxValue = gameLevel.rootMidi + gameLevel.maxInterval
+  in
+    Random.list listLength
+      <| Random.int minValue maxValue
+
+    -- Random.list num <| Random.uniform 60 [64, 67]
+    -- Random.list num <| Random.uniform 59 [53, 54, 55, 56, 57, 58]
+
+    -- Just checking a couple ledger lines
+    -- Random.list num <| Random.uniform 81 [86, 88]
+
+
+    -- BASS TO TREBLE (no ledger lines), including middle C
+    -- Random.list num <| Random.uniform 41 (List.range 42 80)
+
+    
+    -- EVERYTHIIIIIING!
+    -- Random.list num <| Random.uniform 21 (List.range 22 108)
+
+{--
+  Random.list num <| Random.uniform 60 [ 62
+   , 64
+   , 65
+   , 67
+   , 69
+   , 71
+   , 72
+   , 74
+   , 76
+   , 77
+   , 79
+   ]
+--}
+
 

@@ -9850,6 +9850,40 @@ var $author$project$Msg$GenerateTargetNotes = function (a) {
 var $author$project$Model$StartLevelScreen = function (a) {
 	return {$: 'StartLevelScreen', a: a};
 };
+var $elm$core$Basics$clamp = F3(
+	function (low, high, number) {
+		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
+	});
+var $elm$core$Basics$pow = _Basics_pow;
+var $author$project$Note$midiToFrequency = function (midiCode) {
+	var semitoneRatio = 1.0594630943592953;
+	var lowestFreq = 8.1757989156;
+	return lowestFreq * A2($elm$core$Basics$pow, semitoneRatio, midiCode);
+};
+var $author$project$Note$midiToNoteName = function (midiCode) {
+	var pitchClasses = $elm$core$Array$fromList(
+		_List_fromArray(
+			['C', 'C#/Db', 'D', 'D#/Eb', 'E', 'F', 'F#/Gb', 'G', 'G#/Ab', 'A', 'A#/Bb', 'B']));
+	var octave = ((midiCode / 12) | 0) - 1;
+	var index = midiCode % 12;
+	var pitchClass = function () {
+		var _v0 = A2($elm$core$Array$get, index, pitchClasses);
+		if (_v0.$ === 'Nothing') {
+			return 'C';
+		} else {
+			var x = _v0.a;
+			return x;
+		}
+	}();
+	return _Utils_Tuple2(pitchClass, octave);
+};
+var $author$project$Note$createNote = function (midiCode) {
+	return {
+		frequency: $author$project$Note$midiToFrequency(midiCode),
+		midi: A3($elm$core$Basics$clamp, 21, 108, midiCode),
+		noteName: $author$project$Note$midiToNoteName(midiCode)
+	};
+};
 var $elm$random$Random$Generate = function (a) {
 	return {$: 'Generate', a: a};
 };
@@ -9952,47 +9986,43 @@ var $elm$random$Random$generate = F2(
 			$elm$random$Random$Generate(
 				A2($elm$random$Random$map, tagger, generator)));
 	});
-var $elm$core$Basics$clamp = F3(
-	function (low, high, number) {
-		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
-	});
-var $elm$core$Basics$pow = _Basics_pow;
-var $author$project$Note$midiToFrequency = function (midiCode) {
-	var semitoneRatio = 1.0594630943592953;
-	var lowestFreq = 8.1757989156;
-	return lowestFreq * A2($elm$core$Basics$pow, semitoneRatio, midiCode);
+var $elm$core$Bitwise$xor = _Bitwise_xor;
+var $elm$random$Random$peel = function (_v0) {
+	var state = _v0.a;
+	var word = (state ^ (state >>> ((state >>> 28) + 4))) * 277803737;
+	return ((word >>> 22) ^ word) >>> 0;
 };
-var $author$project$Note$midiToNoteName = function (midiCode) {
-	var pitchClasses = $elm$core$Array$fromList(
-		_List_fromArray(
-			['C', 'C#/Db', 'D', 'D#/Eb', 'E', 'F', 'F#/Gb', 'G', 'G#/Ab', 'A', 'A#/Bb', 'B']));
-	var octave = ((midiCode / 12) | 0) - 1;
-	var index = midiCode % 12;
-	var pitchClass = function () {
-		var _v0 = A2($elm$core$Array$get, index, pitchClasses);
-		if (_v0.$ === 'Nothing') {
-			return 'C';
-		} else {
-			var x = _v0.a;
-			return x;
-		}
-	}();
-	return _Utils_Tuple2(pitchClass, octave);
-};
-var $author$project$Note$createNote = function (midiCode) {
-	return {
-		frequency: $author$project$Note$midiToFrequency(midiCode),
-		midi: A3($elm$core$Basics$clamp, 21, 108, midiCode),
-		noteName: $author$project$Note$midiToNoteName(midiCode)
-	};
-};
-var $author$project$Update$generateTargetNotes = F2(
-	function (model, midiCodeList) {
-		var targetNotes = $elm$core$Array$fromList(
-			A2($elm$core$List$map, $author$project$Note$createNote, midiCodeList));
-		return _Utils_update(
-			model,
-			{targetNotes: targetNotes});
+var $elm$random$Random$int = F2(
+	function (a, b) {
+		return $elm$random$Random$Generator(
+			function (seed0) {
+				var _v0 = (_Utils_cmp(a, b) < 0) ? _Utils_Tuple2(a, b) : _Utils_Tuple2(b, a);
+				var lo = _v0.a;
+				var hi = _v0.b;
+				var range = (hi - lo) + 1;
+				if (!((range - 1) & range)) {
+					return _Utils_Tuple2(
+						(((range - 1) & $elm$random$Random$peel(seed0)) >>> 0) + lo,
+						$elm$random$Random$next(seed0));
+				} else {
+					var threshhold = (((-range) >>> 0) % range) >>> 0;
+					var accountForBias = function (seed) {
+						accountForBias:
+						while (true) {
+							var x = $elm$random$Random$peel(seed);
+							var seedN = $elm$random$Random$next(seed);
+							if (_Utils_cmp(x, threshhold) < 0) {
+								var $temp$seed = seedN;
+								seed = $temp$seed;
+								continue accountForBias;
+							} else {
+								return _Utils_Tuple2((x % range) + lo, seedN);
+							}
+						}
+					};
+					return accountForBias(seed0);
+				}
+			});
 	});
 var $elm$random$Random$listHelp = F4(
 	function (revList, n, gen, seed) {
@@ -10024,97 +10054,15 @@ var $elm$random$Random$list = F2(
 				return A4($elm$random$Random$listHelp, _List_Nil, n, gen, seed);
 			});
 	});
-var $elm$random$Random$addOne = function (value) {
-	return _Utils_Tuple2(1, value);
-};
-var $elm$core$Basics$abs = function (n) {
-	return (n < 0) ? (-n) : n;
-};
-var $elm$core$Bitwise$xor = _Bitwise_xor;
-var $elm$random$Random$peel = function (_v0) {
-	var state = _v0.a;
-	var word = (state ^ (state >>> ((state >>> 28) + 4))) * 277803737;
-	return ((word >>> 22) ^ word) >>> 0;
-};
-var $elm$random$Random$float = F2(
-	function (a, b) {
-		return $elm$random$Random$Generator(
-			function (seed0) {
-				var seed1 = $elm$random$Random$next(seed0);
-				var range = $elm$core$Basics$abs(b - a);
-				var n1 = $elm$random$Random$peel(seed1);
-				var n0 = $elm$random$Random$peel(seed0);
-				var lo = (134217727 & n1) * 1.0;
-				var hi = (67108863 & n0) * 1.0;
-				var val = ((hi * 134217728.0) + lo) / 9007199254740992.0;
-				var scaled = (val * range) + a;
-				return _Utils_Tuple2(
-					scaled,
-					$elm$random$Random$next(seed1));
-			});
-	});
-var $elm$random$Random$getByWeight = F3(
-	function (_v0, others, countdown) {
-		getByWeight:
-		while (true) {
-			var weight = _v0.a;
-			var value = _v0.b;
-			if (!others.b) {
-				return value;
-			} else {
-				var second = others.a;
-				var otherOthers = others.b;
-				if (_Utils_cmp(
-					countdown,
-					$elm$core$Basics$abs(weight)) < 1) {
-					return value;
-				} else {
-					var $temp$_v0 = second,
-						$temp$others = otherOthers,
-						$temp$countdown = countdown - $elm$core$Basics$abs(weight);
-					_v0 = $temp$_v0;
-					others = $temp$others;
-					countdown = $temp$countdown;
-					continue getByWeight;
-				}
-			}
-		}
-	});
-var $elm$core$List$sum = function (numbers) {
-	return A3($elm$core$List$foldl, $elm$core$Basics$add, 0, numbers);
-};
-var $elm$random$Random$weighted = F2(
-	function (first, others) {
-		var normalize = function (_v0) {
-			var weight = _v0.a;
-			return $elm$core$Basics$abs(weight);
-		};
-		var total = normalize(first) + $elm$core$List$sum(
-			A2($elm$core$List$map, normalize, others));
+var $author$project$Update$generateRandomTargetNotes = F2(
+	function (listLength, gameLevel) {
+		var minValue = gameLevel.rootMidi - gameLevel.maxInterval;
+		var maxValue = gameLevel.rootMidi + gameLevel.maxInterval;
 		return A2(
-			$elm$random$Random$map,
-			A2($elm$random$Random$getByWeight, first, others),
-			A2($elm$random$Random$float, 0, total));
+			$elm$random$Random$list,
+			listLength,
+			A2($elm$random$Random$int, minValue, maxValue));
 	});
-var $elm$random$Random$uniform = F2(
-	function (value, valueList) {
-		return A2(
-			$elm$random$Random$weighted,
-			$elm$random$Random$addOne(value),
-			A2($elm$core$List$map, $elm$random$Random$addOne, valueList));
-	});
-var $author$project$Note$getRandomMidiList = function (num) {
-	return A2(
-		$elm$random$Random$list,
-		num,
-		A2(
-			$elm$random$Random$uniform,
-			67,
-			_List_fromArray(
-				[67])));
-};
-var $author$project$ConstantsHelpers$hardCodedNotes = _List_fromArray(
-	[60, 67, 60]);
 var $author$project$Update$initMidi = function (isMIDIConnectedBool) {
 	var newModel = function () {
 		if (isMIDIConnectedBool) {
@@ -10229,6 +10177,18 @@ var $author$project$Update$isLevelComplete = function (gameModel) {
 		$elm$core$Array$length(gameModel.targetNotes)) > -1) ? true : false;
 	return isComplete;
 };
+var $author$project$ConstantsHelpers$levels = $elm$core$Array$fromList(
+	_List_fromArray(
+		[
+			{maxInterval: 1, rootMidi: 60},
+			{maxInterval: 2, rootMidi: 60},
+			{maxInterval: 1, rootMidi: 67},
+			{maxInterval: 2, rootMidi: 67},
+			{maxInterval: 3, rootMidi: 60},
+			{maxInterval: 3, rootMidi: 67},
+			{maxInterval: 4, rootMidi: 60},
+			{maxInterval: 4, rootMidi: 67}
+		]));
 var $author$project$ConstantsHelpers$notesPerLevel = 100;
 var $author$project$Update$updateCurTime = F2(
 	function (curTime, model) {
@@ -10286,6 +10246,9 @@ var $author$project$Update$updatePlayerPos = F2(
 					{currentPos: model.nextTargetPos})
 			});
 	});
+var $elm$core$Basics$abs = function (n) {
+	return (n < 0) ? (-n) : n;
+};
 var $author$project$ConstantsHelpers$baseJumpDurationFrames = 20;
 var $author$project$ConstantsHelpers$baseJumpDurMillis = A2($author$project$ConstantsHelpers$convertFramesToMillisDuration, $author$project$ConstantsHelpers$baseJumpDurationFrames, $author$project$ConstantsHelpers$framesPerSecond);
 var $author$project$ConstantsHelpers$shortJumpDurationFrames = 15;
@@ -10407,20 +10370,34 @@ var $author$project$Update$update = F2(
 				var levelIndex = model.a;
 				switch (msg.$) {
 					case 'StartGame':
-						return _Utils_Tuple2(
-							model,
-							A2(
-								$elm$random$Random$generate,
-								$author$project$Msg$GenerateTargetNotes,
-								$author$project$Note$getRandomMidiList($author$project$ConstantsHelpers$notesPerLevel)));
-					case 'GenerateTargetNotes':
-						var midiCodeList = msg.a;
 						var newGameModel = _Utils_update(
 							$author$project$Model$initialGameModel,
 							{levelIndex: levelIndex + 1});
+						var nextGameLevel = function () {
+							var _v3 = A2($elm$core$Array$get, newGameModel.levelIndex, $author$project$ConstantsHelpers$levels);
+							if (_v3.$ === 'Nothing') {
+								return {maxInterval: 1, rootMidi: 60};
+							} else {
+								var level = _v3.a;
+								return level;
+							}
+						}();
 						return _Utils_Tuple2(
-							$author$project$Model$Game(
-								A2($author$project$Update$generateTargetNotes, newGameModel, $author$project$ConstantsHelpers$hardCodedNotes)),
+							$author$project$Model$Game(newGameModel),
+							A2(
+								$elm$random$Random$generate,
+								$author$project$Msg$GenerateTargetNotes,
+								A2($author$project$Update$generateRandomTargetNotes, $author$project$ConstantsHelpers$notesPerLevel, nextGameLevel)));
+					case 'GenerateTargetNotes':
+						var midiList = msg.a;
+						var newGameModel = _Utils_update(
+							$author$project$Model$initialGameModel,
+							{
+								targetNotes: $elm$core$Array$fromList(
+									A2($elm$core$List$map, $author$project$Note$createNote, midiList))
+							});
+						return _Utils_Tuple2(
+							$author$project$Model$Game(newGameModel),
 							$elm$core$Platform$Cmd$none);
 					default:
 						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
