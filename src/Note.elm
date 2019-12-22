@@ -16,12 +16,14 @@ type alias Note =
 type alias NoteName =
     ( String, Int )
 
+
 createNote : Int -> Note
 createNote midiCode =
-    { noteName = midiToNoteName midiCode
+    { noteName = getNoteNameFromMidi midiCode
     , midi = clamp 21 108 midiCode -- assuming piano MIDI!
-    , frequency = midiToFrequency midiCode
+    , frequency = getFrequencyFromMidi midiCode
     }
+
 
 getOctaveShift : Int -> String
 getOctaveShift midiCode =
@@ -34,18 +36,87 @@ getOctaveShift midiCode =
   else 
     "8vb"
 
+getDiatonicIndexFromMidi : Int -> Int
+getDiatonicIndexFromMidi midiCode =
+  let
+      -- Note: midi code 0 is C, and 21 (the lowest "real" note) correctly maps to A
+      chromaticIndex = remainderBy 12 midiCode
+  in
+      -- Map the chromatic scale (12 semitones) to the diatonic scale (8)
+        case chromaticIndex of
+            0 -> 0 -- C
+            1 -> 0 -- C#
+            2 -> 1 -- D
+            3 -> 1 -- D#
+            4 -> 2 -- E
+            5 -> 3 -- F
+            6 -> 3 -- F#
+            7 -> 4 -- G
+            8 -> 4 -- G#
+            9 -> 5 -- A
+            10 -> 5 -- A#
+            11 -> 6 -- B
+            _ -> 0
+
+
+-- Convert from note name ("C" etc) to 0 to 11 from chromatic scale
+getChromaticIndexFromPitchClass : String -> Int
+getChromaticIndexFromPitchClass pitchClass =
+  -- Note: Starting with C because naming convention starts as A0, B0, C1, ... new octave multiple on every C
+  case pitchClass of
+    "C" -> 0
+    "C#" -> 1
+    "D" -> 2
+    "D#" -> 3
+    "E" -> 4
+    "F" -> 5
+    "F#" -> 6
+    "G" -> 7
+    "G#" -> 8
+    "A" -> 9
+    "A#" -> 10
+    "B" -> 11
+    _ -> 0
+
+
+-- Convert index from 0 to 11 from chromatic scale to pitch class letter
+getPitchClassFromChromaticIndex : Int -> String
+getPitchClassFromChromaticIndex noteIndex =
+  case noteIndex of
+    0 -> "C"
+    1 -> "C#"
+    2 -> "D"
+    3 -> "D#"
+    4 -> "E"
+    5 -> "F"
+    6 -> "F#"
+    7 -> "G"
+    8 -> "G#"
+    9 -> "A"
+    10 -> "A#"
+    11 -> "B"
+    _ -> "C"
+
+
+getMidiFromNoteName : NoteName -> Int
+getMidiFromNoteName (pitchClass, octaveMultiple) =
+  let
+      chromaticIndex = getChromaticIndexFromPitchClass pitchClass
+  in
+      chromaticIndex + ( (octaveMultiple + 1) * 12)
+
+
 
 getNoteHeightIndex midiCode = 
   let
       -- Map 21 (lowest piano key, A0) to 0, shift all values
-      semitoneIndex = remainderBy 12 (midiCode - 21)
-
+      diatonicIndex = getDiatonicIndexFromMidi midiCode
+      octaveMultiple = (midiCode - 21) // 12
 
       -- If in the bass clef, shift position down by 3 units
       -- (right now, that's anything below middle C, midi code 60)
       -- note: pos here is bottom to top, where 0 is the lowest,
       -- so the offset is negative (it gets flipped when translating to pixel values)
-
 {--
       shiftBassClef =
         if midiCode < 60 then
@@ -55,32 +126,6 @@ getNoteHeightIndex midiCode =
 --}
       -- for now, no extra gap between clefs
       shiftBassClef = 0
-
-      -- Map the chromatic scale (12 semitones) to the diatonic scale (8)
-      diatonicIndex = 
-        case semitoneIndex of
-            0 -> 0 -- A
-            1 -> 0 -- A#
-
-            2 -> 1 -- B
-
-            3 -> 2 -- C
-            4 -> 2 -- C#
-
-            5 -> 3 -- D
-            6 -> 3 -- D#
-
-            7 -> 4 -- E
-
-            8 -> 5 -- F
-            9 -> 5 -- F#
-
-            10 -> 6 -- G
-            11 -> 6 -- G#
-
-            _ -> 0
-
-      octaveMultiple = (midiCode - 21) // 12
 
       originalHeightIndex = shiftBassClef + diatonicIndex + (octaveMultiple * 7)
   in
@@ -93,6 +138,7 @@ getNoteHeightIndex midiCode =
         originalHeightIndex + 7
        _ ->
          originalHeightIndex
+
 
 -- Given the note height index (from getNoteHeightIndex),
 -- return a list of note height indeces of each ledger line
@@ -168,33 +214,18 @@ getRandomMidi =
     79]
 
 
-midiToNoteName : Int -> NoteName
-midiToNoteName midiCode =
-    let
-        pitchClasses =
-            Array.fromList
-                [ "C", "C#/Db", "D", "D#/Eb", "E", "F", "F#/Gb", "G", "G#/Ab", "A", "A#/Bb", "B" ]
-
-        index =
-            remainderBy 12 midiCode
-
-        pitchClass =
-            case Array.get index pitchClasses of
-                Nothing ->
-                    "C"
-
-                -- if index out of bounds (impastable!!)
-                Just x ->
-                    x
-
-        octave =
-            (midiCode // 12) - 1
-    in
-    ( pitchClass, octave )
+getNoteNameFromMidi : Int -> NoteName
+getNoteNameFromMidi midiCode =
+  let
+      index = remainderBy 12 midiCode
+      pitchClass = getPitchClassFromChromaticIndex index
+      octave = (midiCode // 12) - 1   -- from 0 to 8
+  in
+     ( pitchClass, octave )
 
 
-midiToFrequency : Int -> Float
-midiToFrequency midiCode =
+getFrequencyFromMidi : Int -> Float
+getFrequencyFromMidi midiCode =
     let
         -- 2 ^ (1/12) is the frequency ratio of each note...????
         semitoneRatio =
