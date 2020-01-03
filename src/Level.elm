@@ -16,6 +16,6 @@ generateTargetNotes : Level -> List Int -> Array Note
 generateTargetNotes gameLevel intervalList =
   intervalList
     |> List.map (\n -> gameLevel.rootMidi + n)
-    |> List.map Note.createNote
+    |> List.map Note.createNoteFromMidi
     |> Array.fromList
 

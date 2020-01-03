@@ -67,7 +67,7 @@ initialGameModel : GameModel
 initialGameModel =
     { targetNotes = Array.empty
     , nextTargetNoteIndex = 0
-    , currentNote = Just (Note.createNote 65)
+    , currentNote = Just (Note.createNoteFromMidi 65)
     , score = 0
     , levelIndex = 0
 

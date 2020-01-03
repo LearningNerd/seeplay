@@ -68,7 +68,7 @@ update msg model =
                     { initialGameModel |
                       targetNotes =
                         Array.fromList
-                          <| List.map Note.createNote midiList
+                          <| List.map Note.createNoteFromMidi midiList
                     }
               in
                 ( Game newGameModel, Cmd.none )
@@ -219,7 +219,7 @@ updatePlayerTrajectory gameModel =
 updateCurrentNote : Int -> GameModel -> GameModel
 updateCurrentNote midiCode gameModel =
   let
-      newCurrentNote = Note.createNote midiCode
+      newCurrentNote = Note.createNoteFromMidi midiCode
   in
     { gameModel | currentNote = Just newCurrentNote }
 

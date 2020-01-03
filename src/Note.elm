@@ -17,12 +17,22 @@ type alias NoteName =
     ( String, Int )
 
 
-createNote : Int -> Note
-createNote midiCode =
+createNoteFromMidi : Int -> Note
+createNoteFromMidi midiCode =
     { noteName = getNoteNameFromMidi midiCode
     , midi = clamp 21 108 midiCode -- assuming piano MIDI!
     , frequency = getFrequencyFromMidi midiCode
     }
+
+createNoteFromNoteName : NoteName -> Note
+createNoteFromNoteName noteName =
+  let
+      midiCode = getMidiFromNoteName noteName
+  in
+     { noteName = noteName
+     , midi = midiCode
+     , frequency = getFrequencyFromMidi midiCode
+   }
 
 
 getOctaveShift : Int -> String
