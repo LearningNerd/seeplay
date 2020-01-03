@@ -24,6 +24,7 @@ createNoteFromMidi midiCode =
     , frequency = getFrequencyFromMidi midiCode
     }
 
+
 createNoteFromNoteName : NoteName -> Note
 createNoteFromNoteName noteName =
   let
@@ -34,6 +35,31 @@ createNoteFromNoteName noteName =
      , frequency = getFrequencyFromMidi midiCode
    }
 
+
+-- Transpose by pitch class (eg, C4 + 1 = D4 or A4 - 7 = A3)
+transposeNoteDiatonic : Note -> Int -> Note
+transposeNoteDiatonic note interval =
+  let
+      diatonicIndex = getDiatonicIndexFromMidi note.midi
+      indexPlusInterval = interval + diatonicIndex
+      newDiatonicIndex = modulo 7 indexPlusInterval -- cycle through 7 notes (C to B) in either direction
+      newPitchClass = getPitchClassFromDiatonicIndex newDiatonicIndex
+      octaveMultiple = Tuple.second note.noteName
+      newOctaveMultiple =
+          if indexPlusInterval < 0 then
+             if diatonicIndex == 0 && ( (remainderBy 7 interval) == 0 ) then
+                octaveMultiple + (indexPlusInterval // 7)
+             else
+                -1 + octaveMultiple + (indexPlusInterval // 7)
+          else
+            octaveMultiple + (indexPlusInterval // 7)
+  in
+    createNoteFromNoteName (newPitchClass, newOctaveMultiple)
+
+
+modulo : Int -> Int -> Int
+modulo mod index =
+  (remainderBy mod index) + mod |> remainderBy mod
 
 getOctaveShift : Int -> String
 getOctaveShift midiCode =
@@ -67,6 +93,20 @@ getDiatonicIndexFromMidi midiCode =
             10 -> 5 -- A#
             11 -> 6 -- B
             _ -> 0
+
+
+-- Convert index from 0 to 6 from diatonic scale to pitch class letter
+getPitchClassFromDiatonicIndex : Int -> String
+getPitchClassFromDiatonicIndex noteIndex =
+  case noteIndex of
+    0 -> "C"
+    1 -> "D"
+    2 -> "E"
+    3 -> "F"
+    4 -> "G"
+    5 -> "A"
+    6 -> "B"
+    _ -> "C"
 
 
 -- Convert from note name ("C" etc) to 0 to 11 from chromatic scale
