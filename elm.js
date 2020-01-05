@@ -9850,59 +9850,6 @@ var $author$project$Msg$GenerateTargetNotes = function (a) {
 var $author$project$Model$StartLevelScreen = function (a) {
 	return {$: 'StartLevelScreen', a: a};
 };
-var $elm$core$Basics$clamp = F3(
-	function (low, high, number) {
-		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
-	});
-var $elm$core$Basics$pow = _Basics_pow;
-var $author$project$Note$getFrequencyFromMidi = function (midiCode) {
-	var semitoneRatio = 1.0594630943592953;
-	var lowestFreq = 8.1757989156;
-	return lowestFreq * A2($elm$core$Basics$pow, semitoneRatio, midiCode);
-};
-var $author$project$Note$getPitchClassFromChromaticIndex = function (noteIndex) {
-	switch (noteIndex) {
-		case 0:
-			return 'C';
-		case 1:
-			return 'C#';
-		case 2:
-			return 'D';
-		case 3:
-			return 'D#';
-		case 4:
-			return 'E';
-		case 5:
-			return 'F';
-		case 6:
-			return 'F#';
-		case 7:
-			return 'G';
-		case 8:
-			return 'G#';
-		case 9:
-			return 'A';
-		case 10:
-			return 'A#';
-		case 11:
-			return 'B';
-		default:
-			return 'C';
-	}
-};
-var $author$project$Note$getNoteNameFromMidi = function (midiCode) {
-	var octave = ((midiCode / 12) | 0) - 1;
-	var index = midiCode % 12;
-	var pitchClass = $author$project$Note$getPitchClassFromChromaticIndex(index);
-	return _Utils_Tuple2(pitchClass, octave);
-};
-var $author$project$Note$createNoteFromMidi = function (midiCode) {
-	return {
-		frequency: $author$project$Note$getFrequencyFromMidi(midiCode),
-		midi: A3($elm$core$Basics$clamp, 21, 108, midiCode),
-		noteName: $author$project$Note$getNoteNameFromMidi(midiCode)
-	};
-};
 var $elm$random$Random$Generate = function (a) {
 	return {$: 'Generate', a: a};
 };
@@ -10073,33 +10020,56 @@ var $elm$random$Random$list = F2(
 				return A4($elm$random$Random$listHelp, _List_Nil, n, gen, seed);
 			});
 	});
-var $author$project$Update$generateRandomTargetNotes = F2(
-	function (listLength, gameLevel) {
-		var minValue = gameLevel.rootMidi - gameLevel.maxInterval;
-		var maxValue = gameLevel.rootMidi + gameLevel.maxInterval;
-		return A2(
-			$elm$random$Random$list,
-			listLength,
-			A2($elm$random$Random$int, minValue, maxValue));
-	});
-var $author$project$Update$initMidi = function (isMIDIConnectedBool) {
-	var newModel = function () {
-		if (isMIDIConnectedBool) {
-			return $author$project$Model$StartLevelScreen(0);
-		} else {
-			return $author$project$Model$LoadingScreen;
-		}
-	}();
-	return newModel;
+var $elm$core$Basics$pow = _Basics_pow;
+var $author$project$Note$getFrequencyFromMidi = function (midiCode) {
+	var semitoneRatio = 1.0594630943592953;
+	var lowestFreq = 8.1757989156;
+	return lowestFreq * A2($elm$core$Basics$pow, semitoneRatio, midiCode);
 };
-var $author$project$ConstantsHelpers$convertFramesToMillisDuration = F2(
-	function (durationFrames, fps) {
-		return (durationFrames * 1000) / fps;
-	});
-var $author$project$ConstantsHelpers$framesPerSecond = 60;
-var $author$project$ConstantsHelpers$longJumpDurationFrames = 35;
-var $author$project$ConstantsHelpers$longJumpDurMillis = A2($author$project$ConstantsHelpers$convertFramesToMillisDuration, $author$project$ConstantsHelpers$longJumpDurationFrames, $author$project$ConstantsHelpers$framesPerSecond);
-var $author$project$Model$initialJumpMillis = $author$project$ConstantsHelpers$longJumpDurMillis;
+var $author$project$Note$getChromaticIndexFromPitchClass = function (pitchClass) {
+	switch (pitchClass) {
+		case 'C':
+			return 0;
+		case 'C#':
+			return 1;
+		case 'D':
+			return 2;
+		case 'D#':
+			return 3;
+		case 'E':
+			return 4;
+		case 'F':
+			return 5;
+		case 'F#':
+			return 6;
+		case 'G':
+			return 7;
+		case 'G#':
+			return 8;
+		case 'A':
+			return 9;
+		case 'A#':
+			return 10;
+		case 'B':
+			return 11;
+		default:
+			return 0;
+	}
+};
+var $author$project$Note$getMidiFromNoteName = function (_v0) {
+	var pitchClass = _v0.a;
+	var octaveMultiple = _v0.b;
+	var chromaticIndex = $author$project$Note$getChromaticIndexFromPitchClass(pitchClass);
+	return chromaticIndex + ((octaveMultiple + 1) * 12);
+};
+var $author$project$Note$createNoteFromNoteName = function (noteName) {
+	var midiCode = $author$project$Note$getMidiFromNoteName(noteName);
+	return {
+		frequency: $author$project$Note$getFrequencyFromMidi(midiCode),
+		midi: midiCode,
+		noteName: noteName
+	};
+};
 var $author$project$Note$getDiatonicIndexFromMidi = function (midiCode) {
 	var chromaticIndex = midiCode % 12;
 	switch (chromaticIndex) {
@@ -10131,6 +10101,166 @@ var $author$project$Note$getDiatonicIndexFromMidi = function (midiCode) {
 			return 0;
 	}
 };
+var $author$project$Note$getPitchClassFromDiatonicIndex = function (noteIndex) {
+	switch (noteIndex) {
+		case 0:
+			return 'C';
+		case 1:
+			return 'D';
+		case 2:
+			return 'E';
+		case 3:
+			return 'F';
+		case 4:
+			return 'G';
+		case 5:
+			return 'A';
+		case 6:
+			return 'B';
+		default:
+			return 'C';
+	}
+};
+var $author$project$Note$modulo = F2(
+	function (mod, index) {
+		return ((index % mod) + mod) % mod;
+	});
+var $author$project$Note$transposeNoteDiatonic = F2(
+	function (note, interval) {
+		var octaveMultiple = note.noteName.b;
+		var diatonicIndex = $author$project$Note$getDiatonicIndexFromMidi(note.midi);
+		var indexPlusInterval = interval + diatonicIndex;
+		var newDiatonicIndex = A2($author$project$Note$modulo, 7, indexPlusInterval);
+		var newPitchClass = $author$project$Note$getPitchClassFromDiatonicIndex(newDiatonicIndex);
+		var newOctaveMultiple = (indexPlusInterval < 0) ? (((!diatonicIndex) && (!(interval % 7))) ? (octaveMultiple + ((indexPlusInterval / 7) | 0)) : (((-1) + octaveMultiple) + ((indexPlusInterval / 7) | 0))) : (octaveMultiple + ((indexPlusInterval / 7) | 0));
+		return $author$project$Note$createNoteFromNoteName(
+			_Utils_Tuple2(newPitchClass, newOctaveMultiple));
+	});
+var $author$project$Level$generateTargetNotes = F2(
+	function (listLength, level) {
+		var minValue = -level.maxInterval;
+		var maxValue = level.maxInterval;
+		return A2(
+			$elm$random$Random$list,
+			listLength,
+			A2(
+				$elm$random$Random$map,
+				$author$project$Note$transposeNoteDiatonic(level.rootNote),
+				A2($elm$random$Random$int, minValue, maxValue)));
+	});
+var $elm$core$Basics$clamp = F3(
+	function (low, high, number) {
+		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
+	});
+var $author$project$Note$getPitchClassFromChromaticIndex = function (noteIndex) {
+	switch (noteIndex) {
+		case 0:
+			return 'C';
+		case 1:
+			return 'C#';
+		case 2:
+			return 'D';
+		case 3:
+			return 'D#';
+		case 4:
+			return 'E';
+		case 5:
+			return 'F';
+		case 6:
+			return 'F#';
+		case 7:
+			return 'G';
+		case 8:
+			return 'G#';
+		case 9:
+			return 'A';
+		case 10:
+			return 'A#';
+		case 11:
+			return 'B';
+		default:
+			return 'C';
+	}
+};
+var $author$project$Note$getNoteNameFromMidi = function (midiCode) {
+	var octave = ((midiCode / 12) | 0) - 1;
+	var index = midiCode % 12;
+	var pitchClass = $author$project$Note$getPitchClassFromChromaticIndex(index);
+	return _Utils_Tuple2(pitchClass, octave);
+};
+var $author$project$Note$createNoteFromMidi = function (midiCode) {
+	return {
+		frequency: $author$project$Note$getFrequencyFromMidi(midiCode),
+		midi: A3($elm$core$Basics$clamp, 21, 108, midiCode),
+		noteName: $author$project$Note$getNoteNameFromMidi(midiCode)
+	};
+};
+var $author$project$Level$levels = $elm$core$Array$fromList(
+	_List_fromArray(
+		[
+			{
+			maxInterval: 1,
+			rootNote: $author$project$Note$createNoteFromMidi(60)
+		},
+			{
+			maxInterval: 2,
+			rootNote: $author$project$Note$createNoteFromMidi(60)
+		},
+			{
+			maxInterval: 1,
+			rootNote: $author$project$Note$createNoteFromMidi(67)
+		},
+			{
+			maxInterval: 2,
+			rootNote: $author$project$Note$createNoteFromMidi(67)
+		},
+			{
+			maxInterval: 3,
+			rootNote: $author$project$Note$createNoteFromMidi(60)
+		},
+			{
+			maxInterval: 3,
+			rootNote: $author$project$Note$createNoteFromMidi(67)
+		},
+			{
+			maxInterval: 4,
+			rootNote: $author$project$Note$createNoteFromMidi(60)
+		},
+			{
+			maxInterval: 4,
+			rootNote: $author$project$Note$createNoteFromMidi(67)
+		}
+		]));
+var $author$project$Level$getLevel = function (levelIndex) {
+	var _v0 = A2($elm$core$Array$get, levelIndex, $author$project$Level$levels);
+	if (_v0.$ === 'Nothing') {
+		return {
+			maxInterval: 1,
+			rootNote: $author$project$Note$createNoteFromMidi(60)
+		};
+	} else {
+		var level = _v0.a;
+		return level;
+	}
+};
+var $author$project$Update$initMidi = function (isMIDIConnectedBool) {
+	var newModel = function () {
+		if (isMIDIConnectedBool) {
+			return $author$project$Model$StartLevelScreen(0);
+		} else {
+			return $author$project$Model$LoadingScreen;
+		}
+	}();
+	return newModel;
+};
+var $author$project$ConstantsHelpers$convertFramesToMillisDuration = F2(
+	function (durationFrames, fps) {
+		return (durationFrames * 1000) / fps;
+	});
+var $author$project$ConstantsHelpers$framesPerSecond = 60;
+var $author$project$ConstantsHelpers$longJumpDurationFrames = 35;
+var $author$project$ConstantsHelpers$longJumpDurMillis = A2($author$project$ConstantsHelpers$convertFramesToMillisDuration, $author$project$ConstantsHelpers$longJumpDurationFrames, $author$project$ConstantsHelpers$framesPerSecond);
+var $author$project$Model$initialJumpMillis = $author$project$ConstantsHelpers$longJumpDurMillis;
 var $author$project$Note$getOctaveShift = function (midiCode) {
 	return (midiCode > 102) ? '15ma' : ((midiCode > 90) ? '8va' : ((midiCode > 30) ? '' : '8vb'));
 };
@@ -10197,18 +10327,6 @@ var $author$project$Update$isLevelComplete = function (gameModel) {
 		$elm$core$Array$length(gameModel.targetNotes)) > -1) ? true : false;
 	return isComplete;
 };
-var $author$project$ConstantsHelpers$levels = $elm$core$Array$fromList(
-	_List_fromArray(
-		[
-			{maxInterval: 1, rootMidi: 60},
-			{maxInterval: 2, rootMidi: 60},
-			{maxInterval: 1, rootMidi: 67},
-			{maxInterval: 2, rootMidi: 67},
-			{maxInterval: 3, rootMidi: 60},
-			{maxInterval: 3, rootMidi: 67},
-			{maxInterval: 4, rootMidi: 60},
-			{maxInterval: 4, rootMidi: 67}
-		]));
 var $author$project$ConstantsHelpers$notesPerLevel = 100;
 var $author$project$Update$updateCurTime = F2(
 	function (curTime, model) {
@@ -10393,28 +10511,19 @@ var $author$project$Update$update = F2(
 						var newGameModel = _Utils_update(
 							$author$project$Model$initialGameModel,
 							{levelIndex: levelIndex + 1});
-						var nextGameLevel = function () {
-							var _v3 = A2($elm$core$Array$get, newGameModel.levelIndex, $author$project$ConstantsHelpers$levels);
-							if (_v3.$ === 'Nothing') {
-								return {maxInterval: 1, rootMidi: 60};
-							} else {
-								var level = _v3.a;
-								return level;
-							}
-						}();
+						var nextGameLevel = $author$project$Level$getLevel(newGameModel.levelIndex);
 						return _Utils_Tuple2(
 							$author$project$Model$Game(newGameModel),
 							A2(
 								$elm$random$Random$generate,
 								$author$project$Msg$GenerateTargetNotes,
-								A2($author$project$Update$generateRandomTargetNotes, $author$project$ConstantsHelpers$notesPerLevel, nextGameLevel)));
+								A2($author$project$Level$generateTargetNotes, $author$project$ConstantsHelpers$notesPerLevel, nextGameLevel)));
 					case 'GenerateTargetNotes':
-						var midiList = msg.a;
+						var noteList = msg.a;
 						var newGameModel = _Utils_update(
 							$author$project$Model$initialGameModel,
 							{
-								targetNotes: $elm$core$Array$fromList(
-									A2($elm$core$List$map, $author$project$Note$createNoteFromMidi, midiList))
+								targetNotes: $elm$core$Array$fromList(noteList)
 							});
 						return _Utils_Tuple2(
 							$author$project$Model$Game(newGameModel),
@@ -10935,4 +11044,4 @@ var $author$project$Main$view = function (model) {
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
 	{init: $author$project$Main$init, subscriptions: $author$project$Main$subscriptions, update: $author$project$Update$update, view: $author$project$Main$view});
-_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$int)({"versions":{"elm":"0.19.1"},"types":{"message":"Msg.Msg","aliases":{},"unions":{"Msg.Msg":{"args":[],"tags":{"InitMIDI":["Basics.Bool"],"NotePressed":["Basics.Int"],"NoteReleased":["Basics.Bool"],"StartGame":[],"GenerateTargetNotes":["List.List Basics.Int"],"AnimFrame":["Time.Posix"]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}}}}})}});}(this));
+_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$int)({"versions":{"elm":"0.19.1"},"types":{"message":"Msg.Msg","aliases":{"Note.Note":{"args":[],"type":"{ noteName : Note.NoteName, midi : Basics.Int, frequency : Basics.Float }"},"Note.NoteName":{"args":[],"type":"( String.String, Basics.Int )"}},"unions":{"Msg.Msg":{"args":[],"tags":{"InitMIDI":["Basics.Bool"],"NotePressed":["Basics.Int"],"NoteReleased":["Basics.Bool"],"StartGame":[],"GenerateTargetNotes":["List.List Note.Note"],"AnimFrame":["Time.Posix"]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"String.String":{"args":[],"tags":{"String":[]}}}}})}});}(this));

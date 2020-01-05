@@ -247,23 +247,6 @@ getNoteX xPosIndex =
   Const.leftMargin + ((toFloat xPosIndex) * (toFloat Const.noteXInterval) )
 
 
-
-getRandomMidi : Random.Generator Int
-getRandomMidi =
-  Random.uniform 60 [
-    62,
-    64,
-    65,
-    67,
-    69,
-    71,
-    72,
-    74,
-    76,
-    77,
-    79]
-
-
 getNoteNameFromMidi : Int -> NoteName
 getNoteNameFromMidi midiCode =
   let

@@ -40,26 +40,20 @@ update msg model =
       StartLevelScreen levelIndex ->
         case msg of
 
-            -- TODO: Generate the notes based on levelIndex !!!
 
             StartGame ->
               let
                   newGameModel = { initialGameModel | levelIndex = levelIndex + 1}
 
-                  nextGameLevel = case (Array.get newGameModel.levelIndex Const.levels) of
-                    Nothing ->
-                      { rootMidi = 60, maxInterval = 1 }
-                    Just level ->
-                      level
+                  nextGameLevel = Level.getLevel newGameModel.levelIndex
               in
                 ( Game newGameModel
-                , Random.generate GenerateTargetNotes (generateRandomTargetNotes Const.notesPerLevel nextGameLevel)
+                , Random.generate GenerateTargetNotes
+                    <| Level.generateTargetNotes Const.notesPerLevel nextGameLevel
                 )
 
 
-            -- TODO: how to keep track of the current level though??? to generate the notes the way I want to... 
-
-            GenerateTargetNotes midiList ->
+            GenerateTargetNotes noteList ->
               let
                   -- Init the NEXT game level 
                   -- NOTE: When game is first started, levelIndex will increment from 0 to 1 so the first level is actually 1
@@ -67,8 +61,7 @@ update msg model =
                   newGameModel =
                     { initialGameModel |
                       targetNotes =
-                        Array.fromList
-                          <| List.map Note.createNoteFromMidi midiList
+                        Array.fromList noteList
                     }
               in
                 ( Game newGameModel, Cmd.none )
@@ -280,44 +273,5 @@ isLevelComplete gameModel =
     isComplete 
     -- { gameModel | levelIndex = levelIndex + 1 }
 
-
--- Generate list of [num] random midi codes
-generateRandomTargetNotes : Int -> Level -> Random.Generator (List Int)
-generateRandomTargetNotes listLength gameLevel =
-  let
-      minValue = gameLevel.rootMidi - gameLevel.maxInterval
-      maxValue = gameLevel.rootMidi + gameLevel.maxInterval
-  in
-    Random.list listLength
-      <| Random.int minValue maxValue
-
-    -- Random.list num <| Random.uniform 60 [64, 67]
-    -- Random.list num <| Random.uniform 59 [53, 54, 55, 56, 57, 58]
-
-    -- Just checking a couple ledger lines
-    -- Random.list num <| Random.uniform 81 [86, 88]
-
-
-    -- BASS TO TREBLE (no ledger lines), including middle C
-    -- Random.list num <| Random.uniform 41 (List.range 42 80)
-
-    
-    -- EVERYTHIIIIIING!
-    -- Random.list num <| Random.uniform 21 (List.range 22 108)
-
-{--
-  Random.list num <| Random.uniform 60 [ 62
-   , 64
-   , 65
-   , 67
-   , 69
-   , 71
-   , 72
-   , 74
-   , 76
-   , 77
-   , 79
-   ]
---}
 
 
