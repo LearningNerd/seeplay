@@ -160,7 +160,24 @@ getMidiFromNoteName (pitchClass, octaveMultiple) =
 getNoteHeightIndex midiCode = 
   let
       -- Map 21 (lowest piano key, A0) to 0, shift all values
-      diatonicIndex = getDiatonicIndexFromMidi midiCode
+      -- NOTE: Visually, notes are starting at A; for note NAMES, index starts at C
+      semitoneIndex = remainderBy 12 (midiCode - 21)
+      diatonicIndex = 
+        case semitoneIndex of
+            0 -> 0 -- A
+            1 -> 0 -- A#
+            2 -> 1 -- B
+            3 -> 2 -- C
+            4 -> 2 -- C#
+            5 -> 3 -- D
+            6 -> 3 -- D#
+            7 -> 4 -- E
+            8 -> 5 -- F
+            9 -> 5 -- F#
+            10 -> 6 -- G
+            11 -> 6 -- G#
+            _ -> 0
+
       octaveMultiple = (midiCode - 21) // 12
 
       -- If in the bass clef, shift position down by 3 units

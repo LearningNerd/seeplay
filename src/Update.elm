@@ -63,9 +63,8 @@ update msg model =
                   -- Init the NEXT game level 
                   -- NOTE: When game is first started, levelIndex will increment from 0 to 1 so the first level is actually 1
                   -- TODO: Have a button to play next level OR repeat the current ... or other actions =P
-                  newGameModel =
-                    { gameModel | targetNotes = Array.fromList noteList
-                    }
+                  newGameModel = 
+                    { gameModel | targetNotes = Array.fromList noteList }
                 in
                   ( Game newGameModel, Cmd.none )
 

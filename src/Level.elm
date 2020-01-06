@@ -15,6 +15,7 @@ type alias Level =
 levels =
   Array.fromList
     [ { rootNote = Note.createNoteFromMidi 60, maxInterval = 1 }
+{--
     , { rootNote = Note.createNoteFromMidi 60, maxInterval = 2 }
     , { rootNote = Note.createNoteFromMidi 67, maxInterval = 1 }
     , { rootNote = Note.createNoteFromMidi 67, maxInterval = 2 }
@@ -22,6 +23,7 @@ levels =
     , { rootNote = Note.createNoteFromMidi 67, maxInterval = 3 }
     , { rootNote = Note.createNoteFromMidi 60, maxInterval = 4 }
     , { rootNote = Note.createNoteFromMidi 67, maxInterval = 4 }
+--}
     ]
 
 -- Note: uses hard-coded levels above

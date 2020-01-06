@@ -16,9 +16,9 @@ middleC = [60,61]
 bassNotesList = [41,43,45,47,48,50,52,53,55,57,59]
 bLedgerNotesList = [31,33,35,36,38,40]
 b8vbNotesList = [21,23,24,26,28,29,31,33,35,36,38,40]
--- hardCodedNotes = t8va15maNotesList
+hardCodedNotes = trebleNotesList
 
-hardCodedNotes = [60,67,60]
+-- hardCodedNotes = [59,60,62]
 
 ---------------------------------------------
 

@@ -10201,34 +10201,6 @@ var $author$project$Level$levels = $elm$core$Array$fromList(
 			{
 			maxInterval: 1,
 			rootNote: $author$project$Note$createNoteFromMidi(60)
-		},
-			{
-			maxInterval: 2,
-			rootNote: $author$project$Note$createNoteFromMidi(60)
-		},
-			{
-			maxInterval: 1,
-			rootNote: $author$project$Note$createNoteFromMidi(67)
-		},
-			{
-			maxInterval: 2,
-			rootNote: $author$project$Note$createNoteFromMidi(67)
-		},
-			{
-			maxInterval: 3,
-			rootNote: $author$project$Note$createNoteFromMidi(60)
-		},
-			{
-			maxInterval: 3,
-			rootNote: $author$project$Note$createNoteFromMidi(67)
-		},
-			{
-			maxInterval: 4,
-			rootNote: $author$project$Note$createNoteFromMidi(60)
-		},
-			{
-			maxInterval: 4,
-			rootNote: $author$project$Note$createNoteFromMidi(67)
 		}
 		]));
 var $author$project$Level$getLevel = function (levelIndex) {
@@ -10266,8 +10238,38 @@ var $author$project$Note$getOctaveShift = function (midiCode) {
 };
 var $author$project$Note$getNoteHeightIndex = function (midiCode) {
 	var shiftBassClef = 0;
+	var semitoneIndex = (midiCode - 21) % 12;
 	var octaveMultiple = ((midiCode - 21) / 12) | 0;
-	var diatonicIndex = $author$project$Note$getDiatonicIndexFromMidi(midiCode);
+	var diatonicIndex = function () {
+		switch (semitoneIndex) {
+			case 0:
+				return 0;
+			case 1:
+				return 0;
+			case 2:
+				return 1;
+			case 3:
+				return 2;
+			case 4:
+				return 2;
+			case 5:
+				return 3;
+			case 6:
+				return 3;
+			case 7:
+				return 4;
+			case 8:
+				return 5;
+			case 9:
+				return 5;
+			case 10:
+				return 6;
+			case 11:
+				return 6;
+			default:
+				return 0;
+		}
+	}();
 	var originalHeightIndex = (shiftBassClef + diatonicIndex) + (octaveMultiple * 7);
 	var _v0 = $author$project$Note$getOctaveShift(midiCode);
 	switch (_v0) {
