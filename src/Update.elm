@@ -40,7 +40,6 @@ update msg model =
       StartLevelScreen levelIndex ->
         case msg of
 
-
             StartGame ->
               let
                   newGameModel = { initialGameModel | levelIndex = levelIndex + 1}
@@ -52,27 +51,25 @@ update msg model =
                     <| Level.generateTargetNotes Const.notesPerLevel nextGameLevel
                 )
 
-
-            GenerateTargetNotes noteList ->
-              let
-                  -- Init the NEXT game level 
-                  -- NOTE: When game is first started, levelIndex will increment from 0 to 1 so the first level is actually 1
-                  -- TODO: Have a button to play next level OR repeat the current ... or other actions =P
-                  newGameModel =
-                    { initialGameModel |
-                      targetNotes =
-                        Array.fromList noteList
-                    }
-              in
-                ( Game newGameModel, Cmd.none )
-
             _ ->
               ( model, Cmd.none )
 
 ---------------------   GAME SCREEN   --------------------
       Game gameModel ->
             case msg of
-      
+ 
+              GenerateTargetNotes noteList ->
+                let
+                  -- Init the NEXT game level 
+                  -- NOTE: When game is first started, levelIndex will increment from 0 to 1 so the first level is actually 1
+                  -- TODO: Have a button to play next level OR repeat the current ... or other actions =P
+                  newGameModel =
+                    { gameModel | targetNotes = Array.fromList noteList
+                    }
+                in
+                  ( Game newGameModel, Cmd.none )
+
+     
               AnimFrame curTime ->
                 let
                   newGameModel = 

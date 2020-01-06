@@ -10506,34 +10506,33 @@ var $author$project$Update$update = F2(
 				}
 			case 'StartLevelScreen':
 				var levelIndex = model.a;
+				if (msg.$ === 'StartGame') {
+					var newGameModel = _Utils_update(
+						$author$project$Model$initialGameModel,
+						{levelIndex: levelIndex + 1});
+					var nextGameLevel = $author$project$Level$getLevel(newGameModel.levelIndex);
+					return _Utils_Tuple2(
+						$author$project$Model$Game(newGameModel),
+						A2(
+							$elm$random$Random$generate,
+							$author$project$Msg$GenerateTargetNotes,
+							A2($author$project$Level$generateTargetNotes, $author$project$ConstantsHelpers$notesPerLevel, nextGameLevel)));
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			default:
+				var gameModel = model.a;
 				switch (msg.$) {
-					case 'StartGame':
-						var newGameModel = _Utils_update(
-							$author$project$Model$initialGameModel,
-							{levelIndex: levelIndex + 1});
-						var nextGameLevel = $author$project$Level$getLevel(newGameModel.levelIndex);
-						return _Utils_Tuple2(
-							$author$project$Model$Game(newGameModel),
-							A2(
-								$elm$random$Random$generate,
-								$author$project$Msg$GenerateTargetNotes,
-								A2($author$project$Level$generateTargetNotes, $author$project$ConstantsHelpers$notesPerLevel, nextGameLevel)));
 					case 'GenerateTargetNotes':
 						var noteList = msg.a;
 						var newGameModel = _Utils_update(
-							$author$project$Model$initialGameModel,
+							gameModel,
 							{
 								targetNotes: $elm$core$Array$fromList(noteList)
 							});
 						return _Utils_Tuple2(
 							$author$project$Model$Game(newGameModel),
 							$elm$core$Platform$Cmd$none);
-					default:
-						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
-			default:
-				var gameModel = model.a;
-				switch (msg.$) {
 					case 'AnimFrame':
 						var curTime = msg.a;
 						var newGameModel = $author$project$Update$updateScrollPos(
