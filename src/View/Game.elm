@@ -25,15 +25,22 @@ view model =
         
         svgListAllNotes = drawAllTargetNotes model.itemSpriteIndex model.nextTargetNoteIndex model.targetNotes
 
-        x = model.player.currentPos.x
-        y = model.player.currentPos.y
+        xPos = model.player.currentPos.x
+        yPos = model.player.currentPos.y
+
+        -- Upon playing the target note, don't draw ledger line / 8va thing for the player
+        isOnCurrentNote =
+          if (getCurrentTargetNoteMidi model) == (getCurrentNoteMidi model) then
+             True
+          else
+             False
 
         currentNoteDrawing =
             case model.currentNote of
                 Nothing ->
                   []
                 Just currentNote -> 
-                  [View.Player.view x y model.playerSpriteIndex]
+                  View.Player.view xPos yPos currentNote.midi model.playerSpriteIndex isOnCurrentNote
 
         -- animate viewBox to scroll game level with all notes drawn inside
         -- updated: draw the current note inside the game level?
@@ -81,3 +88,17 @@ drawTargetNote spriteIndex nextTargetNoteIndex xPosIndex note =
     in
       View.Target.view xPosIndex note.midi spriteIndex spriteImage
 
+
+getCurrentTargetNoteMidi : GameModel -> Int
+getCurrentTargetNoteMidi gameModel =
+      case (Array.get (gameModel.nextTargetNoteIndex - 1) gameModel.targetNotes) of
+        Nothing -> Const.playerInitialNoteMidi
+        Just note -> note.midi
+
+
+getCurrentNoteMidi : GameModel -> Int
+getCurrentNoteMidi model =
+            case model.currentNote of
+                Nothing -> Const.playerInitialNoteMidi
+                Just currentNote -> currentNote.midi
+ 

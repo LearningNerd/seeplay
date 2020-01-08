@@ -43,7 +43,7 @@ svgViewTotalHeight = svgViewHeight + topMargin + bottomMargin
 
 -- Player appears here when game is initialized
 playerInitialXPosition = 0 -- currently added to leftMargin
-playerInitialNote = 67 -- controls initial y position; start on G
+playerInitialNoteMidi = 67 -- controls initial y position; start on G
 
 -- To center the player/start of level
 scrollOffset = -900
