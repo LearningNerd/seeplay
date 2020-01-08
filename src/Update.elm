@@ -31,7 +31,12 @@ update msg model =
         case msg of
 
             InitMIDI isMIDIConnectedBool ->
-              ( initMidi isMIDIConnectedBool, Cmd.none )
+              let
+                  newModel = case isMIDIConnectedBool of
+                    True -> StartLevelScreen initialGameModel.levelIndex
+                    False -> LoadingScreen
+              in
+                ( newModel, Cmd.none )
 
             _ ->
               ( model, Cmd.none )
@@ -42,11 +47,9 @@ update msg model =
 
             StartGame ->
               let
-                  newGameModel = { initialGameModel | levelIndex = levelIndex + 1}
-
-                  nextGameLevel = Level.getLevel newGameModel.levelIndex
+                  nextGameLevel = Level.getLevel levelIndex
               in
-                ( Game newGameModel
+                ( Game { initialGameModel | levelIndex = levelIndex }
                 , Random.generate GenerateTargetNotes
                     <| Level.generateTargetNotes Const.notesPerLevel nextGameLevel
                 )
@@ -91,8 +94,8 @@ update msg model =
 
                   nextModel = 
                     if (isLevelComplete newGameModel) then
-                      -- Show screen with the prev level index. (Later: show recap of score etc etc)
-                      StartLevelScreen newGameModel.levelIndex
+                      -- Begin next level! (Later: show recap of score etc etc)
+                      StartLevelScreen (newGameModel.levelIndex + 1)
                     else
                       Game newGameModel
                 in
@@ -166,20 +169,6 @@ updatePlayerPos curTime ({player} as model) =
         currentPos = model.nextTargetPos
       }
     }
-
-
-
-
--- Update model based on MIDI event from JS
-initMidi : Bool -> Model
-initMidi isMIDIConnectedBool =
-  let
-      newModel = case isMIDIConnectedBool of
-                  True -> StartLevelScreen 0
-                  False -> LoadingScreen
-  in
-    newModel
-
 
 
 -- Update player's velocity, jump start position, jump duration milliseconds, and jump start time
