@@ -5800,7 +5800,7 @@ var $author$project$Level$levels = $elm$core$Array$fromList(
 		[
 			{
 			maxInterval: 1,
-			rootNote: $author$project$Note$createNoteFromMidi(69)
+			rootNote: $author$project$Note$createNoteFromMidi(60)
 		}
 		]));
 var $author$project$Level$getLevel = function (levelIndex) {
@@ -5808,7 +5808,7 @@ var $author$project$Level$getLevel = function (levelIndex) {
 	if (_v0.$ === 'Nothing') {
 		return {
 			maxInterval: 1,
-			rootNote: $author$project$Note$createNoteFromMidi(62)
+			rootNote: $author$project$Note$createNoteFromMidi(60)
 		};
 	} else {
 		var level = _v0.a;
@@ -5923,7 +5923,7 @@ var $author$project$Update$isLevelComplete = function (gameModel) {
 		$elm$core$Array$length(gameModel.targetNotes)) > -1) ? true : false;
 	return isComplete;
 };
-var $author$project$ConstantsHelpers$notesPerLevel = 3;
+var $author$project$ConstantsHelpers$notesPerLevel = 100;
 var $author$project$Update$updateCurTime = F2(
 	function (curTime, model) {
 		return _Utils_update(
@@ -6635,26 +6635,36 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
-var $author$project$View$StartLevelScreen$view = A2(
-	$elm$html$Html$div,
-	_List_fromArray(
-		[
-			$elm$html$Html$Attributes$class('startScreen')
-		]),
-	_List_fromArray(
-		[
-			A2(
-			$elm$html$Html$button,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class('startButton'),
-					$elm$html$Html$Events$onClick($author$project$Msg$StartGame)
-				]),
-			_List_fromArray(
-				[
-					$elm$html$Html$text('Start playing!')
-				]))
-		]));
+var $author$project$View$StartLevelScreen$view = function (levelIndex) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('midiStatus')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Ready?')
+					])),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('startButton'),
+						$elm$html$Html$Events$onClick($author$project$Msg$StartGame)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						'Start level ' + $elm$core$String$fromInt(levelIndex))
+					]))
+			]));
+};
 var $author$project$Main$view = function (model) {
 	var currentView = function () {
 		switch (model.$) {
@@ -6662,7 +6672,7 @@ var $author$project$Main$view = function (model) {
 				return $author$project$View$MidiStatus$view(model);
 			case 'StartLevelScreen':
 				var levelIndex = model.a;
-				return $author$project$View$StartLevelScreen$view;
+				return $author$project$View$StartLevelScreen$view(levelIndex);
 			default:
 				var gameModel = model.a;
 				return $author$project$View$Game$view(gameModel);

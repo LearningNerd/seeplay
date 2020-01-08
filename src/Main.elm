@@ -40,7 +40,7 @@ view model =
     currentView = 
       case model of
         LoadingScreen -> View.MidiStatus.view model
-        StartLevelScreen levelIndex -> View.StartLevelScreen.view
+        StartLevelScreen levelIndex -> View.StartLevelScreen.view levelIndex
         Game gameModel -> View.Game.view gameModel
   in
     div [ ]

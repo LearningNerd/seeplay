@@ -10,8 +10,10 @@ import Model exposing (Model)
 import Msg exposing (..)
 
 
-view =
-    div [A.class "startScreen"] [
-          button [ A.class "startButton", onClick StartGame] [ HTML.text "Start playing!" ]
-        ]
+view : Int -> Html Msg
+view levelIndex =
+    div [A.class "midiStatus"]
+          [ p [] [ HTML.text "Ready?" ]
+          , button [ A.class "startButton", onClick StartGame] [ HTML.text <| "Start level " ++ String.fromInt levelIndex ]
+          ]
 
