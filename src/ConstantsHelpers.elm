@@ -22,7 +22,7 @@ hardCodedNotes = trebleNotesList
 
 ---------------------------------------------
 
-notesPerLevel = 100
+notesPerLevel = 10
 
 noteXInterval = 300
 
