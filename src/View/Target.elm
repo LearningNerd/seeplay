@@ -1,5 +1,6 @@
 module View.Target exposing (view, numSpriteFrames)
 
+
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import ConstantsHelpers
@@ -53,15 +54,6 @@ view xPosIndex midiCode spriteIndex spriteImage =
         , class "octaveShift"
         ]
         [text (Note.getOctaveShift midiCode)] 
-
-{--
-    ledgerLineMiddleC = 
-        if midiCode == 60 then
-          (drawLedgerLine xP yP)
-        else
-           text ""
---}
-
   in
     ( [octaveShift] ++ (List.map (drawLedgerLine xP) ledgerLineYPositions) ++
       [ svg
@@ -74,6 +66,7 @@ view xPosIndex midiCode spriteIndex spriteImage =
         ] [ image [xlinkHref spriteImage] [] ]
     ]
   )
+
 
 -- where xPos and yPos are the top-left corner of the sprite
 drawLedgerLine: Float -> Float -> Svg Msg
